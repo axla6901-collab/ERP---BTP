@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Devis · M1 · ERP BTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }</style>
+</head>
+<body class="min-h-screen bg-neutral-50 text-neutral-900">
+
+  <header class="sticky top-0 z-20 border-b bg-white">
+    <div class="flex h-14 items-center gap-4 px-6">
+      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
+      <div class="flex items-center gap-2">
+        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
+        <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700">ERP BTP</a>
+        <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">Compte-R BTP ▾</button>
+      </div>
+      <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
+        <a class="hover:text-neutral-900">Commercial</a>
+        <span class="text-neutral-300">/</span>
+        <a class="hover:text-neutral-900">Devis</a>
+        <span class="text-neutral-300">/</span>
+        <span class="text-neutral-900">DV-2026-042</span>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        <button class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100">
+          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+        </button>
+        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
+        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-[1400px] px-6 py-6">
+
+    <!-- Heading -->
+    <div class="mb-5 flex items-end justify-between">
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-2xl font-semibold tracking-tight">Devis DV-2026-042</h1>
+          <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">brouillon</span>
+        </div>
+        <p class="mt-1 text-sm text-neutral-500">Pour <span class="font-medium text-neutral-700">Mairie de Saint-Étienne</span> · chantier <a href="01-chantier-first.html" class="font-medium text-amber-700 underline-offset-2 hover:underline">École Marguerite</a></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Aperçu PDF</button>
+        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Dupliquer</button>
+        <button class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">Envoyer au client →</button>
+      </div>
+    </div>
+
+    <!-- Status timeline -->
+    <section class="mb-5 rounded-xl border bg-white px-5 py-4 shadow-sm">
+      <ol class="flex items-center justify-between text-xs">
+        <li class="flex items-center gap-2 text-emerald-700">
+          <span class="grid size-6 place-items-center rounded-full bg-emerald-500 text-white">✓</span>
+          <div><div class="font-medium">Créé</div><div class="text-neutral-500">23/05 · Alex</div></div>
+        </li>
+        <li class="h-px flex-1 bg-neutral-200 mx-3"></li>
+        <li class="flex items-center gap-2 text-amber-700">
+          <span class="grid size-6 place-items-center rounded-full bg-amber-500 text-white">●</span>
+          <div><div class="font-medium">En cours d'édition</div><div class="text-neutral-500">aujourd'hui</div></div>
+        </li>
+        <li class="h-px flex-1 bg-neutral-200 mx-3"></li>
+        <li class="flex items-center gap-2 text-neutral-400">
+          <span class="grid size-6 place-items-center rounded-full border-2 border-dashed border-neutral-300">3</span>
+          <div><div class="font-medium">Envoyé</div><div class="text-neutral-400">—</div></div>
+        </li>
+        <li class="h-px flex-1 bg-neutral-200 mx-3"></li>
+        <li class="flex items-center gap-2 text-neutral-400">
+          <span class="grid size-6 place-items-center rounded-full border-2 border-dashed border-neutral-300">4</span>
+          <div><div class="font-medium">Accepté</div><div class="text-neutral-400">—</div></div>
+        </li>
+        <li class="h-px flex-1 bg-neutral-200 mx-3"></li>
+        <li class="flex items-center gap-2 text-neutral-400">
+          <span class="grid size-6 place-items-center rounded-full border-2 border-dashed border-neutral-300">5</span>
+          <div><div class="font-medium">Facturé</div><div class="text-neutral-400">—</div></div>
+        </li>
+      </ol>
+    </section>
+
+    <div class="grid grid-cols-12 gap-5">
+
+      <!-- Main lines -->
+      <section class="col-span-12 lg:col-span-8">
+        <div class="rounded-xl border bg-white shadow-sm">
+          <div class="flex items-center justify-between border-b px-5 py-3">
+            <h2 class="text-base font-semibold">Lignes du devis</h2>
+            <div class="flex gap-2">
+              <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">+ Section</button>
+              <button class="rounded bg-amber-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-600">+ Article</button>
+            </div>
+          </div>
+
+          <table class="w-full text-sm">
+            <thead class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+              <tr>
+                <th class="px-5 py-2 font-medium">Désignation</th>
+                <th class="px-3 py-2 text-right font-medium">Qté</th>
+                <th class="px-3 py-2 font-medium">Unité</th>
+                <th class="px-3 py-2 text-right font-medium">PU HT</th>
+                <th class="px-3 py-2 text-right font-medium">Total HT</th>
+                <th class="w-8"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="bg-amber-50/40">
+                <td colspan="6" class="px-5 py-2 text-xs font-semibold uppercase tracking-widest text-amber-800">▼ Gros-œuvre</td>
+              </tr>
+              <tr class="border-b hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="font-medium">Béton C25/30 — fondations</div>
+                  <div class="text-xs text-neutral-500">BTN-025 · fourni et mis en œuvre</div>
+                </td>
+                <td class="px-3 py-3 text-right tabular-nums">42</td>
+                <td class="px-3 py-3 text-neutral-600">m³</td>
+                <td class="px-3 py-3 text-right tabular-nums">142,00 €</td>
+                <td class="px-3 py-3 text-right font-medium tabular-nums">5 964,00 €</td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="border-b hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="font-medium">Parpaing creux 20 — élévation</div>
+                  <div class="text-xs text-neutral-500">PRP-020 · mur porteur extérieur</div>
+                </td>
+                <td class="px-3 py-3 text-right tabular-nums">1 240</td>
+                <td class="px-3 py-3 text-neutral-600">u</td>
+                <td class="px-3 py-3 text-right tabular-nums">1,80 €</td>
+                <td class="px-3 py-3 text-right font-medium tabular-nums">2 232,00 €</td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="border-b hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="font-medium">Mortier prêt à l'emploi</div>
+                  <div class="text-xs text-amber-700">MOR-001 · composition (3 articles)</div>
+                </td>
+                <td class="px-3 py-3 text-right tabular-nums">8</td>
+                <td class="px-3 py-3 text-neutral-600">m³</td>
+                <td class="px-3 py-3 text-right tabular-nums">186,40 €</td>
+                <td class="px-3 py-3 text-right font-medium tabular-nums">1 491,20 €</td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+
+              <tr class="bg-amber-50/40">
+                <td colspan="6" class="px-5 py-2 text-xs font-semibold uppercase tracking-widest text-amber-800">▼ Couverture</td>
+              </tr>
+              <tr class="border-b hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="font-medium">Tuile romane</div>
+                  <div class="text-xs text-neutral-500">TUI-001</div>
+                </td>
+                <td class="px-3 py-3 text-right tabular-nums">2 800</td>
+                <td class="px-3 py-3 text-neutral-600">u</td>
+                <td class="px-3 py-3 text-right tabular-nums">0,95 €</td>
+                <td class="px-3 py-3 text-right font-medium tabular-nums">2 660,00 €</td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="border-b hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="font-medium">Main d'œuvre couvreur</div>
+                  <div class="text-xs text-neutral-500">MO-COUV · taux 48 €/h</div>
+                </td>
+                <td class="px-3 py-3 text-right tabular-nums">96</td>
+                <td class="px-3 py-3 text-neutral-600">h</td>
+                <td class="px-3 py-3 text-right tabular-nums">48,00 €</td>
+                <td class="px-3 py-3 text-right font-medium tabular-nums">4 608,00 €</td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+            </tbody>
+            <tfoot class="bg-neutral-50/60 text-sm">
+              <tr><td colspan="4" class="px-5 py-2 text-right text-neutral-600">Total HT</td><td class="px-3 py-2 text-right font-semibold tabular-nums">16 955,20 €</td><td></td></tr>
+              <tr><td colspan="4" class="px-5 py-2 text-right text-neutral-600">TVA 20%</td><td class="px-3 py-2 text-right tabular-nums">3 391,04 €</td><td></td></tr>
+              <tr><td colspan="4" class="px-5 py-2 text-right font-semibold text-neutral-900">Total TTC</td><td class="px-3 py-2 text-right font-bold tabular-nums text-amber-700">20 346,24 €</td><td></td></tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- Aside -->
+      <aside class="col-span-12 space-y-4 lg:col-span-4">
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Client</div>
+          <div class="mt-3 flex items-start gap-3">
+            <div class="grid size-10 place-items-center rounded-full bg-neutral-100 text-neutral-500">🏛</div>
+            <div>
+              <div class="font-medium">Mairie de Saint-Étienne</div>
+              <div class="text-xs text-neutral-500">Service Marchés Publics</div>
+              <div class="mt-1 text-xs text-neutral-500">contact@st-etienne.fr</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Chantier rattaché</div>
+          <a href="01-chantier-first.html" class="mt-3 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3 hover:bg-amber-50">
+            <div class="size-2 rounded-full bg-amber-500"></div>
+            <div class="flex-1">
+              <div class="font-medium text-amber-900">École Marguerite</div>
+              <div class="text-xs text-amber-700/80">CH-2026-014 · 92% avancement</div>
+            </div>
+            <div class="text-amber-700">›</div>
+          </a>
+        </div>
+
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Estimation marge</div>
+          <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+            <div><div class="text-neutral-500">Vente HT</div><div class="font-semibold tabular-nums">16 955 €</div></div>
+            <div><div class="text-neutral-500">Coût estimé</div><div class="font-semibold tabular-nums">13 240 €</div></div>
+            <div><div class="text-neutral-500">Marge</div><div class="font-semibold tabular-nums text-emerald-700">21,9 %</div></div>
+          </div>
+          <div class="mt-3 h-1.5 rounded bg-neutral-100"><div class="h-full w-[78%] rounded bg-emerald-500"></div></div>
+          <div class="mt-2 text-xs text-neutral-500">au-dessus de la cible (20%)</div>
+        </div>
+
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Historique</div>
+          <ul class="mt-3 space-y-2.5 text-xs">
+            <li class="flex items-start gap-2">
+              <span class="mt-1 size-1.5 rounded-full bg-amber-500"></span>
+              <div><div>Ligne « Main d'œuvre » ajoutée</div><div class="text-neutral-500">14:02 · Alex</div></div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-1 size-1.5 rounded-full bg-amber-500"></span>
+              <div><div>Quantité béton modifiée (40→42)</div><div class="text-neutral-500">10:11 · Alex</div></div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span>
+              <div><div>Devis créé depuis chantier École Marguerite</div><div class="text-neutral-500">23/05 · 18:02</div></div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <p class="mt-8 text-center text-xs text-neutral-400">
+      M1 — Devis avec timeline d'état en haut, lignes éditables par section, panneau latéral chantier + marge en temps réel.
+    </p>
+  </main>
+</body>
+</html>

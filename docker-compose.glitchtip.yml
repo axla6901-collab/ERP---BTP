@@ -1,0 +1,85 @@
+# GlitchTip — clone open-source de Sentry, self-hosted.
+# Stack séparée du docker-compose.yml principal (4 conteneurs, ~1 Go RAM).
+# À démarrer à la demande seulement :
+#   docker compose -f docker-compose.glitchtip.yml up -d
+#   docker compose -f docker-compose.glitchtip.yml stop  # pour mettre en pause
+# Procédure de setup initiale : docs/runbooks/observabilite.md
+
+services:
+  glitchtip-postgres:
+    image: postgres:16-alpine
+    container_name: erp-btp-glitchtip-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: glitchtip_dev_password
+      POSTGRES_DB: glitchtip
+    volumes:
+      - glitchtip_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glitchtip"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  glitchtip-redis:
+    image: redis:7-alpine
+    container_name: erp-btp-glitchtip-redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  glitchtip-web:
+    image: glitchtip/glitchtip:latest
+    container_name: erp-btp-glitchtip-web
+    restart: unless-stopped
+    depends_on:
+      glitchtip-postgres:
+        condition: service_healthy
+      glitchtip-redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://glitchtip:glitchtip_dev_password@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: change_me_in_prod_64_chars_random_string_xxxxxxxxxxxxxxxxxxxxx
+      PORT: 8000
+      EMAIL_URL: consolemail://
+      GLITCHTIP_DOMAIN: http://localhost:8000
+      DEFAULT_FROM_EMAIL: noreply@glitchtip.local
+      CELERY_WORKER_AUTOSCALE: "1,3"
+      CELERY_WORKER_MAX_TASKS_PER_CHILD: "10000"
+      REDIS_URL: redis://glitchtip-redis:6379/0
+      # Désactive la création publique de compte (un seul admin pour erp-btp)
+      ENABLE_USER_REGISTRATION: "True"
+    volumes:
+      - glitchtip_uploads:/code/uploads
+
+  glitchtip-worker:
+    image: glitchtip/glitchtip:latest
+    container_name: erp-btp-glitchtip-worker
+    restart: unless-stopped
+    depends_on:
+      glitchtip-postgres:
+        condition: service_healthy
+      glitchtip-redis:
+        condition: service_healthy
+    command: ./bin/run-celery-with-beat.sh
+    environment:
+      DATABASE_URL: postgres://glitchtip:glitchtip_dev_password@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: change_me_in_prod_64_chars_random_string_xxxxxxxxxxxxxxxxxxxxx
+      EMAIL_URL: consolemail://
+      GLITCHTIP_DOMAIN: http://localhost:8000
+      DEFAULT_FROM_EMAIL: noreply@glitchtip.local
+      CELERY_WORKER_AUTOSCALE: "1,3"
+      CELERY_WORKER_MAX_TASKS_PER_CHILD: "10000"
+      REDIS_URL: redis://glitchtip-redis:6379/0
+    volumes:
+      - glitchtip_uploads:/code/uploads
+
+volumes:
+  glitchtip_postgres_data:
+  glitchtip_uploads:

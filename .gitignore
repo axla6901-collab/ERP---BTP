@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+.next/
+out/
+build/
+dist/
+
+# Env (ne jamais commiter les secrets)
+.env
+.env.local
+.env.*.local
+.env.local.backup-*
+
+# Mémoire Claude Code (locale, par développeur)
+.claude/
+
+# Plans de session (locaux)
+*.plan.md
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cache
+.turbo/
+.eslintcache
+
+# Sentry
+.sentryclirc
+
+# Volumes Docker locaux (créés par docker-compose)
+# Volumes nommés (postgres_data, minio_data) sont gérés par Docker, mais on évite tout dossier local résiduel
+.docker/

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Administration · M1 · ERP BTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }</style>
+</head>
+<body class="min-h-screen bg-neutral-50 text-neutral-900">
+
+  <header class="sticky top-0 z-20 border-b bg-white">
+    <div class="flex h-14 items-center gap-4 px-6">
+      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
+      <div class="flex items-center gap-2">
+        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
+        <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700">ERP BTP</a>
+        <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">Compte-R BTP ▾</button>
+      </div>
+      <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
+        <a class="hover:text-neutral-900">Administration</a>
+        <span class="text-neutral-300">/</span>
+        <span class="text-neutral-900">Utilisateurs</span>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        <button class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100">
+          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+        </button>
+        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
+        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-[1400px] px-6 py-6">
+
+    <div class="mb-5 flex items-end justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Administration</h1>
+        <p class="mt-1 text-sm text-neutral-500">Utilisateurs, rôles, société et paramètres internes</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Audit log</button>
+        <button class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">+ Inviter un utilisateur</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-5">
+
+      <!-- Side nav admin -->
+      <aside class="col-span-12 lg:col-span-3">
+        <div class="rounded-xl border bg-white p-2 shadow-sm">
+          <ul class="space-y-0.5 text-sm">
+            <li><a class="flex items-center justify-between rounded bg-amber-50 px-3 py-2 font-medium text-amber-800"><span>👥 Utilisateurs</span><span class="text-xs">9</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>🔑 Rôles & permissions</span><span class="text-xs text-neutral-400">5</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>🏢 Société</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span># Numérotation</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>📊 MCD</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>🔐 Sécurité & MFA</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>📤 Imports / exports</span></a></li>
+            <li><a class="flex items-center justify-between rounded px-3 py-2 text-neutral-700 hover:bg-neutral-50"><span>🧾 Journaux d'activité</span></a></li>
+          </ul>
+        </div>
+
+        <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4 text-xs text-amber-900">
+          <div class="font-semibold">Tenant actif</div>
+          <div class="mt-1">Compte-R BTP <span class="text-amber-700">/ compte-r</span></div>
+          <div class="mt-2 text-amber-700/80">Phase M0 · 9 utilisateurs · 142 articles · 7 chantiers</div>
+        </div>
+      </aside>
+
+      <!-- Content : users table -->
+      <section class="col-span-12 lg:col-span-9">
+
+        <!-- KPIs -->
+        <div class="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs text-neutral-500">Utilisateurs actifs</div>
+            <div class="mt-1 text-2xl font-semibold tabular-nums">9</div>
+          </div>
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs text-neutral-500">MFA activé</div>
+            <div class="mt-1 text-2xl font-semibold tabular-nums">6 <span class="text-base text-neutral-500">/ 9</span></div>
+            <div class="mt-1 text-xs text-amber-600">3 à activer</div>
+          </div>
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs text-neutral-500">Invitations en attente</div>
+            <div class="mt-1 text-2xl font-semibold tabular-nums">1</div>
+          </div>
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs text-neutral-500">Dernière connexion</div>
+            <div class="mt-1 text-sm font-semibold">il y a 4 min</div>
+            <div class="mt-1 text-xs text-neutral-500">Pierre Dupont</div>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="mb-3 flex items-center gap-2 text-sm">
+          <span class="rounded-full bg-neutral-900 px-3 py-1 text-xs text-white">Tous <span class="ml-1 text-neutral-400">9</span></span>
+          <span class="rounded-full border bg-white px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50">Admin <span class="ml-1 text-neutral-400">2</span></span>
+          <span class="rounded-full border bg-white px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50">Commercial <span class="ml-1 text-neutral-400">2</span></span>
+          <span class="rounded-full border bg-white px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50">Chef de chantier <span class="ml-1 text-neutral-400">2</span></span>
+          <span class="rounded-full border bg-white px-3 py-1 text-xs text-neutral-700 hover:bg-neutral-50">Ouvrier <span class="ml-1 text-neutral-400">3</span></span>
+          <div class="flex-1"></div>
+          <button class="rounded border bg-white px-2.5 py-1 text-xs hover:bg-neutral-50">Tri ▾</button>
+        </div>
+
+        <div class="rounded-xl border bg-white shadow-sm">
+          <table class="w-full text-sm">
+            <thead class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+              <tr>
+                <th class="px-5 py-2.5 font-medium">Utilisateur</th>
+                <th class="px-5 py-2.5 font-medium">Rôle</th>
+                <th class="px-5 py-2.5 font-medium">MFA</th>
+                <th class="px-5 py-2.5 font-medium">Dernière session</th>
+                <th class="px-5 py-2.5 font-medium">Statut</th>
+                <th class="w-12"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-amber-200 text-center text-xs leading-9 font-medium text-amber-900">AA</div>
+                    <div>
+                      <div class="font-medium">Alex Acosta <span class="ml-1 rounded bg-amber-500/10 px-1 py-0.5 text-[10px] font-medium text-amber-800">vous</span></div>
+                      <div class="text-xs text-neutral-500">aacosta@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">super-admin</span></td>
+                <td class="px-5 py-3"><span class="text-emerald-700">● activé</span></td>
+                <td class="px-5 py-3 text-neutral-600">il y a 4 min</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-sky-200 text-center text-xs leading-9 font-medium text-sky-900">CR</div>
+                    <div>
+                      <div class="font-medium">Camille Roy</div>
+                      <div class="text-xs text-neutral-500">croy@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">admin</span></td>
+                <td class="px-5 py-3"><span class="text-emerald-700">● activé</span></td>
+                <td class="px-5 py-3 text-neutral-600">hier · 17:42</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-emerald-200 text-center text-xs leading-9 font-medium text-emerald-900">SF</div>
+                    <div>
+                      <div class="font-medium">Sami Fontaine</div>
+                      <div class="text-xs text-neutral-500">sfontaine@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">commercial</span></td>
+                <td class="px-5 py-3"><span class="text-emerald-700">● activé</span></td>
+                <td class="px-5 py-3 text-neutral-600">il y a 2 h</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-violet-200 text-center text-xs leading-9 font-medium text-violet-900">JB</div>
+                    <div>
+                      <div class="font-medium">Julien Bernard</div>
+                      <div class="text-xs text-neutral-500">jbernard@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">chef de chantier</span></td>
+                <td class="px-5 py-3"><span class="text-amber-700">○ à activer</span></td>
+                <td class="px-5 py-3 text-neutral-600">25/05 · 09:14</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-amber-200 text-center text-xs leading-9 font-medium text-amber-900">PD</div>
+                    <div>
+                      <div class="font-medium">Pierre Dupont</div>
+                      <div class="text-xs text-neutral-500">pdupont@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-700">ouvrier</span></td>
+                <td class="px-5 py-3"><span class="text-amber-700">○ à activer</span></td>
+                <td class="px-5 py-3 text-neutral-600">il y a 4 min</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-sky-200 text-center text-xs leading-9 font-medium text-sky-900">ML</div>
+                    <div>
+                      <div class="font-medium">Marc Leroy</div>
+                      <div class="text-xs text-neutral-500">mleroy@compte-r.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-neutral-200 px-2 py-0.5 text-xs font-medium text-neutral-700">ouvrier</span></td>
+                <td class="px-5 py-3"><span class="text-emerald-700">● activé</span></td>
+                <td class="px-5 py-3 text-neutral-600">hier · 16:08</td>
+                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-neutral-200 text-center text-xs leading-9 font-medium text-neutral-600">EM</div>
+                    <div>
+                      <div class="font-medium text-neutral-500">Élise Morel</div>
+                      <div class="text-xs text-neutral-400">emorel@compte-r.com · invitation envoyée</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">commercial</span></td>
+                <td class="px-5 py-3 text-neutral-400">—</td>
+                <td class="px-5 py-3 text-neutral-400">jamais</td>
+                <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">invité</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+              <tr class="hover:bg-neutral-50">
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-full bg-neutral-100 text-center text-xs leading-9 font-medium text-neutral-400">XX</div>
+                    <div>
+                      <div class="font-medium text-neutral-400 line-through">Xavier Xanthos</div>
+                      <div class="text-xs text-neutral-400">xxanthos@compte-r.com · désactivé le 12/04</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-neutral-400">—</td>
+                <td class="px-5 py-3 text-neutral-400">—</td>
+                <td class="px-5 py-3 text-neutral-400">12/04 · 11:32</td>
+                <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">archivé</span></td>
+                <td class="px-3 py-3 text-neutral-400">⋮</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="mt-6 text-center text-xs text-neutral-400">
+          M1 — Administration en deux colonnes : nav admin à gauche, contenu à droite. Identique aux autres écrans transverses.
+        </p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

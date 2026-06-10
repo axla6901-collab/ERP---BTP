@@ -1,0 +1,38 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "@typescript-eslint/consistent-type-imports": "error",
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "@/lib/db/client",
+            "importNames": ["db", "getDbAdmin"],
+            "message": "Les server actions métier doivent utiliser `withTenant(entrepriseId, tx => ...)` depuis `@/lib/db/with-tenant`. L'import direct de `db` ou `getDbAdmin` est réservé à lib/db/**, lib/auth/**, lib/admin/** (cf. plan multi-tenant)."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "lib/db/**/*.ts",
+        "lib/auth/**/*.ts",
+        "lib/admin/**/*.ts",
+        "lib/audit/**/*.ts",
+        "scripts/**/*.{ts,mts,cts}",
+        "tests/**/*.{ts,tsx}",
+        "app/api/admin/**/*.ts",
+        "app/api/entreprise/**/*.ts",
+        "**/*-super.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
+}

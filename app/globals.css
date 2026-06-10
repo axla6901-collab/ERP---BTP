@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Fond de page neutral-50 ; cartes blanches (--card) pour le contraste maquette. */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 14%;
+    /* Primaire = amber-500 (#f59e0b) — CTA, focus, surbrillances. */
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 18%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 51%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 18%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 38 92% 50%;
+    --radius: 0.625rem;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 14%;
+    --chart-1: 0 0% 85%;
+    --chart-2: 0 0% 51%;
+    --chart-3: 0 0% 38%;
+    --chart-4: 0 0% 31%;
+    --chart-5: 0 0% 22%;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 0 0% 14%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 48 100% 96%;
+    --sidebar-accent-foreground: 23 83% 31%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 38 92% 50%;
+  }
+
+  .dark {
+    --background: 0 0% 14%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 18%;
+    --card-foreground: 0 0% 98%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 22%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 22%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 0 0% 22%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 100% / 0.1;
+    --input: 0 0% 100% / 0.15;
+    --ring: 38 92% 50%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 0 0% 98%;
+    --chart-1: 0 0% 85%;
+    --chart-2: 0 0% 51%;
+    --chart-3: 0 0% 38%;
+    --chart-4: 0 0% 31%;
+    --chart-5: 0 0% 22%;
+    --sidebar: 0 0% 18%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 22%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 100% / 0.1;
+    --sidebar-ring: 38 92% 50%;
+  }
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Impression du module Planning : A3 paysage, déplié, en couleurs.
+ * Activé par les attributs data-print="..." posés sur les éléments du Gantt.
+ * Inertes hors impression — pas d'impact sur l'affichage normal.
+ * ───────────────────────────────────────────────────────────── */
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 8mm;
+  }
+  body {
+    background: #fff;
+  }
+  [data-print='hide'] {
+    display: none !important;
+  }
+  [data-print='section'] {
+    border: none !important;
+    box-shadow: none !important;
+    position: static !important;
+    inset: auto !important;
+  }
+  [data-print='box'] {
+    height: auto !important;
+    display: flex !important;
+  }
+  [data-print='labels-col'] {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  [data-print='labels-body'] {
+    position: relative !important;
+    top: 0 !important;
+    transform: none !important;
+  }
+  [data-print='time-scroll'] {
+    overflow: visible !important;
+  }
+  [data-print='time-header'] {
+    position: relative !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planning chantier · M1 · ERP BTP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    /* Masque la barre de scroll horizontale verticale tout en gardant le scroll */
+    #timeScroll::-webkit-scrollbar { height: 10px; width: 10px; }
+    #timeScroll::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 9999px; }
+    .bar { user-select: none; }
+    .lib-item:active { cursor: grabbing; }
+    .resize-h { cursor: ew-resize; }
+
+    /* Impression / export PDF : on ne garde que le planning, déplié, en couleurs */
+    @media print {
+      @page { size: A3 landscape; margin: 8mm; }
+      body { background: #fff; }
+      #topbar, #pageHead, #kpiBand, #pageFoot, #libPanel, #drawer, #drawerOverlay, #btnExitFocus { display: none !important; }
+      main { padding: 0 !important; max-width: none !important; }
+      section { border: none !important; box-shadow: none !important; }
+      #ganttBox { height: auto !important; display: block !important; }
+      #ganttBox > .flex { display: flex !important; }
+      #labelsCol { overflow: visible !important; height: auto !important; }
+      #labelsHeader { position: relative !important; }
+      #labelsBody { position: relative !important; top: 0 !important; transform: none !important; }
+      #timeScroll { overflow: visible !important; }
+      #timeHeader { position: relative !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-neutral-50 text-neutral-900">
+
+  <!-- ░░░ Top bar M1 ░░░ -->
+  <header id="topbar" class="sticky top-0 z-30 border-b bg-white">
+    <div class="flex h-14 items-center gap-2 px-3 sm:gap-4 sm:px-6">
+      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
+      <div class="flex items-center gap-2">
+        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
+        <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700">ERP BTP</a>
+        <button class="hidden rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50 sm:block">Compte-R BTP ▾</button>
+      </div>
+      <nav class="ml-3 hidden items-center gap-1.5 text-xs text-neutral-500 lg:flex">
+        <a href="06-chantiers.html" class="hover:text-neutral-900">Chantiers</a>
+        <span class="text-neutral-300">/</span>
+        <a href="01-chantier-first.html" class="hover:text-neutral-900">Loire sur Rhône</a>
+        <span class="text-neutral-300">/</span>
+        <span class="text-neutral-900">Planning</span>
+      </nav>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        <button class="hidden items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100 sm:flex">
+          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+        </button>
+        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
+        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-3 py-4 sm:px-6 sm:py-6">
+
+    <!-- ░░░ Heading + barre d'actions ░░░ -->
+    <div id="pageHead" class="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <div id="pageTitle">
+        <h1 class="text-2xl font-semibold tracking-tight">Planning — Loire sur Rhône</h1>
+        <p class="mt-1 text-sm text-neutral-500">Bâtiment 1 · sept. 2023 → avr. 2024 · 178 j calendaires</p>
+      </div>
+      <div id="pageActions" class="flex flex-wrap items-center gap-2">
+        <div id="zoomToggle" class="flex rounded-lg border bg-white p-0.5 text-xs">
+          <button data-zoom="jour" class="rounded px-2.5 py-1 text-neutral-600 hover:bg-neutral-100">Jour</button>
+          <button data-zoom="semaine" class="rounded bg-amber-500 px-2.5 py-1 font-medium text-white">Semaine</button>
+          <button data-zoom="mois" class="rounded px-2.5 py-1 text-neutral-600 hover:bg-neutral-100">Mois</button>
+        </div>
+        <select id="groupBy" class="rounded-lg border bg-white px-2 py-1.5 text-xs" title="Regrouper les lignes du planning">
+          <option value="niveau">Grouper : niveau</option>
+          <option value="metier">Grouper : corps de métier</option>
+        </select>
+        <div class="flex rounded-lg border bg-white p-0.5 text-xs">
+          <button id="btnUndo" class="rounded px-2 py-1 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30" title="Annuler (Ctrl+Z)">↶</button>
+          <button id="btnRedo" class="rounded px-2 py-1 text-neutral-600 hover:bg-neutral-100 disabled:opacity-30" title="Rétablir (Ctrl+Y)">↷</button>
+        </div>
+        <div class="relative">
+          <button id="btnHist" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50" title="Historique des modifications">🕘 Historique</button>
+          <div id="histMenu" class="absolute right-0 top-full z-40 mt-1 hidden max-h-80 w-72 overflow-y-auto rounded-lg border bg-white p-1 text-xs shadow-lg"></div>
+        </div>
+        <button id="btnToday" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Aujourd'hui</button>
+        <button id="btnCrit" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50" title="Mettre en évidence le chemin critique">⚡ Chemin critique</button>
+        <button id="btnKpi" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50" title="Masquer le décor et agrandir le planning">⤢ Plein écran</button>
+        <button id="btnHideDone" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50" title="Masquer les tâches terminées antérieures à aujourd'hui">✓ Masquer terminées</button>
+        <div class="relative">
+          <button id="btnFilter" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Filtre ▾</button>
+          <div id="filterMenu" class="absolute right-0 top-full z-40 mt-1 hidden w-60 rounded-lg border bg-white p-2 text-xs shadow-lg"></div>
+        </div>
+        <button id="btnPrint" class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50" title="Imprimer / exporter en PDF">🖨 Imprimer</button>
+        <button id="btnAddTask" class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">+ Tâche</button>
+      </div>
+    </div>
+
+    <!-- ░░░ KPIs ░░░ -->
+    <div id="kpiBand" class="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="text-xs text-neutral-500">Avancement</div>
+        <div id="kpiAvancement" class="mt-1 text-2xl font-semibold tabular-nums">—</div>
+        <div class="mt-2 h-1.5 rounded bg-neutral-100"><div id="kpiAvancementBar" class="h-full rounded bg-amber-500" style="width:0%"></div></div>
+      </div>
+      <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="text-xs text-neutral-500">Tâches planifiées</div>
+        <div id="kpiTaches" class="mt-1 text-2xl font-semibold tabular-nums">—</div>
+        <div class="mt-1 text-xs text-neutral-500">sur 6 niveaux</div>
+      </div>
+      <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="text-xs text-neutral-500">Heures ouvriers</div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums"><span id="kpiHeuresDone" class="text-amber-600">—</span> <span class="text-base font-normal text-neutral-400">/ <span id="kpiHeuresPlan">—</span> h</span></div>
+        <div class="mt-1 text-xs text-neutral-500">saisies / planifiées</div>
+      </div>
+      <div class="rounded-xl border bg-white p-4 shadow-sm">
+        <div class="text-xs text-neutral-500">Planning</div>
+        <div id="kpiStatut" class="mt-1 text-2xl font-semibold">—</div>
+        <div id="kpiStatutDetail" class="mt-1 text-xs text-neutral-500">—</div>
+      </div>
+    </div>
+
+    <!-- ░░░ Zone planning : bibliothèque + Gantt ░░░ -->
+    <section class="rounded-xl border bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b px-5 py-3">
+        <div class="flex items-center gap-3">
+          <h2 class="text-base font-semibold">Diagramme de Gantt</h2>
+          <span id="ganttCount" class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600"></span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-neutral-500">
+          <span class="hidden sm:inline">Glissez une tâche depuis la bibliothèque, ou tracez une barre sur une ligne vide</span>
+          <button id="btnLib" class="rounded border px-2 py-1 hover:bg-neutral-50">Bibliothèque ◧</button>
+          <button id="btnExitFocus" class="hidden rounded bg-amber-500 px-2 py-1 font-medium text-white hover:bg-amber-600">↩ Vue standard</button>
+        </div>
+      </div>
+
+      <div id="ganttBox" class="flex" style="height:600px">
+
+        <!-- ── Bibliothèque BTP (drag source) ── -->
+        <aside id="libPanel" class="flex w-[180px] flex-none flex-col border-r bg-neutral-50/60 sm:w-[230px]">
+          <div class="border-b p-3">
+            <div class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Bibliothèque BTP</div>
+            <input id="libSearch" placeholder="Rechercher une tâche…" class="mt-2 w-full rounded-md border bg-white px-2 py-1.5 text-xs outline-none focus:border-amber-400" />
+          </div>
+          <div id="libList" class="min-h-0 flex-1 space-y-3 overflow-y-auto p-3 text-xs"></div>
+          <div class="border-t p-2 text-center text-[10px] text-neutral-400">↑ glisser-déposer sur le planning</div>
+        </aside>
+
+        <!-- ── Gantt ── -->
+        <div class="flex min-w-0 flex-1">
+          <!-- Colonne libellés (fixe horizontalement) -->
+          <div id="labelsCol" class="relative w-[150px] flex-none overflow-hidden border-r bg-white sm:w-[270px]">
+            <div id="labelsHeader" class="absolute inset-x-0 top-0 z-10 flex items-end border-b bg-white px-3 pb-1 text-[11px] font-medium uppercase tracking-wide text-neutral-400" style="height:52px">Niveau / Tâche</div>
+            <div id="labelsBody" class="absolute inset-x-0" style="top:52px; will-change:transform"></div>
+          </div>
+          <!-- Timeline scrollable horizontalement -->
+          <div id="timeScroll" class="relative min-w-0 flex-1 overflow-auto">
+            <div id="timeHeader" class="sticky top-0 z-10 border-b bg-white"></div>
+            <div id="canvas" class="relative"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Légende (chips cliquables = filtre) -->
+      <div id="legend" class="flex flex-wrap items-center gap-x-4 gap-y-2 border-t px-5 py-3 text-xs text-neutral-600"></div>
+    </section>
+
+    <p id="pageFoot" class="mt-6 text-center text-xs text-neutral-400">
+      M1 — Planning de chantier inspiré du fichier « RBV - Loire sur Rhône ». Données fictives Compte-R BTP.
+      Cliquer une barre ouvre le détail + la saisie des heures ouvriers (alimente le <a href="10-rh-pointage.html" class="underline">pointage RH</a>).
+    </p>
+  </main>
+
+  <!-- ░░░ Drawer détail tâche + saisie heures ░░░ -->
+  <div id="drawerOverlay" class="fixed inset-0 z-40 hidden bg-neutral-900/20"></div>
+  <aside id="drawer" class="fixed right-0 top-0 z-50 hidden h-full w-full max-w-md translate-x-full overflow-y-auto border-l bg-white shadow-2xl transition-transform duration-200">
+    <div class="flex items-center justify-between border-b px-5 py-4">
+      <div class="flex items-center gap-2">
+        <span id="dwCatDot" class="size-3 rounded-full"></span>
+        <h3 class="text-sm font-semibold">Détail de la tâche</h3>
+      </div>
+      <button id="dwClose" class="rounded p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700">✕</button>
+    </div>
+
+    <div class="space-y-5 p-5">
+      <div>
+        <label class="text-xs font-medium text-neutral-500">Intitulé</label>
+        <input id="dwName" class="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:border-amber-400" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-medium text-neutral-500">Niveau</label>
+          <div id="dwLevel" class="mt-1 rounded-md border bg-neutral-50 px-3 py-2 text-sm"></div>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-neutral-500">Corps de métier</label>
+          <select id="dwCat" class="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm outline-none focus:border-amber-400"></select>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-neutral-500">Début</label>
+          <input id="dwStart" type="date" class="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:border-amber-400" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-neutral-500">Fin</label>
+          <input id="dwEnd" type="date" class="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:border-amber-400" />
+        </div>
+      </div>
+
+      <!-- Avancement -->
+      <div>
+        <label class="text-xs font-medium text-neutral-500">Avancement de la tâche</label>
+        <div class="mt-2 flex items-center gap-3">
+          <input id="dwProg" type="range" min="0" max="100" step="5" value="0" class="flex-1 accent-amber-500" />
+          <div class="flex items-center gap-1">
+            <input id="dwProgNum" type="number" min="0" max="100" step="5" value="0" class="w-16 rounded-md border px-2 py-1 text-right text-sm font-semibold text-amber-600 outline-none focus:border-amber-400" />
+            <span class="text-sm text-neutral-500">%</span>
+          </div>
+        </div>
+        <p class="mt-1 text-[11px] text-neutral-400">Aussi réglable directement sur la barre (glisser le bas de la barre).</p>
+      </div>
+
+      <!-- Enchaînement -->
+      <div>
+        <label class="text-xs font-medium text-neutral-500">Enchaînement — dépend de</label>
+        <select id="dwDep" class="mt-1 w-full rounded-md border bg-white px-3 py-2 text-sm outline-none focus:border-amber-400"></select>
+        <p class="mt-1 text-[11px] text-neutral-400">Si la tâche précédente est déplacée, celle-ci — et toute sa suite — se décalent automatiquement.</p>
+      </div>
+
+      <!-- Équipe & heures -->
+      <div class="rounded-xl border bg-neutral-50/60">
+        <div class="flex items-center justify-between border-b px-4 py-2.5">
+          <div class="text-sm font-semibold">Équipe & heures</div>
+          <span id="dwNbOuvriers" class="rounded-full bg-white px-2 py-0.5 text-xs text-neutral-600 ring-1 ring-neutral-200"></span>
+        </div>
+        <div class="px-4 py-2">
+          <div class="grid grid-cols-[1fr_56px_56px_22px] gap-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+            <div>Ouvrier</div><div class="text-right">Prévu</div><div class="text-right">Réalisé</div><div></div>
+          </div>
+          <div id="dwEquipe" class="space-y-1.5"></div>
+          <div class="mt-2 flex items-center gap-2">
+            <select id="dwAddWorker" class="flex-1 rounded-md border bg-white px-2 py-1.5 text-xs outline-none focus:border-amber-400"></select>
+            <button id="dwAddBtn" class="rounded-md bg-neutral-800 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-neutral-700">+ Affecter</button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between border-t px-4 py-2.5 text-sm">
+          <span class="text-neutral-500">Total heures</span>
+          <span><span id="dwTotalDone" class="font-semibold text-amber-600">0</span> <span class="text-neutral-400">/ <span id="dwTotalPlan">0</span> h prévues</span></span>
+        </div>
+      </div>
+
+      <a href="10-rh-pointage.html" class="flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50">
+        🕒 Voir / valider dans le pointage RH →
+      </a>
+
+      <div class="flex gap-2 pt-1">
+        <button id="dwDelete" class="rounded-md border border-rose-200 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50">Supprimer</button>
+        <button id="dwSave" class="flex-1 rounded-md bg-amber-500 px-3 py-2 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button>
+      </div>
+    </div>
+  </aside>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   Données fidèles — chantier « Loire sur Rhône », Bâtiment 1
+   Extraites de l'onglet « RBV - Loire sur rhône » du fichier Excel.
+   1 tâche = { id, group, name, start, end, cat, hours, milestone?, dep? }
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// Corps de métier → palette limitée (ambre = hero / gros œuvre)
+const CATS = {
+  gros_oeuvre:  { label: 'Gros œuvre',            fill: '#f59e0b' },
+  terrassement: { label: 'Terrassement / remblais', fill: '#78716c' },
+  maconnerie:   { label: 'Maçonnerie (agglos)',   fill: '#f97316' },
+  structure:    { label: 'Structure / réseaux',   fill: '#0ea5e9' },
+  finitions:    { label: 'Finitions',             fill: '#10b981' },
+  securite:     { label: 'Sécurité',              fill: '#f43f5e' },
+  installation: { label: 'Installation / grue',   fill: '#64748b' },
+  livraison:    { label: 'Livraison (jalon)',     fill: '#8b5cf6' },
+};
+
+const WORKERS = ['P. Dupont', 'M. Leroy', 'J. Bernard', 'S. Fontaine', 'K. Mercier', 'A. Roy', 'T. Girard'];
+
+// Ordre et libellés des groupes (phases / niveaux)
+let GROUPS = [
+  { key: 'prep',  label: 'Préparation (formalités, études, métreur)' },
+  { key: 'inst',  label: 'Installation chantier' },
+  { key: 'ss',    label: 'Sous-sol (SS)' },
+  { key: 'rdc',   label: 'RDC' },
+  { key: 'r1',    label: 'R+1' },
+  { key: 'r2',    label: 'R+2' },
+  { key: 'r3',    label: 'R+3' },
+  { key: 'repli', label: 'Repli du chantier' },
+];
+
+let _id = 0; const nid = () => 't' + (++_id);
+const T = (group, name, start, end, cat, hours, milestone, dep) =>
+  ({ id: nid(), group, name, start, end, cat, hours: hours || 0, milestone: !!milestone, dep: dep || null });
+
+let TASKS = [
+  // ── Préparation (groupe plié par défaut) ──
+  T('prep', 'Autorisation de voirie',        '2023-09-04', '2023-09-04', 'installation', 0, true),
+  T('prep', 'Plans de fondations',           '2023-09-18', '2023-09-18', 'structure',    0, true),
+  T('prep', 'Consultation aciers',           '2023-10-02', '2023-10-13', 'installation', 0),
+  T('prep', 'BC aciers',                     '2023-10-18', '2023-10-18', 'livraison',    0, true),
+  T('prep', 'Location grue',                 '2023-11-15', '2024-04-23', 'installation', 0),
+
+  // ── Installation chantier ──
+  T('inst', 'Livraison Acier',               '2023-10-30', '2023-10-30', 'livraison',    0, true),
+  T('inst', 'Implantation Bâtiment',         '2023-10-30', '2023-10-30', 'installation', 8),
+  T('inst', 'Clôtures / Barrières Heras',    '2023-11-02', '2023-11-02', 'installation', 16),
+  T('inst', 'Fouille grue',                  '2023-11-02', '2023-11-02', 'installation', 8),
+  T('inst', 'Livraison Fût grue',            '2023-11-02', '2023-11-02', 'livraison',    0, true),
+  T('inst', 'Massif grue',                   '2023-11-02', '2023-11-08', 'gros_oeuvre',  120),
+  T('inst', 'Pose bungalows + Enedis',       '2023-11-06', '2023-11-06', 'installation', 16),
+  T('inst', 'Branchement bungalows',         '2023-11-08', '2023-11-08', 'installation', 16),
+  T('inst', 'Finition base vie',             '2023-11-10', '2023-11-10', 'installation', 16),
+  T('inst', 'Montage grue',                  '2023-11-15', '2023-11-16', 'installation', 24),
+
+  // ── Sous-sol ──
+  T('ss', 'SS - Livraison Aciers Fondation', '2023-11-16', '2023-11-16', 'livraison',    0, true),
+  T('ss', 'SS - Terrassement / Fouilles',    '2023-11-20', '2023-11-29', 'terrassement', 192),
+  T('ss', 'SS - Fondation',                  '2023-11-22', '2023-12-01', 'gros_oeuvre',  256),
+  T('ss', 'SS - Livraison Aciers voiles',    '2023-11-22', '2023-11-22', 'livraison',    0, true),
+  T('ss', 'SS - Voiles',                     '2023-11-27', '2023-12-22', 'gros_oeuvre',  640),
+  T('ss', 'SS - Étanchéité',                 '2024-01-03', '2024-01-29', 'structure',    0),
+  T('ss', 'SS - Réseaux',                    '2024-01-02', '2024-01-15', 'structure',    320),
+  T('ss', 'SS - Poutres',                    '2024-01-15', '2024-01-26', 'structure',    160),
+  T('ss', 'SS - Dallage',                    '2024-01-16', '2024-02-05', 'gros_oeuvre',  480),
+  T('ss', 'SS - Livraison Prédalle',         '2024-01-24', '2024-01-24', 'livraison',    0, true),
+  T('ss', 'SS - Remblais',                   '2024-01-29', '2024-02-09', 'terrassement', 80),
+  T('ss', 'SS - Plancher haut',              '2024-01-29', '2024-02-16', 'gros_oeuvre',  480),
+  T('ss', 'SS - Livraison Sécurité',         '2024-02-05', '2024-02-05', 'livraison',    0, true),
+  T('ss', 'SS - Sécurité',                   '2024-02-12', '2024-04-23', 'securite',     832),
+  T('ss', 'SS - Finitions',                  '2024-02-26', '2024-03-12', 'finitions',    96),
+
+  // ── RDC ──
+  T('rdc', 'RDC - Livraison Aciers voiles',  '2024-02-07', '2024-02-07', 'livraison',    0, true),
+  T('rdc', 'RDC - Voiles',                   '2024-02-12', '2024-02-23', 'gros_oeuvre',  320),
+  T('rdc', 'RDC - Livraison Escalier',       '2024-02-12', '2024-02-12', 'livraison',    0, true),
+  T('rdc', 'RDC - agglos',                   '2024-02-12', '2024-02-23', 'maconnerie',   120),
+  T('rdc', 'RDC - Livraison Aciers plancher','2024-02-14', '2024-02-14', 'livraison',    0, true),
+  T('rdc', 'RDC - Plancher haut',            '2024-02-19', '2024-03-01', 'gros_oeuvre',  320),
+  T('rdc', 'RDC - Finitions',                '2024-03-04', '2024-03-29', 'finitions',    320),
+
+  // ── R+1 ──
+  T('r1', 'R+1 - Livraison Aciers voiles',   '2024-02-21', '2024-02-21', 'livraison',    0, true),
+  T('r1', 'R+1 - Voiles',                    '2024-02-26', '2024-03-08', 'gros_oeuvre',  240),
+  T('r1', 'R+1 - agglos',                    '2024-02-26', '2024-03-08', 'maconnerie',   96),
+  T('r1', 'R+1 - Livraison Aciers plancher', '2024-02-28', '2024-02-28', 'livraison',    0, true),
+  T('r1', 'R+1 - Plancher haut',             '2024-03-06', '2024-03-19', 'gros_oeuvre',  320),
+  T('r1', 'R+1 - Finitions',                 '2024-03-25', '2024-04-03', 'finitions',    128),
+
+  // ── R+2 ──
+  T('r2', 'R+2 - Livraison Aciers voiles',   '2024-03-06', '2024-03-06', 'livraison',    0, true),
+  T('r2', 'R+2 - Voiles',                    '2024-03-11', '2024-03-22', 'gros_oeuvre',  240),
+  T('r2', 'R+2 - agglos',                    '2024-03-11', '2024-03-22', 'maconnerie',   96),
+  T('r2', 'R+2 - Plancher haut',             '2024-03-18', '2024-03-29', 'gros_oeuvre',  240),
+  T('r2', 'R+2 - Finitions',                 '2024-04-04', '2024-04-12', 'finitions',    112),
+
+  // ── R+3 ──
+  T('r3', 'R+3 - Livraison Aciers voiles',   '2024-03-20', '2024-03-20', 'livraison',    0, true),
+  T('r3', 'R+3 - Voiles',                    '2024-03-25', '2024-04-05', 'gros_oeuvre',  240),
+  T('r3', 'R+3 - agglos',                    '2024-03-25', '2024-04-05', 'maconnerie',   96),
+  T('r3', 'R+3 - Plancher haut',             '2024-04-01', '2024-04-12', 'gros_oeuvre',  240),
+  T('r3', 'R+3 - Souche',                    '2024-04-08', '2024-04-12', 'gros_oeuvre',  120),
+  T('r3', 'R+3 - Seuils + appuis fenêtres',  '2024-04-15', '2024-04-19', 'gros_oeuvre',  240),
+  T('r3', 'R+3 - Finitions',                 '2024-04-11', '2024-04-19', 'finitions',    112),
+
+  // ── Repli ──
+  T('repli', 'Repli du chantier',            '2024-04-19', '2024-04-25', 'installation', 80),
+];
+
+// Dépendances de démo (auto-cascade) : Voiles → Plancher haut de chaque niveau
+function linkDep(predName, succName) {
+  const p = TASKS.find(t => t.name === predName), s = TASKS.find(t => t.name === succName);
+  if (p && s) s.dep = p.id;
+}
+linkDep('SS - Voiles', 'SS - Plancher haut');
+linkDep('RDC - Voiles', 'RDC - Plancher haut');
+linkDep('R+1 - Voiles', 'R+1 - Plancher haut');
+linkDep('R+2 - Voiles', 'R+2 - Plancher haut');
+linkDep('R+3 - Voiles', 'R+3 - Plancher haut');
+// Épine dorsale structurelle (= chemin critique du chantier)
+linkDep('SS - Terrassement / Fouilles', 'SS - Fondation');
+linkDep('SS - Fondation', 'SS - Voiles');
+linkDep('SS - Plancher haut', 'RDC - Voiles');
+linkDep('RDC - Plancher haut', 'R+1 - Voiles');
+linkDep('R+1 - Plancher haut', 'R+2 - Voiles');
+linkDep('R+2 - Plancher haut', 'R+3 - Voiles');
+linkDep('R+3 - Plancher haut', 'R+3 - Souche');
+linkDep('R+3 - Souche', 'R+3 - Seuils + appuis fenêtres');
+linkDep('R+3 - Seuils + appuis fenêtres', 'R+3 - Finitions');
+linkDep('R+3 - Finitions', 'Repli du chantier');
+
+// Bibliothèque BTP (sources de glisser-déposer), durée par défaut en jours
+const LIBRARY = [
+  { sect: 'Terrassement', items: [
+    { name: 'Terrassement / Fouilles', cat: 'terrassement', dur: 8 },
+    { name: 'Remblais',                cat: 'terrassement', dur: 10 },
+  ]},
+  { sect: 'Gros œuvre', items: [
+    { name: 'Fondation',     cat: 'gros_oeuvre', dur: 8 },
+    { name: 'Voiles',        cat: 'gros_oeuvre', dur: 10 },
+    { name: 'Dallage',       cat: 'gros_oeuvre', dur: 15 },
+    { name: 'Plancher haut', cat: 'gros_oeuvre', dur: 10 },
+    { name: 'Souche',        cat: 'gros_oeuvre', dur: 5 },
+  ]},
+  { sect: 'Maçonnerie', items: [
+    { name: 'Agglos',  cat: 'maconnerie', dur: 10 },
+    { name: 'Enduits', cat: 'maconnerie', dur: 8 },
+  ]},
+  { sect: 'Structure', items: [
+    { name: 'Réseaux', cat: 'structure', dur: 10 },
+    { name: 'Poutres', cat: 'structure', dur: 10 },
+  ]},
+  { sect: 'Finitions', items: [
+    { name: 'Finitions',  cat: 'finitions', dur: 12 },
+    { name: 'Sécurité',   cat: 'securite',  dur: 20 },
+  ]},
+  { sect: 'Livraisons (jalon)', items: [
+    { name: 'Livraison Aciers',   cat: 'livraison', dur: 1, milestone: true },
+    { name: 'Livraison Prédalle', cat: 'livraison', dur: 1, milestone: true },
+    { name: 'Livraison Escalier', cat: 'livraison', dur: 1, milestone: true },
+  ]},
+];
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Helpers dates (en UTC pour éviter les décalages de fuseau)
+   ═══════════════════════════════════════════════════════════════════════ */
+const DAY = 86400000;
+const MOIS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const parseD = s => new Date(s + 'T00:00:00Z');
+const dnum   = d => Math.floor((typeof d === 'string' ? parseD(d) : d).getTime() / DAY);
+const fromN  = n => new Date(n * DAY);
+const iso    = d => d.toISOString().slice(0, 10);
+const addDays= (s, n) => iso(new Date((dnum(s) + n) * DAY));
+const fmtFR  = s => { const d = parseD(s); return d.getUTCDate() + ' ' + MOIS[d.getUTCMonth()]; };
+
+const TODAY = '2024-01-15';   // date de référence simulée (le chantier est en 2023-24)
+
+/* ═══════════════════════════════════════════════════════════════════════
+   État & rendu
+   ═══════════════════════════════════════════════════════════════════════ */
+const PX = { jour: 26, semaine: 11, mois: 4.2 };
+const ROW_H = 34, GROUP_H = 38, HEAD_H = 52;
+
+const state = {
+  zoom: 'semaine',
+  collapsed: new Set(['prep']),
+  hiddenCats: new Set(),
+  selected: null,
+  focus: false,
+  hideDone: false,
+  groupBy: 'niveau',     // 'niveau' | 'metier'
+  critical: false,       // surbrillance du chemin critique
+};
+// Tâche terminée (100%) et antérieure à aujourd'hui
+const isDonePast = t => (t.progress || 0) >= 100 && dnum(t.end) < dnum(TODAY);
+let CRIT = new Set();    // ids des tâches du chemin critique (recalculé au rendu)
+
+// Groupes affichés selon le mode de regroupement
+function currentGroups() {
+  if (state.groupBy === 'metier') {
+    return Object.keys(CATS)
+      .filter(k => TASKS.some(t => t.cat === k))
+      .map(k => ({ key: 'cat:' + k, label: CATS[k].label, cat: k }));
+  }
+  return GROUPS;
+}
+function tasksOfGroup(g) {
+  return state.groupBy === 'metier'
+    ? TASKS.filter(t => t.cat === g.cat)
+    : TASKS.filter(t => t.group === g.key);
+}
+
+let RANGE_START, RANGE_END, TOTAL_DAYS, PROJECT_SPAN, PROJECT_END;
+function computeRange() {
+  let min = Infinity, max = -Infinity;
+  TASKS.forEach(t => { min = Math.min(min, dnum(t.start)); max = Math.max(max, dnum(t.end)); });
+  RANGE_START = min - 3; RANGE_END = max + 6; TOTAL_DAYS = RANGE_END - RANGE_START + 1;
+  PROJECT_SPAN = max - min + 1; PROJECT_END = iso(fromN(max));
+}
+const px = () => PX[state.zoom];
+const xOf = ds => (dnum(ds) - RANGE_START) * px();
+const widthOf = (s, e) => (dnum(e) - dnum(s) + 1) * px();
+
+// Heures "saisies" pré-remplies : tâches terminées avant TODAY = faites ; en cours = au prorata
+function seedHours(t) {
+  // avancement initial cohérent avec la date de référence (terminé avant auj. = 100%, en cours = prorata)
+  if (t.progress === undefined) {
+    const dur = dnum(t.end) - dnum(t.start) + 1;
+    if (dnum(t.end) < dnum(TODAY)) t.progress = 100;
+    else if (dnum(t.start) <= dnum(TODAY)) t.progress = Math.round((dnum(TODAY) - dnum(t.start) + 1) / dur * 100);
+    else t.progress = 0;
+  }
+  if (t.equipe) return;
+  if (t.hours === 0) { t.equipe = []; t.done = 0; return; }
+  const dur = dnum(t.end) - dnum(t.start) + 1;
+  const nb = Math.min(6, Math.max(1, Math.round(t.hours / (dur * 8))));
+  let frac = 0;
+  if (dnum(t.end) < dnum(TODAY)) frac = 1;
+  else if (dnum(t.start) <= dnum(TODAY)) frac = (dnum(TODAY) - dnum(t.start) + 1) / dur;
+  const planPer = Math.round(t.hours / nb);
+  t.equipe = [];
+  for (let i = 0; i < nb; i++) {
+    t.equipe.push({ name: WORKERS[i % WORKERS.length], plan: planPer, done: Math.round(planPer * frac) });
+  }
+}
+const taskDone = t => (t.equipe || []).reduce((s, w) => s + (+w.done || 0), 0);
+const taskPlan = t => t.hours || (t.equipe || []).reduce((s, w) => s + (+w.plan || 0), 0);
+
+/* ── Construction de la mise en page (groupes + lignes visibles) ── */
+function buildLayout() {
+  const rows = [];   // { type:'group'|'task', y, h, ... }
+  let y = 0;
+  currentGroups().forEach(g => {
+    const tks = tasksOfGroup(g).filter(t => !state.hiddenCats.has(t.cat)
+      && !(state.hideDone && isDonePast(t)));
+    if (tks.length === 0) return;   // groupe entièrement masqué (ex. terminé)
+    rows.push({ type: 'group', group: g, y, h: GROUP_H, tasks: tks });
+    y += GROUP_H;
+    if (!state.collapsed.has(g.key)) {
+      tks.forEach(t => { rows.push({ type: 'task', task: t, y, h: ROW_H }); y += ROW_H; });
+    }
+  });
+  return { rows, height: y };
+}
+
+/* ── Rendu principal ── */
+function render() {
+  TASKS.forEach(seedHours);
+  CRIT = state.critical ? criticalPath() : new Set();
+  const W = TOTAL_DAYS * px();
+  const { rows, height } = buildLayout();
+
+  // Entête timeline (bande mois + bande sem./jour)
+  const head = document.getElementById('timeHeader');
+  head.style.width = W + 'px'; head.style.height = HEAD_H + 'px';
+  head.innerHTML = buildHeader(W);
+
+  // Canvas
+  const cv = document.getElementById('canvas');
+  cv.style.width = W + 'px'; cv.style.height = height + 'px';
+  cv.innerHTML = buildBackground(W, height, rows) + buildArrows(rows) + buildBars(rows);
+
+  // Libellés
+  const lb = document.getElementById('labelsBody');
+  lb.innerHTML = buildLabels(rows);
+
+  document.getElementById('ganttCount').textContent =
+    TASKS.length + ' tâches · ' + GROUPS.length + ' groupes';
+
+  updateKPIs();
+  attachBarHandlers();
+}
+
+function buildHeader(W) {
+  let months = '', sub = '';
+  // Bande mois
+  let d = RANGE_START;
+  while (d <= RANGE_END) {
+    const dt = fromN(d);
+    const mStart = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), 1) / DAY;
+    const mEnd = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + 1, 0) / DAY;
+    const from = Math.max(d, RANGE_START), to = Math.min(mEnd, RANGE_END);
+    const left = (from - RANGE_START) * px(), w = (to - from + 1) * px();
+    months += '<div class="absolute flex items-center border-l border-neutral-200 px-2 text-[11px] font-semibold text-neutral-700" style="left:' + left + 'px;width:' + w + 'px;top:0;height:26px">'
+            + MOIS[dt.getUTCMonth()] + ' ' + (dt.getUTCMonth() === 0 || from === RANGE_START ? dt.getUTCFullYear() : '') + '</div>';
+    d = mEnd + 1;
+  }
+  // Bande inférieure : semaines (n°) ou jours selon zoom
+  if (state.zoom === 'jour') {
+    for (let i = RANGE_START; i <= RANGE_END; i++) {
+      const dt = fromN(i), dow = dt.getUTCDay(), we = (dow === 0 || dow === 6);
+      sub += '<div class="absolute text-center text-[9px] ' + (we ? 'text-neutral-300' : 'text-neutral-500') + '" style="left:' + ((i - RANGE_START) * px()) + 'px;width:' + px() + 'px;top:28px">' + dt.getUTCDate() + '</div>';
+    }
+  } else {
+    // n° de semaine ISO approx : itère lundi par lundi
+    let i = RANGE_START;
+    while (fromN(i).getUTCDay() !== 1 && i <= RANGE_END) i++;
+    for (; i <= RANGE_END; i += 7) {
+      sub += '<div class="absolute border-l border-neutral-100 pl-1 text-[9px] text-neutral-400" style="left:' + ((i - RANGE_START) * px()) + 'px;width:' + (7 * px()) + 'px;top:30px">S' + isoWeek(fromN(i)) + '</div>';
+    }
+  }
+  return months + sub;
+}
+function isoWeek(d) {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = (t.getUTCDay() + 6) % 7; t.setUTCDate(t.getUTCDate() - day + 3);
+  const first = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
+  return 1 + Math.round(((t - first) / DAY - 3 + ((first.getUTCDay() + 6) % 7)) / 7);
+}
+
+function buildBackground(W, H, rows) {
+  let bg = '';
+  // Week-ends (zoom jour uniquement)
+  if (state.zoom === 'jour') {
+    for (let i = RANGE_START; i <= RANGE_END; i++) {
+      const dow = fromN(i).getUTCDay();
+      if (dow === 0 || dow === 6)
+        bg += '<div class="absolute bg-neutral-50" style="left:' + ((i - RANGE_START) * px()) + 'px;width:' + px() + 'px;top:0;height:' + H + 'px"></div>';
+    }
+  }
+  // Séparateurs de mois
+  let d = RANGE_START;
+  while (d <= RANGE_END) {
+    const dt = fromN(d);
+    const mEnd = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + 1, 0) / DAY;
+    bg += '<div class="absolute bg-neutral-100" style="left:' + ((d - RANGE_START) * px()) + 'px;width:1px;top:0;height:' + H + 'px"></div>';
+    d = mEnd + 1;
+  }
+  // Fonds de ligne (groupes + survol)
+  rows.forEach(r => {
+    if (r.type === 'group')
+      bg += '<div class="absolute bg-neutral-50/70" style="left:0;top:' + r.y + 'px;width:' + W + 'px;height:' + r.h + 'px"></div>';
+    else
+      bg += '<div class="ganttRow absolute border-b border-neutral-50 hover:bg-amber-50/40" data-group="' + r.task.group + '" style="left:0;top:' + r.y + 'px;width:' + W + 'px;height:' + r.h + 'px"></div>';
+  });
+  // Trait "Aujourd'hui"
+  const tx = xOf(TODAY) + px() / 2;
+  bg += '<div class="absolute z-10" style="left:' + tx + 'px;width:0;top:0;height:' + H + 'px;border-left:2px solid #f59e0b"></div>'
+      + '<div class="absolute z-10 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow" style="left:' + (tx + 3) + 'px;top:2px">Aujourd\'hui</div>';
+  return bg;
+}
+
+// Flèches d'enchaînement (fin du prédécesseur → début du successeur)
+function buildArrows(rows) {
+  const pos = {};
+  rows.forEach(r => {
+    if (r.type !== 'task') return;
+    const t = r.task;
+    pos[t.id] = {
+      yc: r.y + r.h / 2,
+      xStart: xOf(t.start),
+      xEnd: t.milestone ? xOf(t.start) + px() : (dnum(t.end) + 1 - RANGE_START) * px(),
+    };
+  });
+  let paths = '';
+  TASKS.forEach(s => {
+    if (!s.dep) return;
+    const a = pos[s.dep], b = pos[s.id];
+    if (!a || !b) return;                       // un des deux est dans un groupe replié
+    const x1 = a.xEnd, y1 = a.yc, x2 = b.xStart, y2 = b.yc;
+    const oncrit = CRIT.has(s.id) && CRIT.has(s.dep);
+    paths += '<path d="M' + x1 + ' ' + y1 + ' H' + (x1 + 9) + ' V' + y2 + ' H' + Math.max(x1 + 9, x2 - 1) + '" '
+          + 'stroke="' + (oncrit ? '#f43f5e' : '#94a3b8') + '" stroke-width="' + (oncrit ? 2.5 : 1.5) + '" fill="none" '
+          + 'marker-end="url(#' + (oncrit ? 'arrowHeadC' : 'arrowHead') + ')"/>';
+  });
+  if (!paths) return '';
+  const W = TOTAL_DAYS * px();
+  let H = 0; rows.forEach(r => H = Math.max(H, r.y + r.h));
+  return '<svg class="pointer-events-none absolute left-0 top-0" width="' + W + '" height="' + H + '" style="z-index:5">'
+       + '<defs><marker id="arrowHead" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">'
+       + '<path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker>'
+       + '<marker id="arrowHeadC" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">'
+       + '<path d="M0,0 L6,3 L0,6 Z" fill="#f43f5e"/></marker></defs>' + paths + '</svg>';
+}
+
+function buildBars(rows) {
+  let html = '';
+  rows.forEach(r => {
+    if (r.type === 'group') {
+      // Barre récap du groupe (étendue min→max)
+      const tks = r.tasks;
+      if (tks.length) {
+        const mn = tks.reduce((a, t) => Math.min(a, dnum(t.start)), Infinity);
+        const mx = tks.reduce((a, t) => Math.max(a, dnum(t.end)), -Infinity);
+        const left = (mn - RANGE_START) * px(), w = (mx - mn + 1) * px();
+        html += '<div class="absolute rounded-full bg-neutral-300/70" style="left:' + left + 'px;width:' + w + 'px;top:' + (r.y + r.h / 2 - 3) + 'px;height:6px"></div>';
+      }
+      return;
+    }
+    const t = r.task, c = CATS[t.cat];
+    if (t.milestone) {
+      const cx = xOf(t.start) + px() / 2, fait = (t.progress || 0) >= 100;
+      const shadow = CRIT.has(t.id) ? 'box-shadow:0 0 0 2px #f43f5e'
+        : (fait ? 'box-shadow:0 0 0 2px #fff,0 0 0 3px ' + c.fill : '');
+      html += '<div class="bar absolute" data-id="' + t.id + '" title="' + esc(t.name) + (fait ? ' — fait' : '') + '" '
+           + 'style="left:' + (cx - 7) + 'px;top:' + (r.y + r.h / 2 - 7) + 'px;width:14px;height:14px;background:' + c.fill + ';transform:rotate(45deg);border-radius:3px;cursor:pointer;' + shadow + '"></div>';
+    } else {
+      const left = xOf(t.start), w = Math.max(px(), widthOf(t.start, t.end));
+      const pct = Math.max(0, Math.min(100, t.progress || 0));
+      const nbO = (t.equipe || []).length;
+      const meta = ' · ' + pct + '%' + (t.hours ? ' · ' + taskDone(t) + '/' + taskPlan(t) + 'h' : '') + (nbO ? ' · 👷' + nbO : '');
+      html += '<div class="bar group absolute flex items-center rounded-md text-[11px] font-medium text-white shadow-sm" '
+           + 'data-id="' + t.id + '" title="' + esc(t.name) + ' — ' + pct + '%' + (nbO ? ', ' + nbO + ' ouvrier' + (nbO > 1 ? 's' : '') + ', ' + taskDone(t) + '/' + taskPlan(t) + ' h' : '') + '" '
+           + 'style="left:' + left + 'px;width:' + w + 'px;top:' + (r.y + 5) + 'px;height:' + (r.h - 10) + 'px;background:' + c.fill + ';cursor:grab' + (CRIT.has(t.id) ? ';box-shadow:0 0 0 2px #f43f5e,0 1px 2px rgba(0,0,0,.12)' : '') + '">'
+           + '<span class="resize-h absolute inset-y-0 left-0 z-10 w-1.5" data-handle="left"></span>'
+           + '<span class="pointer-events-none relative truncate px-2 pb-1">' + esc(t.name.replace(/^(SS|RDC|R\+\d) - /, '')) + meta + '</span>'
+           + '<span class="resize-h absolute inset-y-0 right-0 z-10 w-1.5" data-handle="right"></span>'
+           + '<div class="pointer-events-none absolute" style="left:4px;right:4px;bottom:2px;height:3px;border-radius:9999px;background:rgba(255,255,255,.35)">'   /* jauge d\'avancement intégrée */
+           + '<div data-progfill style="height:100%;border-radius:9999px;width:' + pct + '%;background:rgba(255,255,255,.95)"></div></div>'
+           + '<span class="absolute z-10" style="left:8px;right:8px;bottom:0;height:9px;cursor:ew-resize" data-handle="prog" title="Glisser pour saisir l\'avancement"></span>'   /* poignée d\'avancement */
+           + '<span class="link-dot absolute right-[-7px] top-1/2 z-20 hidden size-3 -translate-y-1/2 cursor-crosshair rounded-full bg-white shadow ring-2 ring-amber-400 group-hover:block" data-link="' + t.id + '" title="Glisser vers une autre tâche pour l\'enchaîner"></span>'
+           + '</div>';
+    }
+  });
+  return html;
+}
+
+function buildLabels(rows) {
+  let html = '';
+  rows.forEach(r => {
+    if (r.type === 'group') {
+      const g = r.group, collapsed = state.collapsed.has(g.key);
+      const isLevel = ['ss','rdc','r1','r2','r3'].includes(g.key) || /copie/.test(g.key);
+      html += '<div class="flex items-center gap-1.5 border-b bg-neutral-50/70 px-3" style="height:' + GROUP_H + 'px">'
+           + '<button data-toggle="' + g.key + '" class="grid size-4 flex-none place-items-center rounded text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700">' + (collapsed ? '▸' : '▾') + '</button>'
+           + '<span class="min-w-0 flex-1 truncate text-[13px] font-semibold text-neutral-700">' + esc(g.label) + '</span>'
+           + '<span class="flex-none rounded-full bg-white px-1.5 text-[10px] text-neutral-500 ring-1 ring-neutral-200">' + r.tasks.length + '</span>'
+           + (isLevel ? '<button data-dup="' + g.key + '" title="Dupliquer l\'étage" class="flex-none rounded px-1 text-[11px] text-neutral-400 hover:bg-amber-100 hover:text-amber-700">⧉</button>' : '')
+           + '</div>';
+    } else {
+      const t = r.task, c = CATS[t.cat];
+      html += '<div class="ganttLabel flex items-center gap-2 border-b border-neutral-50 px-3 hover:bg-amber-50/40" data-id="' + t.id + '" style="height:' + ROW_H + 'px;cursor:pointer">'
+           + '<span class="size-2 flex-none rounded-full" style="background:' + c.fill + '"></span>'
+           + '<span class="min-w-0 flex-1 truncate text-[12px] text-neutral-700">' + esc(t.name.replace(/^(SS|RDC|R\+\d) - /, '')) + '</span>'
+           + '<span class="flex-none text-[10px] tabular-nums text-neutral-400">' + fmtFR(t.start) + '</span>'
+           + '</div>';
+    }
+  });
+  return html;
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+/* ── KPIs ── */
+function updateKPIs() {
+  let plan = 0, done = 0, wsum = 0, wact = 0, wexp = 0;
+  TASKS.forEach(t => {
+    const p = taskPlan(t); plan += p; done += taskDone(t);
+    const w = p || 1, dur = dnum(t.end) - dnum(t.start) + 1;
+    // avancement ATTENDU à date (selon le planning) pour cette tâche
+    let exp = 0;
+    if (dnum(t.end) < dnum(TODAY)) exp = 100;
+    else if (dnum(t.start) <= dnum(TODAY)) exp = Math.round((dnum(TODAY) - dnum(t.start) + 1) / dur * 100);
+    wsum += w; wact += w * (t.progress || 0); wexp += w * exp;
+  });
+  const av = wsum ? Math.round(wact / wsum) : 0;        // avancement réel
+  const ex = wsum ? Math.round(wexp / wsum) : 0;        // avancement attendu
+  const delta = av - ex;
+  document.getElementById('kpiAvancement').textContent = av + ' %';
+  document.getElementById('kpiAvancementBar').style.width = av + '%';
+  document.getElementById('kpiTaches').textContent = TASKS.length;
+  document.getElementById('kpiHeuresDone').textContent = done.toLocaleString('fr-FR');
+  document.getElementById('kpiHeuresPlan').textContent = plan.toLocaleString('fr-FR');
+
+  // Statut planning : en avance / à l'heure / en retard (réel vs attendu)
+  const jours = Math.round(delta / 100 * PROJECT_SPAN);
+  const st = document.getElementById('kpiStatut'), de = document.getElementById('kpiStatutDetail');
+  const finPrev = 'fin prév. ' + fmtFR(PROJECT_END);
+  if (delta >= 3) {
+    st.textContent = '▲ En avance'; st.className = 'mt-1 text-2xl font-semibold text-emerald-600';
+    de.textContent = '+' + delta + ' pts' + (jours > 0 ? ' · ~' + jours + ' j d\'avance' : '') + ' · ' + finPrev;
+    de.className = 'mt-1 text-xs text-emerald-600';
+  } else if (delta <= -3) {
+    st.textContent = '▼ En retard'; st.className = 'mt-1 text-2xl font-semibold text-rose-600';
+    de.textContent = delta + ' pts' + (jours < 0 ? ' · ~' + Math.abs(jours) + ' j de retard' : '') + ' · ' + finPrev;
+    de.className = 'mt-1 text-xs text-rose-600';
+  } else {
+    st.textContent = '● À l\'heure'; st.className = 'mt-1 text-2xl font-semibold text-neutral-700';
+    de.textContent = 'conforme (' + (delta >= 0 ? '+' : '') + delta + ' pts) · ' + finPrev;
+    de.className = 'mt-1 text-xs text-neutral-500';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Historique des modifications — annuler / rétablir (snapshots en mémoire)
+   ═══════════════════════════════════════════════════════════════════════ */
+let histStack = [], histIndex = -1, _dwBefore = null, _dwLabel = null;
+function snapshot() {
+  return { tasks: JSON.parse(JSON.stringify(TASKS)), groups: JSON.parse(JSON.stringify(GROUPS)), id: _id };
+}
+function restoreState(s) {
+  TASKS = JSON.parse(JSON.stringify(s.tasks));
+  GROUPS = JSON.parse(JSON.stringify(s.groups));
+  _id = s.id;
+  computeRange(); render();
+}
+function pushHistory(label) {
+  histStack = histStack.slice(0, histIndex + 1);   // tronque la branche « rétablir »
+  histStack.push({ label, time: new Date(), state: snapshot() });
+  if (histStack.length > 60) histStack.shift();
+  histIndex = histStack.length - 1;
+  renderHistory();
+}
+function jumpHistory(i) {
+  if (i < 0 || i >= histStack.length) return;
+  _dwBefore = null;                 // évite un enregistrement parasite si un drawer était ouvert
+  histIndex = i; restoreState(histStack[i].state); renderHistory();
+}
+function renderHistory() {
+  const u = document.getElementById('btnUndo'), r = document.getElementById('btnRedo');
+  if (u) u.disabled = histIndex <= 0;
+  if (r) r.disabled = histIndex >= histStack.length - 1;
+  const menu = document.getElementById('histMenu');
+  if (!menu) return;
+  const items = histStack.map((h, i) => {
+    const cur = i === histIndex;
+    return '<button data-i="' + i + '" class="flex w-full items-center gap-2 rounded px-2 py-1 text-left hover:bg-neutral-50 '
+      + (cur ? 'bg-amber-50 font-medium text-amber-800' : 'text-neutral-700') + '">'
+      + '<span class="text-[10px] tabular-nums text-neutral-400">' + h.time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '</span>'
+      + '<span class="flex-1 truncate">' + esc(h.label) + '</span>'
+      + (cur ? '<span class="text-[10px] text-amber-600">● actuel</span>' : '') + '</button>';
+  });
+  menu.innerHTML = '<div class="px-2 py-1 text-[10px] uppercase tracking-wide text-neutral-400">Historique (' + histStack.length + ')</div>'
+    + items.reverse().join('');   // plus récent en haut
+  menu.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => jumpHistory(+b.dataset.i)));
+}
+document.getElementById('btnUndo').addEventListener('click', () => jumpHistory(histIndex - 1));
+document.getElementById('btnRedo').addEventListener('click', () => jumpHistory(histIndex + 1));
+const histMenu = document.getElementById('histMenu');
+document.getElementById('btnHist').addEventListener('click', e => { e.stopPropagation(); histMenu.classList.toggle('hidden'); });
+document.addEventListener('click', e => {
+  if (!histMenu.classList.contains('hidden') && !histMenu.contains(e.target) && e.target.id !== 'btnHist') histMenu.classList.add('hidden');
+});
+window.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;   // laisse l'undo natif des champs
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z' && !e.shiftKey) { e.preventDefault(); jumpHistory(histIndex - 1); }
+  else if ((e.ctrlKey || e.metaKey) && (k === 'y' || (e.shiftKey && k === 'z'))) { e.preventDefault(); jumpHistory(histIndex + 1); }
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Bibliothèque + légende + zoom + boutons
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderLibrary(filter) {
+  const f = (filter || '').toLowerCase();
+  let html = '';
+  LIBRARY.forEach(sec => {
+    const items = sec.items.filter(i => i.name.toLowerCase().includes(f));
+    if (!items.length) return;
+    html += '<div><div class="mb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">' + sec.sect + '</div><div class="space-y-1">';
+    items.forEach(i => {
+      const c = CATS[i.cat];
+      html += '<div class="lib-item flex items-center gap-2 rounded-md border bg-white px-2 py-1.5 hover:border-amber-300 hover:shadow-sm" draggable="true" '
+           + 'data-name="' + esc(i.name) + '" data-cat="' + i.cat + '" data-dur="' + i.dur + '" data-ms="' + (i.milestone ? 1 : 0) + '" style="cursor:grab">'
+           + '<span class="size-2.5 flex-none ' + (i.milestone ? 'rotate-45' : 'rounded-full') + '" style="background:' + c.fill + '"></span>'
+           + '<span class="min-w-0 flex-1 truncate text-neutral-700">' + esc(i.name) + '</span>'
+           + '<span class="flex-none text-[10px] text-neutral-400">' + (i.milestone ? 'jalon' : i.dur + 'j') + '</span>'
+           + '</div>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('libList').innerHTML = html;
+  document.querySelectorAll('.lib-item').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        name: el.dataset.name, cat: el.dataset.cat, dur: +el.dataset.dur, ms: el.dataset.ms === '1'
+      }));
+    });
+  });
+}
+
+function renderLegend() {
+  const el = document.getElementById('legend');
+  el.innerHTML = '<span class="mr-1 text-neutral-400">Filtrer :</span>' + Object.entries(CATS).map(([k, c]) => {
+    const off = state.hiddenCats.has(k);
+    return '<button data-cat="' + k + '" class="flex items-center gap-1.5 ' + (off ? 'opacity-30' : '') + '">'
+         + '<span class="size-3 ' + (k === 'livraison' ? 'rotate-45' : 'rounded-full') + '" style="background:' + c.fill + '"></span>'
+         + '<span>' + c.label + '</span></button>';
+  }).join('');
+  el.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.cat;
+    state.hiddenCats.has(k) ? state.hiddenCats.delete(k) : state.hiddenCats.add(k);
+    renderLegend(); render();
+  }));
+}
+
+/* ── Zoom ── */
+document.getElementById('zoomToggle').addEventListener('click', e => {
+  const b = e.target.closest('[data-zoom]'); if (!b) return;
+  state.zoom = b.dataset.zoom;
+  document.querySelectorAll('#zoomToggle button').forEach(x => {
+    const on = x.dataset.zoom === state.zoom;
+    x.className = on ? 'rounded bg-amber-500 px-2.5 py-1 font-medium text-white' : 'rounded px-2.5 py-1 text-neutral-600 hover:bg-neutral-100';
+  });
+  render();
+});
+
+document.getElementById('btnToday').addEventListener('click', () => {
+  const ts = document.getElementById('timeScroll');
+  ts.scrollTo({ left: xOf(TODAY) - ts.clientWidth / 2, behavior: 'smooth' });
+});
+
+document.getElementById('btnLib').addEventListener('click', () => {
+  document.getElementById('libPanel').classList.toggle('hidden');
+});
+
+// Hauteur du Gantt = espace écran restant (grandit quand on masque les KPI)
+function fitGantt() {
+  const box = document.getElementById('ganttBox');
+  const reserve = state.focus ? 70 : 118;   // moins de marge en plein écran = Gantt plus haut
+  const h = Math.max(340, window.innerHeight - box.getBoundingClientRect().top - reserve);
+  box.style.height = h + 'px';
+}
+window.addEventListener('resize', fitGantt);
+
+// Mode plein écran : masque tout le décor (barre du haut, titre, KPI, pied de page)
+// et ne laisse que le planning + le bouton pour revenir au standard.
+const btnKpi = document.getElementById('btnKpi');
+const btnExitFocus = document.getElementById('btnExitFocus');
+function setFocus(on) {
+  state.focus = on;
+  document.getElementById('topbar').classList.toggle('hidden', on);
+  document.getElementById('pageHead').classList.toggle('hidden', on);   // titre + toute la barre d'actions
+  document.getElementById('kpiBand').classList.toggle('hidden', on);
+  document.getElementById('pageFoot').classList.toggle('hidden', on);
+  btnExitFocus.classList.toggle('hidden', !on);                          // bouton retour, à côté de Bibliothèque
+  const main = document.querySelector('main');
+  main.style.paddingTop = on ? '8px' : '';                               // compatible avec le padding responsive
+  main.style.paddingBottom = on ? '8px' : '';
+  fitGantt();
+}
+btnKpi.addEventListener('click', () => setFocus(true));
+btnExitFocus.addEventListener('click', () => setFocus(false));
+
+// Masquer / afficher les tâches terminées antérieures à aujourd'hui
+document.getElementById('btnHideDone').addEventListener('click', () => {
+  state.hideDone = !state.hideDone;
+  const b = document.getElementById('btnHideDone');
+  b.textContent = (state.hideDone ? '✓ Afficher terminées' : '✓ Masquer terminées');
+  b.classList.toggle('bg-amber-500', state.hideDone);
+  b.classList.toggle('text-white', state.hideDone);
+  b.classList.toggle('border-amber-500', state.hideDone);
+  render();
+});
+
+// Chemin critique (bascule)
+document.getElementById('btnCrit').addEventListener('click', () => {
+  state.critical = !state.critical;
+  const b = document.getElementById('btnCrit');
+  b.classList.toggle('bg-rose-500', state.critical);
+  b.classList.toggle('text-white', state.critical);
+  b.classList.toggle('border-rose-500', state.critical);
+  render();
+});
+
+// Regroupement : par niveau / par corps de métier
+document.getElementById('groupBy').addEventListener('change', e => {
+  state.groupBy = e.target.value;
+  state.collapsed = new Set();     // tout déplier pour voir le nouveau regroupement
+  render();
+});
+
+// Filtre par corps de métier (menu déroulant) — synchronisé avec la légende
+const filterMenu = document.getElementById('filterMenu');
+function renderFilterMenu() {
+  filterMenu.innerHTML =
+    '<div class="mb-1 flex items-center justify-between px-1 text-[10px] uppercase tracking-wide text-neutral-400">'
+    + '<span>Corps de métier</span><button id="fmAll" class="normal-case text-amber-600 hover:underline">tout afficher</button></div>'
+    + Object.entries(CATS).map(([k, c]) =>
+        '<label class="flex cursor-pointer items-center gap-2 rounded px-1 py-1 hover:bg-neutral-50">'
+        + '<input type="checkbox" data-cat="' + k + '" ' + (state.hiddenCats.has(k) ? '' : 'checked') + ' class="accent-amber-500" />'
+        + '<span class="size-2.5 ' + (k === 'livraison' ? 'rotate-45' : 'rounded-full') + '" style="background:' + c.fill + '"></span>'
+        + '<span class="flex-1 text-neutral-700">' + c.label + '</span></label>').join('');
+  filterMenu.querySelectorAll('input[data-cat]').forEach(cb => cb.addEventListener('change', () => {
+    cb.checked ? state.hiddenCats.delete(cb.dataset.cat) : state.hiddenCats.add(cb.dataset.cat);
+    renderLegend(); render();
+  }));
+  filterMenu.querySelector('#fmAll').addEventListener('click', () => {
+    state.hiddenCats.clear(); renderFilterMenu(); renderLegend(); render();
+  });
+}
+document.getElementById('btnFilter').addEventListener('click', e => {
+  e.stopPropagation();
+  const isHidden = filterMenu.classList.toggle('hidden');
+  if (!isHidden) renderFilterMenu();
+});
+document.addEventListener('click', e => {
+  if (!filterMenu.classList.contains('hidden') && !filterMenu.contains(e.target) && e.target.id !== 'btnFilter')
+    filterMenu.classList.add('hidden');
+});
+
+// Impression / export PDF : passe temporairement en zoom mois (plus compact) et déplie tout
+let _zoomPrint;
+window.addEventListener('beforeprint', () => {
+  _zoomPrint = state.zoom; state.zoom = 'mois';
+  timeScroll.scrollTop = 0;
+  document.getElementById('labelsBody').style.transform = 'translateY(0)';
+  render();
+});
+window.addEventListener('afterprint', () => { state.zoom = _zoomPrint; render(); });
+document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+document.getElementById('btnAddTask').addEventListener('click', () => {
+  // Ajoute une tâche dans le dernier groupe ouvert, démarrant à la date du jour simulée
+  const g = GROUPS.find(g => !state.collapsed.has(g.key)) || GROUPS[1];
+  const t = T(g.key, 'Nouvelle tâche', TODAY, addDays(TODAY, 4), 'gros_oeuvre', 0);
+  TASKS.push(t); render(); pushHistory('Tâche ajoutée'); openDrawer(t.id);
+});
+
+/* ── Synchronisation scroll vertical libellés ↔ canvas ── */
+const timeScroll = document.getElementById('timeScroll');
+timeScroll.addEventListener('scroll', () => {
+  document.getElementById('labelsBody').style.transform = 'translateY(' + (-timeScroll.scrollTop) + 'px)';
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Plier/déplier, dupliquer un étage (délégation sur les libellés)
+   ═══════════════════════════════════════════════════════════════════════ */
+document.getElementById('labelsBody').addEventListener('click', e => {
+  const tog = e.target.closest('[data-toggle]');
+  if (tog) {
+    const k = tog.dataset.toggle;
+    state.collapsed.has(k) ? state.collapsed.delete(k) : state.collapsed.add(k);
+    render(); return;
+  }
+  const dup = e.target.closest('[data-dup]');
+  if (dup) { duplicateGroup(dup.dataset.dup); return; }
+  const lab = e.target.closest('.ganttLabel');
+  if (lab) openDrawer(lab.dataset.id);
+});
+
+function duplicateGroup(key) {
+  const src = GROUPS.find(g => g.key === key);
+  const tks = TASKS.filter(t => t.group === key);
+  if (!tks.length) return;
+  const mn = tks.reduce((a, t) => Math.min(a, dnum(t.start)), Infinity);
+  const mx = tks.reduce((a, t) => Math.max(a, dnum(t.end)), -Infinity);
+  const shift = (mx - mn + 1) + 5;            // décale après la fin du groupe source
+  const newKey = key + '-c' + (++_id);
+  const m = src.label.match(/R\+(\d)/);
+  const newLabel = m ? 'R+' + (+m[1] + 1) + ' (copie)' : src.label + ' (copie)';
+  // insère le groupe juste après la source
+  const idx = GROUPS.findIndex(g => g.key === key);
+  GROUPS.splice(idx + 1, 0, { key: newKey, label: newLabel });
+  tks.forEach(t => {
+    const clone = T(newKey, t.name.replace(/^R\+\d/, m ? 'R+' + (+m[1] + 1) : ''), addDays(t.start, shift), addDays(t.end, shift), t.cat, t.hours, t.milestone);
+    TASKS.push(clone);
+  });
+  state.collapsed.delete(newKey);
+  render();
+  pushHistory('Étage « ' + src.label + ' » dupliqué');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Drag depuis la bibliothèque + tracer-pour-créer sur le canvas
+   ═══════════════════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('canvas');
+
+function groupAtY(y) {
+  const { rows } = buildLayout();
+  let key = null, cur = null;
+  for (const r of rows) {
+    if (r.type === 'group') cur = r.group.key;
+    if (y >= r.y && y < r.y + r.h) { key = cur; break; }
+  }
+  return key || currentGroups()[0].key;
+}
+// Affecte la tâche au bon niveau (mode niveau) ou corps de métier (mode métier) selon Y
+function assignGroupAtY(t, key) {
+  if (key && key.indexOf('cat:') === 0) t.cat = key.slice(4);
+  else t.group = key;
+}
+function dateAtX(x) { return iso(fromN(RANGE_START + Math.floor(x / px()))); }
+
+canvas.addEventListener('dragover', e => { e.preventDefault(); });
+canvas.addEventListener('drop', e => {
+  e.preventDefault();
+  let data; try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  const key = groupAtY(y);
+  const start = dateAtX(x);
+  const t = T('inst', data.name, start, addDays(start, Math.max(0, data.dur - 1)), data.cat, data.ms ? 0 : data.dur * 16, data.ms);
+  assignGroupAtY(t, key);
+  TASKS.push(t);
+  if (state.collapsed.has(key)) state.collapsed.delete(key);
+  render(); pushHistory('Tâche « ' + t.name + ' » ajoutée'); openDrawer(t.id);
+});
+
+/* ── Tracer une barre sur une ligne vide (mousedown → drag → mouseup) ── */
+let drawing = null;
+canvas.addEventListener('mousedown', e => {
+  if (e.target.closest('.bar')) return;            // un clic sur une barre = autre handler
+  const rect = canvas.getBoundingClientRect();
+  const x0 = e.clientX - rect.left, y0 = e.clientY - rect.top;
+  const group = groupAtY(y0);
+  const ghost = document.createElement('div');
+  ghost.className = 'absolute rounded-md';
+  ghost.style.cssText = 'top:' + (Math.floor((y0) / 1) ) + 'px;background:#f59e0b;opacity:.4;height:' + (ROW_H - 10) + 'px;left:' + x0 + 'px;width:2px;pointer-events:none';
+  // aligne le ghost sur la ligne survolée
+  const { rows } = buildLayout();
+  const row = rows.find(r => y0 >= r.y && y0 < r.y + r.h);
+  ghost.style.top = ((row ? row.y : y0) + 5) + 'px';
+  canvas.appendChild(ghost);
+  drawing = { x0, group, ghost };
+  e.preventDefault();
+});
+window.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const left = Math.min(x, drawing.x0), w = Math.abs(x - drawing.x0);
+  drawing.ghost.style.left = left + 'px'; drawing.ghost.style.width = w + 'px';
+});
+window.addEventListener('mouseup', e => {
+  if (!drawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const a = Math.min(x, drawing.x0), b = Math.max(x, drawing.x0);
+  drawing.ghost.remove();
+  if (b - a > 6) {                                  // assez large = nouvelle tâche
+    const start = dateAtX(a), end = dateAtX(b);
+    const t = T('inst', 'Nouvelle tâche', start, end, 'gros_oeuvre', 0);
+    assignGroupAtY(t, drawing.group);
+    TASKS.push(t); render(); pushHistory('Tâche créée'); openDrawer(t.id);
+  }
+  drawing = null;
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Déplacer / redimensionner une barre + clic = ouvrir le détail
+   ═══════════════════════════════════════════════════════════════════════ */
+function attachBarHandlers() {
+  canvas.querySelectorAll('.bar').forEach(bar => {
+    bar.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      const t = TASKS.find(x => x.id === bar.dataset.id); if (!t) return;
+      if (e.target.dataset.link) { startLink(t, bar, e); return; }              // poignée d'enchaînement
+      if (e.target.dataset.handle === 'prog') { startProgress(t, bar, e); return; } // saisie avancement
+      const mode = e.target.dataset.handle || 'move';
+      const startX = e.clientX, oStart = t.start, oEnd = t.end;
+      let moved = false;
+      function mm(ev) {
+        const dDays = Math.round((ev.clientX - startX) / px());
+        if (dDays !== 0) moved = true;
+        if (t.milestone) { t.start = addDays(oStart, dDays); t.end = t.start; }
+        else if (mode === 'move') { t.start = addDays(oStart, dDays); t.end = addDays(oEnd, dDays); }
+        else if (mode === 'left') { const ns = addDays(oStart, dDays); if (dnum(ns) <= dnum(t.end)) t.start = ns; }
+        else if (mode === 'right') { const ne = addDays(oEnd, dDays); if (dnum(ne) >= dnum(t.start)) t.end = ne; }
+        liveUpdate(bar, t);
+      }
+      function mu(ev) {
+        window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu);
+        if (!moved) { openDrawer(t.id); return; }
+        const endDelta = dnum(t.end) - dnum(oEnd);   // déplacement de la fin (move ou resize droit)
+        cascadeByEnd(t, endDelta);                    // toutes les tâches enchaînées en aval suivent
+        render();
+        pushHistory((mode === 'move' ? 'Déplacement de « ' : 'Redimensionnement de « ') + t.name + ' »');
+      }
+      window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu);
+    });
+  });
+}
+function liveUpdate(bar, t) {
+  if (t.milestone) { bar.style.left = (xOf(t.start) + px() / 2 - 7) + 'px'; return; }
+  bar.style.left = xOf(t.start) + 'px';
+  bar.style.width = Math.max(px(), widthOf(t.start, t.end)) + 'px';
+}
+
+// Saisir l'avancement directement sur la tâche : glisser le bas de la barre
+function startProgress(t, barEl, e) {
+  e.stopPropagation(); e.preventDefault();
+  const fill = barEl.querySelector('[data-progfill]');
+  const p0 = t.progress || 0;
+  function set(ev) {
+    const r = barEl.getBoundingClientRect();
+    let pct = Math.round(((ev.clientX - r.left) / r.width) * 20) * 5;   // arrondi au pas de 5 %
+    pct = Math.max(0, Math.min(100, pct));
+    t.progress = pct;
+    if (fill) fill.style.width = pct + '%';
+  }
+  function mm(ev) { set(ev); }
+  function mu(ev) {
+    window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu);
+    set(ev); updateKPIs(); render();
+    if (t.progress !== p0) pushHistory('Avancement « ' + t.name + ' » → ' + t.progress + ' %');
+  }
+  set(e);
+  window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu);
+}
+
+// Glisser la poignée d'une barre vers une autre tâche = créer un enchaînement (la cible dépend de la source)
+function startLink(src, barEl, e) {
+  e.stopPropagation(); e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const b = barEl.getBoundingClientRect();
+  const x1 = b.right - rect.left, y1 = b.top + b.height / 2 - rect.top;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'linkTmp';
+  svg.setAttribute('class', 'pointer-events-none absolute left-0 top-0');
+  svg.style.zIndex = '40';
+  svg.setAttribute('width', TOTAL_DAYS * px());
+  svg.setAttribute('height', parseInt(canvas.style.height) || 600);
+  svg.innerHTML = '<path id="linkTmpP" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3" fill="none"/>';
+  canvas.appendChild(svg);
+  const p = svg.querySelector('#linkTmpP');
+  function mm(ev) {
+    const x2 = ev.clientX - rect.left, y2 = ev.clientY - rect.top;
+    p.setAttribute('d', 'M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2);
+  }
+  function mu(ev) {
+    window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu);
+    svg.remove();
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const tb = el && el.closest('.bar');
+    if (tb) {
+      const tgt = TASKS.find(x => x.id === tb.dataset.id);
+      if (tgt && tgt.id !== src.id && !wouldCycle(src, tgt)) { tgt.dep = src.id; scheduleAfter(tgt, src); computeRange(); render(); pushHistory('Enchaînement « ' + src.name + ' » → « ' + tgt.name + ' »'); return; }
+    }
+    render();
+  }
+  window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu);
+}
+// Décale en cascade tous les successeurs enchaînés (récursif) du même delta que la fin du prédécesseur
+function cascadeByEnd(pred, endDelta, seen) {
+  if (!endDelta) return;
+  seen = seen || new Set();
+  if (seen.has(pred.id)) return; seen.add(pred.id);
+  TASKS.filter(s => s.dep === pred.id).forEach(s => {
+    s.start = addDays(s.start, endDelta); s.end = addDays(s.end, endDelta);
+    cascadeByEnd(s, endDelta, seen);
+  });
+}
+// Enchaînement fin→début : place le successeur juste après la fin du prédécesseur (et propage)
+function scheduleAfter(succ, pred, lag) {
+  const dur = dnum(succ.end) - dnum(succ.start);
+  const oldStart = succ.start;
+  succ.start = addDays(pred.end, (lag || 0) + 1);   // démarre le lendemain de la fin du prédécesseur
+  succ.end = addDays(succ.start, dur);
+  cascadeByEnd(succ, dnum(succ.start) - dnum(oldStart));   // ses propres successeurs suivent
+}
+// Empêche un enchaînement circulaire (target ne doit pas être déjà en amont de src)
+function wouldCycle(src, target) {
+  let n = src; const seen = new Set();
+  while (n && !seen.has(n.id)) { if (n.id === target.id) return true; seen.add(n.id); n = TASKS.find(x => x.id === n.dep); }
+  return false;
+}
+// Chemin critique : chaîne de dépendances aboutissant à la tâche qui finit le plus tard
+function criticalPath() {
+  let end = null;
+  TASKS.forEach(t => { if (!end || dnum(t.end) > dnum(end.end)) end = t; });
+  const set = new Set(); let n = end; const guard = new Set();
+  while (n && !guard.has(n.id)) { set.add(n.id); guard.add(n.id); n = n.dep ? TASKS.find(x => x.id === n.dep) : null; }
+  return set;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Drawer — détail de la tâche + saisie des heures ouvriers
+   ═══════════════════════════════════════════════════════════════════════ */
+const drawer = document.getElementById('drawer'), overlay = document.getElementById('drawerOverlay');
+// remplit le select corps de métier
+document.getElementById('dwCat').innerHTML = Object.entries(CATS).map(([k, c]) => '<option value="' + k + '">' + c.label + '</option>').join('');
+
+function openDrawer(id) {
+  const t = TASKS.find(x => x.id === id); if (!t) return;
+  seedHours(t);
+  state.selected = id;
+  document.getElementById('dwName').value = t.name;
+  document.getElementById('dwLevel').textContent = (GROUPS.find(g => g.key === t.group) || {}).label || t.group;
+  document.getElementById('dwCat').value = t.cat;
+  document.getElementById('dwCatDot').style.background = CATS[t.cat].fill;
+  document.getElementById('dwStart').value = t.start;
+  document.getElementById('dwEnd').value = t.end;
+  document.getElementById('dwProg').value = t.progress || 0;
+  document.getElementById('dwProgNum').value = t.progress || 0;
+  // liste des prédécesseurs possibles (toutes les autres tâches)
+  document.getElementById('dwDep').innerHTML = '<option value="">— aucune —</option>' +
+    TASKS.filter(x => x.id !== t.id).map(x =>
+      '<option value="' + x.id + '"' + (t.dep === x.id ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('');
+  renderEquipe(t);
+  // select d'ajout d'ouvrier
+  document.getElementById('dwAddWorker').innerHTML = WORKERS.map(w => '<option>' + w + '</option>').join('');
+  _dwBefore = JSON.stringify(snapshot());                       // état avant édition (pour l'historique)
+  _dwLabel = 'Modification de « ' + t.name + ' »';
+  overlay.classList.remove('hidden');
+  drawer.classList.remove('hidden');
+  requestAnimationFrame(() => drawer.classList.remove('translate-x-full'));
+}
+function closeDrawer() {
+  if (_dwBefore !== null) {                                      // enregistre si quelque chose a changé
+    if (JSON.stringify(snapshot()) !== _dwBefore) pushHistory(_dwLabel || 'Modification');
+    _dwBefore = null;
+  }
+  drawer.classList.add('translate-x-full');
+  setTimeout(() => { drawer.classList.add('hidden'); overlay.classList.add('hidden'); }, 200);
+  state.selected = null;
+}
+overlay.addEventListener('click', closeDrawer);
+document.getElementById('dwClose').addEventListener('click', closeDrawer);
+
+function renderEquipe(t) {
+  const wrap = document.getElementById('dwEquipe');
+  if (!t.equipe || !t.equipe.length) {
+    wrap.innerHTML = '<div class="py-2 text-center text-xs text-neutral-400">' + (t.milestone ? 'Jalon — pas d\'heures' : 'Aucun ouvrier affecté') + '</div>';
+  } else {
+    wrap.innerHTML = t.equipe.map((w, i) =>
+      '<div class="grid grid-cols-[1fr_56px_56px_22px] items-center gap-2">'
+      + '<span class="truncate text-sm text-neutral-700" title="' + esc(w.name) + '">' + esc(w.name) + '</span>'
+      + '<input type="number" min="0" value="' + (w.plan || 0) + '" data-i="' + i + '" data-f="plan" class="dwH w-full rounded border px-1.5 py-1 text-right text-xs outline-none focus:border-amber-400" />'
+      + '<input type="number" min="0" value="' + (w.done || 0) + '" data-i="' + i + '" data-f="done" class="dwH w-full rounded border px-1.5 py-1 text-right text-xs outline-none focus:border-amber-400" />'
+      + '<button data-rm="' + i + '" title="Retirer" class="dwRm grid size-5 place-items-center rounded text-neutral-400 hover:bg-rose-50 hover:text-rose-600">×</button>'
+      + '</div>'
+    ).join('');
+    wrap.querySelectorAll('.dwH').forEach(inp => inp.addEventListener('input', () => {
+      t.equipe[+inp.dataset.i][inp.dataset.f] = +inp.value || 0;
+      refreshDrawerTotals(t);
+    }));
+    wrap.querySelectorAll('.dwRm').forEach(btn => btn.addEventListener('click', () => {
+      t.equipe.splice(+btn.dataset.rm, 1);
+      renderEquipe(t);
+    }));
+  }
+  document.getElementById('dwNbOuvriers').textContent = (t.equipe ? t.equipe.length : 0) + ' ouvrier' + ((t.equipe && t.equipe.length > 1) ? 's' : '');
+  refreshDrawerTotals(t);
+}
+function refreshDrawerTotals(t) {
+  const done = (t.equipe || []).reduce((s, w) => s + (+w.done || 0), 0);
+  const plan = (t.equipe || []).reduce((s, w) => s + (+w.plan || 0), 0) || t.hours;
+  document.getElementById('dwTotalDone').textContent = done;
+  document.getElementById('dwTotalPlan').textContent = plan;
+  t.hours = plan;                 // garde "Heures planifiées" cohérent
+  updateKPIs();                   // KPI heures saisies / planifiées en direct
+}
+
+const dwProg = document.getElementById('dwProg');
+const dwProgNum = document.getElementById('dwProgNum');
+function syncProg(v) {
+  const t = TASKS.find(x => x.id === state.selected); if (!t) return;
+  v = Math.max(0, Math.min(100, Math.round(+v || 0)));
+  t.progress = v; dwProg.value = v; dwProgNum.value = v;
+  updateKPIs();                 // KPI avancement + statut planning en direct
+}
+dwProg.addEventListener('input', () => syncProg(dwProg.value));
+dwProgNum.addEventListener('input', () => syncProg(dwProgNum.value));
+dwProg.addEventListener('change', () => render());     // reflète la jauge sur la barre
+dwProgNum.addEventListener('change', () => render());
+
+document.getElementById('dwAddBtn').addEventListener('click', () => {
+  const t = TASKS.find(x => x.id === state.selected); if (!t) return;
+  if (!t.equipe) t.equipe = [];
+  const name = document.getElementById('dwAddWorker').value;
+  if (t.equipe.some(w => w.name === name)) return;          // anti-doublon
+  t.equipe.push({ name, plan: 0, done: 0 });
+  renderEquipe(t);
+});
+
+document.getElementById('dwSave').addEventListener('click', () => {
+  const t = TASKS.find(x => x.id === state.selected); if (!t) return;
+  t.name = document.getElementById('dwName').value || t.name;
+  t.cat = document.getElementById('dwCat').value;
+  t.start = document.getElementById('dwStart').value || t.start;
+  t.end = document.getElementById('dwEnd').value || t.end;
+  if (dnum(t.end) < dnum(t.start)) t.end = t.start;
+  const depVal = document.getElementById('dwDep').value || null;
+  const depTask = depVal && TASKS.find(x => x.id === depVal);
+  if (depTask && !wouldCycle(depTask, t)) { t.dep = depVal; scheduleAfter(t, depTask); }   // fin→début
+  else t.dep = null;
+  _dwLabel = 'Modification de « ' + t.name + ' »';
+  computeRange(); render(); closeDrawer();
+});
+
+document.getElementById('dwDelete').addEventListener('click', () => {
+  const tg = TASKS.find(x => x.id === state.selected);
+  const name = tg ? tg.name : 'tâche';
+  TASKS = TASKS.filter(x => x.id !== state.selected);
+  _dwBefore = null;                          // évite le double-enregistrement par closeDrawer
+  computeRange(); render();
+  pushHistory('Suppression de « ' + name + ' »');
+  closeDrawer();
+});
+
+document.getElementById('libSearch').addEventListener('input', e => renderLibrary(e.target.value));
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Démarrage
+   ═══════════════════════════════════════════════════════════════════════ */
+computeRange();
+// Sur petit écran, on replie la bibliothèque par défaut (rouvrable via « Bibliothèque ◧ »)
+if (window.innerWidth < 768) document.getElementById('libPanel').classList.add('hidden');
+// Avancements réels saisis (démo) : le gros œuvre du sous-sol accuse un léger retard
+[['SS - Voiles', 80], ['SS - Réseaux', 55], ['SS - Étanchéité', 45], ['SS - Poutres', 35], ['SS - Fondation', 100]]
+  .forEach(([n, p]) => { const t = TASKS.find(x => x.name === n); if (t) t.progress = p; });
+renderLibrary('');
+renderLegend();
+render();
+// base de l'historique : état initial (après amorçage des heures/avancement)
+histStack = [{ label: 'État initial', time: new Date(), state: snapshot() }];
+histIndex = 0;
+renderHistory();
+// au chargement, cadre sur le début des travaux visibles (et non sur "aujourd'hui",
+// sinon les premières tâches sont hors écran à gauche)
+fitGantt();
+setTimeout(() => {
+  fitGantt();
+  const ts = document.getElementById('timeScroll');
+  const visible = TASKS.filter(t => !state.collapsed.has(t.group));
+  const firstStart = visible.length ? visible.reduce((a, t) => Math.min(a, dnum(t.start)), Infinity) : RANGE_START;
+  ts.scrollLeft = Math.max(0, xOf(iso(fromN(firstStart))) - 40);
+}, 60);
+</script>
+</body>
+</html>
