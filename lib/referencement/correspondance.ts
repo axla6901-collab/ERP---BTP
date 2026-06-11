@@ -21,9 +21,7 @@ function pathBase(slug: string) {
   return `/${slug}/administration/referentiel-tiers/correspondance`;
 }
 
-export async function lireCorrespondance(
-  corpsEtatId: string,
-): Promise<CorpsEtatDocumentRequis[]> {
+export async function lireCorrespondance(corpsEtatId: string): Promise<CorpsEtatDocumentRequis[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, (tx) =>
     tx
@@ -44,7 +42,11 @@ export async function enregistrerCorrespondance(
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = correspondanceBatchSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const { corpsEtatId, lignes } = parsed.data;
   // Dédoublonnage défensif sur la PK (corps_etat_id, nature_document_id, nature_tiers).

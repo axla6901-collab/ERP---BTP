@@ -21,13 +21,7 @@ type PageToolbarProps = {
  * droite. À utiliser en tête des pages de section (remplace l'en-tête de
  * section `<h1 text-3xl>`).
  */
-export function PageToolbar({
-  title,
-  subtitle,
-  actions,
-  children,
-  className,
-}: PageToolbarProps) {
+export function PageToolbar({ title, subtitle, actions, children, className }: PageToolbarProps) {
   return (
     <div
       className={cn(
@@ -38,18 +32,12 @@ export function PageToolbar({
       <div className="flex flex-wrap items-center gap-3">
         {(title || subtitle) && (
           <div className="flex min-w-0 flex-col">
-            {title && (
-              <h2 className="truncate text-lg font-semibold tracking-tight">{title}</h2>
-            )}
-            {subtitle && (
-              <span className="truncate text-xs text-muted-foreground">{subtitle}</span>
-            )}
+            {title && <h2 className="truncate text-lg font-semibold tracking-tight">{title}</h2>}
+            {subtitle && <span className="truncate text-xs text-muted-foreground">{subtitle}</span>}
           </div>
         )}
         {children ? <div className="min-w-0 flex-1">{children}</div> : <div className="flex-1" />}
-        {actions && (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
-        )}
+        {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
       </div>
     </div>
   );

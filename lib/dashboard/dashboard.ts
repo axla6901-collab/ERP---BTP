@@ -5,19 +5,12 @@ import { and, asc, desc, eq, gte, inArray, isNull, lte } from 'drizzle-orm';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { agregerSommaireChantiers } from '@/lib/planning/sommaire';
-import {
-  chantierTacheEquipe,
-  chantierTaches,
-  chantiers,
-} from '@/db/schema/chantiers';
+import { chantierTacheEquipe, chantierTaches, chantiers } from '@/db/schema/chantiers';
 import { clients, devis } from '@/db/schema/commercial';
 import { employes } from '@/db/schema/employes';
 import { pointages } from '@/db/schema/pointages';
 import { utilisateurs } from '@/db/schema/utilisateurs';
-import {
-  LIBELLES_STATUT_CHANTIER,
-  type StatutChantier,
-} from '@/lib/validation/chantiers';
+import { LIBELLES_STATUT_CHANTIER, type StatutChantier } from '@/lib/validation/chantiers';
 
 import {
   bornesSemaine,
@@ -342,7 +335,9 @@ export async function lireApercuChantier(chantierId: string): Promise<ApercuChan
         .from(utilisateurs)
         .where(inArray(utilisateurs.id, utilisateurIds));
 
-      const empParUtil = new Map(emps.filter((e) => e.utilisateurId).map((e) => [e.utilisateurId as string, e]));
+      const empParUtil = new Map(
+        emps.filter((e) => e.utilisateurId).map((e) => [e.utilisateurId as string, e]),
+      );
       const emailParUtil = new Map(users.map((u) => [u.id, u.email]));
 
       // Présence du jour : un pointage daté d'aujourd'hui par employé.
@@ -470,22 +465,26 @@ export async function lireApercuChantier(chantierId: string): Promise<ApercuChan
           ton: p.type === 'absence' ? 'neutral' : 'emerald',
         };
       }),
-      ...tachesSemaine.map((t): ActiviteItem => ({
-        id: `ta-${t.id}`,
-        type: 'tache',
-        texte: `Tâche « ${t.libelle} » — ${t.avancementPourcent}% (${LIBELLES_STATUT_TACHE[t.statut] ?? t.statut})`,
-        acteur: null,
-        timestamp: t.updatedAt.toISOString(),
-        ton: 'sky',
-      })),
-      ...devisSemaine.map((d): ActiviteItem => ({
-        id: `dv-${d.id}`,
-        type: 'devis',
-        texte: `Devis ${d.numero} — ${LIBELLES_STATUT_DEVIS[d.statut] ?? d.statut}`,
-        acteur: null,
-        timestamp: d.updatedAt.toISOString(),
-        ton: 'amber',
-      })),
+      ...tachesSemaine.map(
+        (t): ActiviteItem => ({
+          id: `ta-${t.id}`,
+          type: 'tache',
+          texte: `Tâche « ${t.libelle} » — ${t.avancementPourcent}% (${LIBELLES_STATUT_TACHE[t.statut] ?? t.statut})`,
+          acteur: null,
+          timestamp: t.updatedAt.toISOString(),
+          ton: 'sky',
+        }),
+      ),
+      ...devisSemaine.map(
+        (d): ActiviteItem => ({
+          id: `dv-${d.id}`,
+          type: 'devis',
+          texte: `Devis ${d.numero} — ${LIBELLES_STATUT_DEVIS[d.statut] ?? d.statut}`,
+          acteur: null,
+          timestamp: d.updatedAt.toISOString(),
+          ton: 'amber',
+        }),
+      ),
     ]
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
       .slice(0, 10);

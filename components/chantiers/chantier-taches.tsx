@@ -67,12 +67,7 @@ function classesPillStatut(s: StatutTache): string {
   }
 }
 
-export function ChantierTaches({
-  taches,
-  responsables,
-  peutEcrire,
-  actions,
-}: Props) {
+export function ChantierTaches({ taches, responsables, peutEcrire, actions }: Props) {
   const router = useRouter();
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,7 +128,7 @@ export function ChantierTaches({
           {taches.length > 0 && (
             <span className="text-sm font-normal text-muted-foreground">
               Avancement moyen :{' '}
-              <span className="font-semibold text-foreground tabular-nums">
+              <span className="font-semibold tabular-nums text-foreground">
                 {avancementMoyen} %
               </span>
             </span>
@@ -180,7 +175,7 @@ export function ChantierTaches({
                     />
                   ) : (
                     <div className="flex items-start gap-3">
-                      <span className="mt-1 w-6 text-right text-xs font-mono text-muted-foreground">
+                      <span className="mt-1 w-6 text-right font-mono text-xs text-muted-foreground">
                         {idx + 1}
                       </span>
                       <div className="grow space-y-1">
@@ -191,7 +186,7 @@ export function ChantierTaches({
                           >
                             {LIBELLES_STATUT_TACHE[t.statut]}
                           </span>
-                          <span className="tabular-nums text-xs text-muted-foreground">
+                          <span className="text-xs tabular-nums text-muted-foreground">
                             {t.avancementPourcent}%
                           </span>
                         </div>

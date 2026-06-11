@@ -42,8 +42,12 @@ export async function clearMailpit(): Promise<void> {
 export async function waitForMail(to: string, timeoutMs = 15000): Promise<MailpitMessageBody> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const list = (await fetch(`${MAILPIT_BASE}/api/v1/messages`).then((r) => r.json())) as MailpitMessageList;
-    const match = list.messages.find((m) => m.To.some((t) => t.Address.toLowerCase() === to.toLowerCase()));
+    const list = (await fetch(`${MAILPIT_BASE}/api/v1/messages`).then((r) =>
+      r.json(),
+    )) as MailpitMessageList;
+    const match = list.messages.find((m) =>
+      m.To.some((t) => t.Address.toLowerCase() === to.toLowerCase()),
+    );
     if (match) {
       return (await fetch(`${MAILPIT_BASE}/api/v1/message/${match.ID}`).then((r) =>
         r.json(),

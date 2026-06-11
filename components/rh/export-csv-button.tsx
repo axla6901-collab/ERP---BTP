@@ -11,9 +11,7 @@ type Props = {
   filtres: FiltresExport;
   action: (
     filtres: FiltresExport,
-  ) => Promise<
-    { ok: true; filename: string; csv: string } | { ok: false; error: string }
-  >;
+  ) => Promise<{ ok: true; filename: string; csv: string } | { ok: false; error: string }>;
 };
 
 export function ExportCsvButton({ filtres, action }: Props) {

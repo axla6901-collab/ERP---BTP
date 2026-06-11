@@ -39,8 +39,12 @@ export const societes = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex('uq_societes_code_active').on(t.code).where(sql`deleted_at IS NULL`),
-    index('idx_societes_actif').on(t.actif).where(sql`deleted_at IS NULL`),
+    uniqueIndex('uq_societes_code_active')
+      .on(t.code)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_societes_actif')
+      .on(t.actif)
+      .where(sql`deleted_at IS NULL`),
     index('idx_societes_entreprise').on(t.entrepriseId),
     check('chk_societes_code_format', sql`code ~ '^[A-Z0-9._-]{2,32}$'`),
     check('chk_societes_raison_len', sql`char_length(raison_sociale) BETWEEN 2 AND 200`),

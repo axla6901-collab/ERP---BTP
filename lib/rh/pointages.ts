@@ -39,9 +39,7 @@ export type FiltresPointages = {
   type?: TypePointage;
 };
 
-export async function listerPointages(
-  filtres: FiltresPointages = {},
-): Promise<PointageEnrichi[]> {
+export async function listerPointages(filtres: FiltresPointages = {}): Promise<PointageEnrichi[]> {
   const ctx = await requireTenantContextWithMfa();
 
   const conditions: SQL[] = [isNull(pointages.deletedAt)];
@@ -80,10 +78,7 @@ export async function listerPointages(
   }));
 }
 
-export async function listerPointagesMois(
-  annee: number,
-  mois: number,
-): Promise<PointageEnrichi[]> {
+export async function listerPointagesMois(annee: number, mois: number): Promise<PointageEnrichi[]> {
   const dateMin = `${annee}-${String(mois).padStart(2, '0')}-01`;
   const lastDay = new Date(annee, mois, 0).getDate();
   const dateMax = `${annee}-${String(mois).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
@@ -94,9 +89,7 @@ export async function listerPointagesMois(
 // Mutations unitaires
 // ─────────────────────────────────────────────────────────────
 
-export async function creerPointage(
-  input: PointageInput,
-): Promise<ActionResult<{ id: string }>> {
+export async function creerPointage(input: PointageInput): Promise<ActionResult<{ id: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_POINTAGE_WRITE);
   const parsed = pointageSchema.safeParse(input);
   if (!parsed.success) {
@@ -208,7 +201,8 @@ export async function saisirMatricePointages(
   for (const ligne of lignes) {
     for (const [jourStr, quantite] of Object.entries(ligne.jours)) {
       if (quantite === null || quantite === undefined || quantite === '') continue;
-      const n = typeof quantite === 'number' ? quantite : Number(String(quantite).replace(',', '.'));
+      const n =
+        typeof quantite === 'number' ? quantite : Number(String(quantite).replace(',', '.'));
       if (Number.isNaN(n) || n <= 0) continue;
       const day = parseInt(jourStr, 10);
       if (day < 1 || day > lastDay) continue;
@@ -289,7 +283,7 @@ export async function saisirMatricePointages(
     if (err instanceof Error && /uq_pointages/.test(err.message)) {
       return {
         ok: false,
-        error: 'Doublon détecté pendant l\'insertion (pointage déjà existant pour ce couple).',
+        error: "Doublon détecté pendant l'insertion (pointage déjà existant pour ce couple).",
       };
     }
     throw err;

@@ -29,9 +29,9 @@ describe('generateNumero', () => {
   it('retourne la valeur renvoyée par la DB', async () => {
     const tx = makeTx();
     vi.mocked(tx.execute).mockResolvedValueOnce([{ numero: 'D-2026-000042' }] as never);
-    await expect(
-      generateNumero(tx, 'devis' satisfies TypeNumero, ENTREPRISE_ID),
-    ).resolves.toBe('D-2026-000042');
+    await expect(generateNumero(tx, 'devis' satisfies TypeNumero, ENTREPRISE_ID)).resolves.toBe(
+      'D-2026-000042',
+    );
   });
 
   it('lance une erreur si la DB renvoie un tableau vide', async () => {

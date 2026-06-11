@@ -188,7 +188,9 @@ export async function requireSuperAdmin(): Promise<UtilisateurCourant> {
  * Mémoïsée par requête HTTP.
  */
 export const listEntreprisesUtilisateur = cache(
-  async (): Promise<Array<{ id: string; slug: string; raisonSociale: string; isDefault: boolean }>> => {
+  async (): Promise<
+    Array<{ id: string; slug: string; raisonSociale: string; isDefault: boolean }>
+  > => {
     const utilisateur = await getCurrentUtilisateur();
     if (!utilisateur) return [];
 

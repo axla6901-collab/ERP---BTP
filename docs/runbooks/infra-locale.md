@@ -168,6 +168,7 @@ docker compose logs postgres
 ```
 
 Causes fréquentes :
+
 - Port `5432` déjà utilisé par un autre Postgres (vérifier avec `netstat -ano | findstr :5432`)
 - Volume `postgres_data` corrompu après un kill brutal → `docker compose down -v` (perte des données)
 
@@ -198,15 +199,16 @@ Vérifier que les ports `9000` et `9001` sont libres.
 
 ## Sécurité — à retenir
 
-| Élément | Visibilité |
-|---|---|
-| `DATABASE_URL` (dev) | Secret local — ne JAMAIS commiter `.env.local` |
-| `BETTER_AUTH_SECRET` | Secret absolu — utilisé pour signer les sessions, fuite = tous les tokens compromis |
-| `S3_SECRET_ACCESS_KEY` | Secret local — change-le en prod |
+| Élément                                 | Visibilité                                                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` (dev)                    | Secret local — ne JAMAIS commiter `.env.local`                                                                |
+| `BETTER_AUTH_SECRET`                    | Secret absolu — utilisé pour signer les sessions, fuite = tous les tokens compromis                           |
+| `S3_SECRET_ACCESS_KEY`                  | Secret local — change-le en prod                                                                              |
 | Mots de passe dans `docker-compose.yml` | **Développement uniquement** — la production utilise des secrets gérés (variables d'env du host, vault, etc.) |
-| Ports exposés (`5432`, `9000`, etc.) | Bindés sur `localhost` uniquement — ne pas binder sur `0.0.0.0` sans reverse proxy |
+| Ports exposés (`5432`, `9000`, etc.)    | Bindés sur `localhost` uniquement — ne pas binder sur `0.0.0.0` sans reverse proxy                            |
 
 En cas de fuite suspectée :
+
 1. Régénérer `BETTER_AUTH_SECRET` → invalide toutes les sessions actives
 2. Régénérer les credentials MinIO via la console (Identity → Users) puis mettre à jour `.env.local`
 3. Rotation du mot de passe Postgres : recréer le conteneur avec un nouveau `POSTGRES_PASSWORD` puis `pnpm db:push`

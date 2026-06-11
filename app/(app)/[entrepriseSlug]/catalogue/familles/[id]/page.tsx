@@ -5,14 +5,15 @@ import { FamilleForm } from '@/components/catalogue/famille-form';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
-import { lireFamille, listerFamilles, mettreAJourFamille, supprimerFamille } from '@/lib/catalogue/familles';
+import {
+  lireFamille,
+  listerFamilles,
+  mettreAJourFamille,
+  supprimerFamille,
+} from '@/lib/catalogue/familles';
 import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
 
-export default async function FamilleDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function FamilleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const famille = await lireFamille(id);
@@ -72,7 +73,7 @@ export default async function FamilleDetailPage({
         successRedirect="/catalogue/familles"
       />
 
-      <div className="border-t pt-6 max-w-2xl">
+      <div className="max-w-2xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer cette famille"

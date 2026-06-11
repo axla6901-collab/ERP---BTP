@@ -106,7 +106,8 @@ describe('agrementActionSchema', () => {
   it('exige un motif pour un refus', () => {
     expect(agrementActionSchema.safeParse({ action: 'refuser' }).success).toBe(false);
     expect(
-      agrementActionSchema.safeParse({ action: 'refuser', motif: 'Documents non conformes' }).success,
+      agrementActionSchema.safeParse({ action: 'refuser', motif: 'Documents non conformes' })
+        .success,
     ).toBe(true);
   });
 
@@ -140,9 +141,9 @@ describe('tierSchema', () => {
   });
 
   it('rejette une nature inconnue', () => {
-    expect(
-      tierSchema.safeParse({ code: 'X1', nom: 'Test', natureTiers: 'inconnue' }).success,
-    ).toBe(false);
+    expect(tierSchema.safeParse({ code: 'X1', nom: 'Test', natureTiers: 'inconnue' }).success).toBe(
+      false,
+    );
   });
 
   it('rejette un SIRET à 13 chiffres', () => {

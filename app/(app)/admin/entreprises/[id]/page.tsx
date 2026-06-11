@@ -48,11 +48,7 @@ export const dynamic = 'force-dynamic';
 
 type Params = { id: string };
 
-export default async function AdminEntrepriseFichePage({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+export default async function AdminEntrepriseFichePage({ params }: { params: Promise<Params> }) {
   const { id } = await params;
   const [entreprise, modelesNumerotation, logos] = await Promise.all([
     getEntrepriseDetail(id),
@@ -151,8 +147,7 @@ export default async function AdminEntrepriseFichePage({
       {!entreprise.actif && (
         <Alert>
           <AlertDescription>
-            Cette société est désactivée — les utilisateurs membres ne peuvent
-            plus la sélectionner.
+            Cette société est désactivée — les utilisateurs membres ne peuvent plus la sélectionner.
           </AlertDescription>
         </Alert>
       )}
@@ -211,8 +206,7 @@ export default async function AdminEntrepriseFichePage({
                 year: 'numeric',
               })}
               {' · '}
-              Adresse rendue ci-dessus :{' '}
-              <span className="font-mono">{adresseComplete || '—'}</span>
+              Adresse rendue ci-dessus : <span className="font-mono">{adresseComplete || '—'}</span>
             </p>
           </CardContent>
         </Card>
@@ -305,10 +299,9 @@ export default async function AdminEntrepriseFichePage({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Templates de numérotation (devis, factures, avoirs…) pour cette
-              société. Les numéros déjà émis restent intangibles (registre fiscal
-              append-only) ; les changements sont tracés dans{' '}
-              <code className="font-mono">audit_log</code> avec un marqueur{' '}
+              Templates de numérotation (devis, factures, avoirs…) pour cette société. Les numéros
+              déjà émis restent intangibles (registre fiscal append-only) ; les changements sont
+              tracés dans <code className="font-mono">audit_log</code> avec un marqueur{' '}
               <code className="font-mono">viaSuperAdmin: true</code>.
             </p>
             <NumerotationForm

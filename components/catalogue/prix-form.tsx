@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 
-import { useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { toast } from 'sonner';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -102,7 +102,11 @@ export function PrixForm({ defaultUniteId, unites, fournisseurs, onSubmit, onSuc
 
   return (
     <Form {...form}>
-      <form method="post" onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4 max-w-3xl">
+      <form
+        method="post"
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="grid max-w-3xl gap-4"
+      >
         {erreur && (
           <Alert variant="destructive">
             <AlertTitle>Erreur</AlertTitle>
@@ -141,7 +145,8 @@ export function PrixForm({ defaultUniteId, unites, fournisseurs, onSubmit, onSuc
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Laisser « Référence générique » pour un prix non négocié avec un fournisseur précis.
+                  Laisser « Référence générique » pour un prix non négocié avec un fournisseur
+                  précis.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -156,7 +161,9 @@ export function PrixForm({ defaultUniteId, unites, fournisseurs, onSubmit, onSuc
                 <FormControl>
                   <Input maxLength={100} {...field} value={field.value ?? ''} />
                 </FormControl>
-                <FormDescription>Code article chez le fournisseur (ex: SABLE-FIN-25KG).</FormDescription>
+                <FormDescription>
+                  Code article chez le fournisseur (ex: SABLE-FIN-25KG).
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

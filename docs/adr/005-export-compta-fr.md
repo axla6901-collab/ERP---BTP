@@ -88,23 +88,24 @@ Seed avec un **PCG BTP standard** (à ajuster avec l'expert-comptable de l'entre
 
 **À la validation d'une facture** (transition `statut` brouillon → émise), une Server Action écrit les écritures dans `ecritures_comptables` dans la même transaction que le changement de statut. Exemple pour une facture client TTC 1200 € (HT 1000 + TVA 200) :
 
-| date | journal | compte | libellé | débit | crédit |
-|---|---|---|---|---|---|
-| 2026-04-15 | VTE | 411DUPONT | F-2026-000017 DUPONT SA | 1200,00 | 0,00 |
-| 2026-04-15 | VTE | 70110 | F-2026-000017 Prestations BTP | 0,00 | 1000,00 |
-| 2026-04-15 | VTE | 44571 | F-2026-000017 TVA 20% | 0,00 | 200,00 |
+| date       | journal | compte    | libellé                       | débit   | crédit  |
+| ---------- | ------- | --------- | ----------------------------- | ------- | ------- |
+| 2026-04-15 | VTE     | 411DUPONT | F-2026-000017 DUPONT SA       | 1200,00 | 0,00    |
+| 2026-04-15 | VTE     | 70110     | F-2026-000017 Prestations BTP | 0,00    | 1000,00 |
+| 2026-04-15 | VTE     | 44571     | F-2026-000017 TVA 20%         | 0,00    | 200,00  |
 
 ### Cas auto-liquidation TVA BTP (art. 283-2 nonies CGI)
 
 Quand le client est un preneur assujetti et que les travaux entrent dans le périmètre :
+
 - Facture **HT** sans TVA (mention obligatoire "Auto-liquidation — TVA due par le preneur")
 - Écriture simplifiée : pas de compte `44571` chez nous
 - Flag `auto_liquidation BOOLEAN` sur `factures`
 
-| date | journal | compte | libellé | débit | crédit |
-|---|---|---|---|---|---|
-| 2026-04-15 | VTE | 411DUPONT | F-2026-000017 | 1000,00 | 0,00 |
-| 2026-04-15 | VTE | 70110 | F-2026-000017 | 0,00 | 1000,00 |
+| date       | journal | compte    | libellé       | débit   | crédit  |
+| ---------- | ------- | --------- | ------------- | ------- | ------- |
+| 2026-04-15 | VTE     | 411DUPONT | F-2026-000017 | 1000,00 | 0,00    |
+| 2026-04-15 | VTE     | 70110     | F-2026-000017 | 0,00    | 1000,00 |
 
 ### Formats cibles
 
@@ -112,16 +113,16 @@ Quand le client est un preneur assujetti et que les travaux entrent dans le pér
 
 Format `.txt` à **largeur fixe** (spec Cegid Quadra Import ASCII). Chaque ligne = 1 écriture. Colonnes principales :
 
-| Positions | Champ | Format |
-|---|---|---|
-| 1-5 | Code journal | AN 5 |
-| 6-13 | Date (AAAAMMJJ) | N 8 |
-| 14-21 | N° compte général | AN 8 |
-| 22-39 | N° compte auxiliaire | AN 18 |
-| 40-59 | Référence pièce | AN 20 |
-| 60-89 | Libellé | AN 30 |
-| 90-102 | Montant débit | N 13 (centimes, zero-padded) |
-| 103-115 | Montant crédit | N 13 |
+| Positions | Champ                | Format                       |
+| --------- | -------------------- | ---------------------------- |
+| 1-5       | Code journal         | AN 5                         |
+| 6-13      | Date (AAAAMMJJ)      | N 8                          |
+| 14-21     | N° compte général    | AN 8                         |
+| 22-39     | N° compte auxiliaire | AN 18                        |
+| 40-59     | Référence pièce      | AN 20                        |
+| 60-89     | Libellé              | AN 30                        |
+| 90-102    | Montant débit        | N 13 (centimes, zero-padded) |
+| 103-115   | Montant crédit       | N 13                         |
 
 Adaptateur : `lib/accounting/exporters/cegid-quadra.ts`.
 
@@ -152,11 +153,11 @@ Configuration exposée dans les paramètres admin :
 
 ### Plan d'implémentation
 
-| Itération | Livrable |
-|---|---|
-| **M6** (Facturation) | Table `ecritures_comptables` + trigger/Server Action création auto à validation facture |
-| **M9** (Documents admin) | Adaptateurs Cegid + Sage + FEC + UI export + page config plan comptable |
-| **M10** (Reporting) | Dashboard rapprochement compta (écart `ecritures_comptables` vs. export) |
+| Itération                | Livrable                                                                                |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| **M6** (Facturation)     | Table `ecritures_comptables` + trigger/Server Action création auto à validation facture |
+| **M9** (Documents admin) | Adaptateurs Cegid + Sage + FEC + UI export + page config plan comptable                 |
+| **M10** (Reporting)      | Dashboard rapprochement compta (écart `ecritures_comptables` vs. export)                |
 
 ### Validation
 
@@ -198,6 +199,7 @@ Configuration exposée dans les paramètres admin :
 ## Révision
 
 À revisiter si :
+
 - L'expert-comptable utilisateur passe sur un logiciel non listé (EBP, Ciel, etc.) → ajouter un adaptateur.
 - Une API de comptabilité temps-réel devient nécessaire (Chorus Pro, fiduciaire numérique).
 - Le calendrier de facturation électronique obligatoire FR impose une API PDP dédiée.

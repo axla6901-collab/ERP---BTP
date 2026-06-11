@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -145,7 +145,8 @@ export function FamilleForm({
                   <Input placeholder="GROS-OEUVRE" maxLength={32} {...field} />
                 </FormControl>
                 <FormDescription>
-                  Identifiant court (2-32 caractères, lettres / chiffres / . _ -). Forcé en majuscules.
+                  Identifiant court (2-32 caractères, lettres / chiffres / . _ -). Forcé en
+                  majuscules.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

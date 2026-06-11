@@ -4,12 +4,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant, type TenantTx } from '@/lib/db/with-tenant';
-import {
-  articles,
-  nomenclatureLignes,
-  nomenclatures,
-  unites,
-} from '@/db/schema/catalogue';
+import { articles, nomenclatureLignes, nomenclatures, unites } from '@/db/schema/catalogue';
 import type { ArticleType } from '@/lib/validation/catalogue';
 
 export type LigneBomEclatee = {
@@ -79,7 +74,10 @@ export type PrixRevient =
  * Calcule le prix de revient d'un article (récursif).
  * Retourne le total et la liste des articles feuilles sans prix valide.
  */
-export async function calculerPrixRevient(articleId: string, atDate?: string): Promise<PrixRevient> {
+export async function calculerPrixRevient(
+  articleId: string,
+  atDate?: string,
+): Promise<PrixRevient> {
   const ctx = await requireTenantContextWithMfa();
   const date = atDate ?? new Date().toISOString().slice(0, 10);
   const rows = await withTenant(ctx.entreprise.id, (tx) =>
@@ -87,7 +85,9 @@ export async function calculerPrixRevient(articleId: string, atDate?: string): P
       total: string;
       missing_count: number;
       missing_articles: string[];
-    }>(sql`SELECT total, missing_count, missing_articles FROM bom_cost_roll(${articleId}::uuid, ${date}::date)`),
+    }>(
+      sql`SELECT total, missing_count, missing_articles FROM bom_cost_roll(${articleId}::uuid, ${date}::date)`,
+    ),
   );
   const first = rows[0];
   if (!first) return { ok: true, total: '0.00', missingCount: 0, missingArticles: [] };
@@ -157,10 +157,7 @@ async function chargerArbreBomInterne(
       uniteEmploiSymbole: unites.symbole,
     })
     .from(nomenclatures)
-    .innerJoin(
-      nomenclatureLignes,
-      eq(nomenclatureLignes.nomenclatureId, nomenclatures.id),
-    )
+    .innerJoin(nomenclatureLignes, eq(nomenclatureLignes.nomenclatureId, nomenclatures.id))
     .innerJoin(articles, eq(articles.id, nomenclatureLignes.composantArticleId))
     .leftJoin(unites, eq(unites.id, nomenclatureLignes.uniteEmploiId))
     .where(
@@ -199,9 +196,7 @@ async function chargerArbreBomInterne(
     coefficientPerte: r.ligne.coefficientPerte,
     notes: r.ligne.notes,
     enfants:
-      r.composantType === 'compose'
-        ? sousArbres.get(r.ligne.composantArticleId) ?? []
-        : null,
+      r.composantType === 'compose' ? (sousArbres.get(r.ligne.composantArticleId) ?? []) : null,
   }));
 }
 

@@ -34,7 +34,12 @@ export function AgrementActions({ tierId, statut }: Props) {
   return (
     <div className="flex flex-wrap gap-2">
       {statut !== 'agree' && (
-        <Button size="sm" variant="outline" disabled={pending} onClick={() => executer('agreer', false)}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pending}
+          onClick={() => executer('agreer', false)}
+        >
           Agréer
         </Button>
       )}

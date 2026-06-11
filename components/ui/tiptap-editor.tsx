@@ -163,7 +163,13 @@ function Toolbar({ editor, disabled }: { editor: Editor; disabled?: boolean }) {
   }, [editor]);
 
   const buttons: Array<
-    | { type: 'button'; label: string; icon: React.ReactNode; onPressed: () => void; active: boolean }
+    | {
+        type: 'button';
+        label: string;
+        icon: React.ReactNode;
+        onPressed: () => void;
+        active: boolean;
+      }
     | { type: 'separator' }
   > = [
     {

@@ -42,9 +42,7 @@ describe('Table (style maquette)', () => {
         </TableBody>
       </Table>,
     );
-    expect(container.querySelector('[data-slot=table-body]')?.className).toContain(
-      'divide-y',
-    );
+    expect(container.querySelector('[data-slot=table-body]')?.className).toContain('divide-y');
   });
 
   it('TableCell = px-5 py-3', () => {
@@ -72,8 +70,6 @@ describe('Table (style maquette)', () => {
         </TableFooter>
       </Table>,
     );
-    expect(container.querySelector('[data-slot=table-footer]')?.className).toContain(
-      'bg-muted/40',
-    );
+    expect(container.querySelector('[data-slot=table-footer]')?.className).toContain('bg-muted/40');
   });
 });

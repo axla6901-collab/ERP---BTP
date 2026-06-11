@@ -6,13 +6,7 @@ import { cn } from '@/lib/utils';
  * Style aligné sur les badges « État » des grilles tarifaires : pastille
  * `rounded-full` verte (actif) ou grise atténuée (inactif).
  */
-export function StatutActifBadge({
-  actif,
-  className,
-}: {
-  actif: boolean;
-  className?: string;
-}) {
+export function StatutActifBadge({ actif, className }: { actif: boolean; className?: string }) {
   return (
     <span
       className={cn(

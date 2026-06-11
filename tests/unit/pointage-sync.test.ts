@@ -42,8 +42,12 @@ describe('pointageSyncSchema', () => {
   });
 
   it('refuse un clientUuid absent ou invalide', () => {
-    expect(pointageSyncSchema.safeParse(payloadHeures({ clientUuid: undefined })).success).toBe(false);
-    expect(pointageSyncSchema.safeParse(payloadHeures({ clientUuid: 'pas-un-uuid' })).success).toBe(false);
+    expect(pointageSyncSchema.safeParse(payloadHeures({ clientUuid: undefined })).success).toBe(
+      false,
+    );
+    expect(pointageSyncSchema.safeParse(payloadHeures({ clientUuid: 'pas-un-uuid' })).success).toBe(
+      false,
+    );
   });
 
   it('refuse une quantité nulle ou négative', () => {
@@ -53,11 +57,10 @@ describe('pointageSyncSchema', () => {
 
   it('refuse une absence avec chantier, et des heures sans chantier', () => {
     expect(
-      pointageSyncSchema.safeParse(payloadHeures({ type: 'absence', motifAbsence: 'autre' })).success,
+      pointageSyncSchema.safeParse(payloadHeures({ type: 'absence', motifAbsence: 'autre' }))
+        .success,
     ).toBe(false); // chantier présent sur une absence
-    expect(
-      pointageSyncSchema.safeParse(payloadHeures({ chantierId: null })).success,
-    ).toBe(false); // heures sans chantier
+    expect(pointageSyncSchema.safeParse(payloadHeures({ chantierId: null })).success).toBe(false); // heures sans chantier
   });
 });
 

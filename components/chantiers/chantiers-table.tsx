@@ -67,9 +67,7 @@ export function ChantiersTable({ items, rightActions, peutEcrire, entrepriseSlug
       id: 'responsable',
       header: 'Responsable',
       cell: (c) => (
-        <span className="text-xs text-muted-foreground">
-          {c.responsableEmail ?? 'Non assigné'}
-        </span>
+        <span className="text-xs text-muted-foreground">{c.responsableEmail ?? 'Non assigné'}</span>
       ),
       sortAccessor: (c) => c.responsableEmail,
       searchAccessor: (c) => c.responsableEmail ?? '',
@@ -91,9 +89,7 @@ export function ChantiersTable({ items, rightActions, peutEcrire, entrepriseSlug
       id: 'montant',
       header: 'Montant prév. HT (€)',
       align: 'right',
-      cell: (c) => (
-        <span className="tabular-nums">{formatMontant(c.montantPrevisionnelHt)}</span>
-      ),
+      cell: (c) => <span className="tabular-nums">{formatMontant(c.montantPrevisionnelHt)}</span>,
       sortAccessor: (c) => (c.montantPrevisionnelHt ? Number(c.montantPrevisionnelHt) : null),
     },
     {

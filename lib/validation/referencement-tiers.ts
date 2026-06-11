@@ -22,7 +22,12 @@ export type TiersReferencementFlagInput = z.infer<typeof tiersReferencementFlagS
 // Enums (listes partagées UI ↔ DB)
 // ─────────────────────────────────────────────────────────────
 
-export const NATURES_TIERS = ['artisan', 'artisan_ae', 'fournisseur', 'fournisseur_artisan'] as const;
+export const NATURES_TIERS = [
+  'artisan',
+  'artisan_ae',
+  'fournisseur',
+  'fournisseur_artisan',
+] as const;
 export type NatureTiers = (typeof NATURES_TIERS)[number];
 
 export const LIBELLES_NATURE_TIERS: Record<NatureTiers, string> = {
@@ -50,7 +55,7 @@ export type ModeControleDocument = (typeof MODES_CONTROLE_DOCUMENT)[number];
 
 export const LIBELLES_MODE_CONTROLE: Record<ModeControleDocument, string> = {
   duree_jours: 'Durée de validité (jours)',
-  date_fin_assurance: "Date de fin (assurance) + tolérance",
+  date_fin_assurance: 'Date de fin (assurance) + tolérance',
   case_a_cocher: 'Case à cocher (présence)',
   date_obtention: "Date d'obtention (sans expiration)",
 };
@@ -109,7 +114,10 @@ const ordreAffichage = z.coerce
   .default(0);
 
 const entierJoursOptionnel = z
-  .union([z.coerce.number().int('Entier requis.').min(0, 'Doit être ≥ 0.').max(36500, 'Trop grand.'), z.null()])
+  .union([
+    z.coerce.number().int('Entier requis.').min(0, 'Doit être ≥ 0.').max(36500, 'Trop grand.'),
+    z.null(),
+  ])
   .optional()
   .transform((v) => (v === undefined || v === null || Number.isNaN(v) ? null : v));
 
@@ -321,8 +329,20 @@ export const tierDocumentSchema = z.object({
   natureDocumentId: z.string().uuid('Nature de document requise.'),
   minioKey: z.string().trim().min(1, 'Clé de stockage manquante.'),
   nomFichierOrigine: texteCourtOptionnel(255, 'Nom de fichier'),
-  mimeType: z.string().trim().max(150).optional().nullable().transform((v) => (v && v.length > 0 ? v : null)),
-  tailleBytes: z.coerce.number().int().positive().optional().nullable().transform((v) => v ?? null),
+  mimeType: z
+    .string()
+    .trim()
+    .max(150)
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+  tailleBytes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .nullable()
+    .transform((v) => v ?? null),
   dateObtention: dateOptionnelle,
   dateFinValidite: dateOptionnelle,
   notes: texteCourtOptionnel(1000, 'Notes'),

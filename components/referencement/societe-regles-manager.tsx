@@ -77,7 +77,8 @@ export function SocieteReglesManager({ societeId, regles, peutEcrire }: Props) {
       <ul className="divide-y rounded-lg border">
         {regles.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">
-            Aucune règle. Ajoutez-en une (ex. <span className="font-mono">SUSPENSION_CHANTIER_LRAR</span>).
+            Aucune règle. Ajoutez-en une (ex.{' '}
+            <span className="font-mono">SUSPENSION_CHANTIER_LRAR</span>).
           </li>
         )}
         {regles.map((r) => (

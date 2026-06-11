@@ -7,10 +7,7 @@ import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { employeHabilitations, type EmployeHabilitation } from '@/db/schema/employes';
-import {
-  habilitationSchema,
-  type HabilitationInput,
-} from '@/lib/validation/rh';
+import { habilitationSchema, type HabilitationInput } from '@/lib/validation/rh';
 
 import { ROLES_RH_WRITE } from './permissions';
 import type { ActionResult } from '@/lib/catalogue/types';

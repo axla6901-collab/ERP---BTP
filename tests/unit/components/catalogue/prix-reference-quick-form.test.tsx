@@ -76,11 +76,7 @@ describe('PrixReferenceQuickForm', () => {
 
     // router.refresh() → le Server Component renvoie le prix normalisé persisté.
     rerender(
-      <PrixReferenceQuickForm
-        {...props}
-        defaultPrix="12.50"
-        defaultValidFrom="2026-06-10"
-      />,
+      <PrixReferenceQuickForm {...props} defaultPrix="12.50" defaultValidFrom="2026-06-10" />,
     );
 
     expect(screen.getByLabelText('Prix HT')).toHaveValue('12.50');
@@ -98,4 +94,3 @@ describe('PrixReferenceQuickForm', () => {
     expect(screen.getByText(/saisis un prix/i)).toBeInTheDocument();
   });
 });
-

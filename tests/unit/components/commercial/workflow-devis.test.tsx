@@ -86,12 +86,18 @@ describe('WorkflowDevis', () => {
 
     it('Brouillon est courante quand statut=brouillon', () => {
       renderAvec('brouillon');
-      expect(screen.getByRole('button', { name: 'Brouillon' })).toHaveAttribute('aria-current', 'step');
+      expect(screen.getByRole('button', { name: 'Brouillon' })).toHaveAttribute(
+        'aria-current',
+        'step',
+      );
     });
 
     it('Brouillon est courante quand statut=refuse (legacy)', () => {
       renderAvec('refuse');
-      expect(screen.getByRole('button', { name: 'Brouillon' })).toHaveAttribute('aria-current', 'step');
+      expect(screen.getByRole('button', { name: 'Brouillon' })).toHaveAttribute(
+        'aria-current',
+        'step',
+      );
     });
 
     it('5e étape : « Gagné » quand statut=gagne', () => {
@@ -121,7 +127,7 @@ describe('WorkflowDevis', () => {
       expect(screen.getByText('DEV-2026-00042')).toBeInTheDocument();
     });
 
-    it('n\'affiche pas de bloc numéro quand non fourni (création)', () => {
+    it("n'affiche pas de bloc numéro quand non fourni (création)", () => {
       const { container } = renderAvec('brouillon');
       // Pas de texte commençant par "Devis " (le titre H2 est hors composant)
       expect(container.textContent).not.toMatch(/^Devis\s/);
@@ -130,7 +136,7 @@ describe('WorkflowDevis', () => {
 
   // ─── Cliquabilité des libellés d'étape ──────────────────────────────
 
-  describe('cliquabilité des libellés d\'étape', () => {
+  describe("cliquabilité des libellés d'étape", () => {
     it('depuis brouillon : seul En validation cliquable', () => {
       renderAvec('brouillon');
       expect(screen.getByRole('button', { name: 'En validation' })).not.toBeDisabled();
@@ -223,7 +229,9 @@ describe('WorkflowDevis', () => {
   describe('bouton Enregistrer', () => {
     it('absent si enregistrerLabel non fourni', () => {
       renderAvec('brouillon');
-      expect(screen.queryByRole('button', { name: 'Enregistrer le devis' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Enregistrer le devis' }),
+      ).not.toBeInTheDocument();
     });
 
     it('rendu avec le libellé fourni et type="submit"', () => {
@@ -328,7 +336,7 @@ describe('WorkflowDevis', () => {
   // ─── Mode readOnly ───────────────────────────────────────────────────
 
   describe('mode readOnly', () => {
-    it('aucun libellé d\'étape cliquable', () => {
+    it("aucun libellé d'étape cliquable", () => {
       renderAvec('brouillon', { readOnly: true });
       expect(screen.getByRole('button', { name: 'En validation' })).toBeDisabled();
       expect(screen.getByRole('button', { name: 'Validé' })).toBeDisabled();

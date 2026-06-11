@@ -258,9 +258,7 @@ export function PointageMatrice({
             <tr className="bg-muted/50">
               <th className="border-r px-1 py-1 text-left font-semibold">Employé</th>
               <th className="border-r px-1 py-1 text-left font-semibold">Type</th>
-              <th className="border-r px-1 py-1 text-left font-semibold">
-                Chantier / Motif
-              </th>
+              <th className="border-r px-1 py-1 text-left font-semibold">Chantier / Motif</th>
               {jourInfos.map(({ j, letter, weekend }) => (
                 <th
                   key={j}
@@ -272,9 +270,7 @@ export function PointageMatrice({
                   <div className="leading-none">{j}</div>
                 </th>
               ))}
-              <th className="border-l bg-muted/50 px-1 py-1 text-center font-semibold">
-                Tot.
-              </th>
+              <th className="border-l bg-muted/50 px-1 py-1 text-center font-semibold">Tot.</th>
               <th className="bg-muted/50 px-0"></th>
             </tr>
           </thead>
@@ -287,7 +283,7 @@ export function PointageMatrice({
                     <select
                       value={l.employeId}
                       onChange={(e) => updateLigne(idx, { employeId: e.target.value })}
-                      className="h-7 w-full bg-transparent px-1 text-[11px] focus:outline-none focus:bg-amber-50"
+                      className="h-7 w-full bg-transparent px-1 text-[11px] focus:bg-amber-50 focus:outline-none"
                       title={
                         l.employeId
                           ? (() => {
@@ -313,11 +309,10 @@ export function PointageMatrice({
                         updateLigne(idx, {
                           type,
                           chantierId: type === 'absence' ? null : l.chantierId,
-                          motifAbsence:
-                            type === 'absence' ? l.motifAbsence ?? 'autre' : null,
+                          motifAbsence: type === 'absence' ? (l.motifAbsence ?? 'autre') : null,
                         });
                       }}
-                      className="h-7 w-full bg-transparent px-1 text-[11px] focus:outline-none focus:bg-amber-50"
+                      className="h-7 w-full bg-transparent px-1 text-[11px] focus:bg-amber-50 focus:outline-none"
                     >
                       <option value="heures">Heures</option>
                       <option value="absence">Absence</option>
@@ -330,7 +325,7 @@ export function PointageMatrice({
                         onChange={(e) =>
                           updateLigne(idx, { motifAbsence: e.target.value as MotifAbsence })
                         }
-                        className="h-7 w-full truncate bg-transparent px-1 text-[11px] focus:outline-none focus:bg-amber-50"
+                        className="h-7 w-full truncate bg-transparent px-1 text-[11px] focus:bg-amber-50 focus:outline-none"
                       >
                         {MOTIFS_ABSENCE_MATRICE.map((m) => (
                           <option key={m} value={m}>
@@ -341,13 +336,11 @@ export function PointageMatrice({
                     ) : (
                       <select
                         value={l.chantierId ?? ''}
-                        onChange={(e) =>
-                          updateLigne(idx, { chantierId: e.target.value || null })
-                        }
-                        className="h-7 w-full bg-transparent px-1 text-[11px] focus:outline-none focus:bg-amber-50"
+                        onChange={(e) => updateLigne(idx, { chantierId: e.target.value || null })}
+                        className="h-7 w-full bg-transparent px-1 text-[11px] focus:bg-amber-50 focus:outline-none"
                         title={
                           l.chantierId
-                            ? chantiers.find((c) => c.id === l.chantierId)?.libelle ?? ''
+                            ? (chantiers.find((c) => c.id === l.chantierId)?.libelle ?? '')
                             : ''
                         }
                       >
@@ -361,10 +354,7 @@ export function PointageMatrice({
                     )}
                   </td>
                   {jourInfos.map(({ j, weekend }) => (
-                    <td
-                      key={j}
-                      className={`border-r p-0 ${weekend ? 'bg-rose-50/30' : ''}`}
-                    >
+                    <td key={j} className={`border-r p-0 ${weekend ? 'bg-rose-50/30' : ''}`}>
                       <input
                         type="text"
                         inputMode="decimal"
@@ -399,8 +389,8 @@ export function PointageMatrice({
           <PlusIcon className="mr-1 size-3.5" /> Ajouter une ligne
         </Button>
         <p className="text-xs text-muted-foreground">
-          Toutes les colonnes jour sont visibles sans défilement. La sauvegarde remplace
-          tous les pointages du mois pour les couples (employé, chantier/motif, type) listés.
+          Toutes les colonnes jour sont visibles sans défilement. La sauvegarde remplace tous les
+          pointages du mois pour les couples (employé, chantier/motif, type) listés.
         </p>
       </div>
     </div>

@@ -60,12 +60,7 @@ describe('ImportCatalogueDialog', () => {
   it('ouvrir() exposé via la ref déclenche le sélecteur de fichier', () => {
     const ref = createRef<ImportCatalogueDialogHandle>();
     const { container } = render(
-      <ImportCatalogueDialog
-        ref={ref}
-        fournisseurId="f1"
-        fournisseurNom="POINT.P"
-        hideTrigger
-      />,
+      <ImportCatalogueDialog ref={ref} fournisseurId="f1" fournisseurNom="POINT.P" hideTrigger />,
     );
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = vi.spyOn(input, 'click');

@@ -44,7 +44,11 @@ export async function creerCorpsEtat(input: CorpsEtatInput): Promise<ActionResul
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = corpsEtatSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -86,7 +90,11 @@ export async function mettreAJourCorpsEtat(
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = corpsEtatSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     await withTenant(ctx.entreprise.id, async (tx) => {

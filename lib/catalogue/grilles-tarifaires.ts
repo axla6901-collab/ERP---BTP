@@ -16,10 +16,7 @@ import {
   type GrilleTarifaireLigne,
 } from '@/db/schema/catalogue';
 import { chantiers } from '@/db/schema/chantiers';
-import {
-  grilleTarifaireSchema,
-  type GrilleTarifaireInput,
-} from '@/lib/validation/catalogue';
+import { grilleTarifaireSchema, type GrilleTarifaireInput } from '@/lib/validation/catalogue';
 
 import { ROLES_CATALOGUE_WRITE } from './permissions';
 import type { ActionResult } from './types';
@@ -54,9 +51,7 @@ export type GrilleResumeChantier = GrilleTarifaire & {
 // Lecture
 // ─────────────────────────────────────────────────────────────
 
-export async function listerGrillesFournisseur(
-  fournisseurId: string,
-): Promise<GrilleResume[]> {
+export async function listerGrillesFournisseur(fournisseurId: string): Promise<GrilleResume[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, async (tx) => {
     const grilles = await tx
@@ -96,9 +91,7 @@ export async function listerGrillesFournisseur(
   });
 }
 
-export async function listerGrillesChantier(
-  chantierId: string,
-): Promise<GrilleResumeChantier[]> {
+export async function listerGrillesChantier(chantierId: string): Promise<GrilleResumeChantier[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, async (tx) => {
     const grilles = await tx
@@ -109,12 +102,7 @@ export async function listerGrillesChantier(
       })
       .from(grillesTarifaires)
       .innerJoin(fournisseurs, eq(grillesTarifaires.fournisseurId, fournisseurs.id))
-      .where(
-        and(
-          eq(grillesTarifaires.chantierId, chantierId),
-          isNull(grillesTarifaires.deletedAt),
-        ),
-      )
+      .where(and(eq(grillesTarifaires.chantierId, chantierId), isNull(grillesTarifaires.deletedAt)))
       .orderBy(desc(grillesTarifaires.validFrom));
 
     if (grilles.length === 0) return [];
@@ -290,59 +278,56 @@ export async function mettreAJourGrille(
   }
 
   try {
-    const { fournisseurId, chantierId } = await withTenant(
-      ctx.entreprise.id,
-      async (tx) => {
-        const [before] = await tx
-          .select()
-          .from(grillesTarifaires)
-          .where(and(eq(grillesTarifaires.id, id), isNull(grillesTarifaires.deletedAt)));
-        if (!before) throw new Error('NOT_FOUND');
+    const { fournisseurId, chantierId } = await withTenant(ctx.entreprise.id, async (tx) => {
+      const [before] = await tx
+        .select()
+        .from(grillesTarifaires)
+        .where(and(eq(grillesTarifaires.id, id), isNull(grillesTarifaires.deletedAt)));
+      if (!before) throw new Error('NOT_FOUND');
 
-        await tx
-          .update(grillesTarifaires)
-          .set({
-            chantierId: parsed.data.chantierId,
-            libelle: parsed.data.libelle,
-            validFrom: parsed.data.validFrom,
-            validTo: parsed.data.validTo,
-            actif: parsed.data.actif,
-            notes: parsed.data.notes,
-            updatedBy: ctx.utilisateur.id,
-          })
-          .where(eq(grillesTarifaires.id, id));
+      await tx
+        .update(grillesTarifaires)
+        .set({
+          chantierId: parsed.data.chantierId,
+          libelle: parsed.data.libelle,
+          validFrom: parsed.data.validFrom,
+          validTo: parsed.data.validTo,
+          actif: parsed.data.actif,
+          notes: parsed.data.notes,
+          updatedBy: ctx.utilisateur.id,
+        })
+        .where(eq(grillesTarifaires.id, id));
 
-        // Remplacement complet des lignes : approche simple, sûre, et qui évite
-        // de devoir gérer un diff côté UI. Vu le volume (quelques dizaines à
-        // quelques centaines de lignes par grille), c'est acceptable.
-        await tx.delete(grilleTarifaireLignes).where(eq(grilleTarifaireLignes.grilleId, id));
-        await tx.insert(grilleTarifaireLignes).values(
-          parsed.data.lignes.map((l) => ({
-            entrepriseId: ctx.entreprise.id,
-            grilleId: id,
-            articleId: l.articleId,
-            prixUnitaireHt: l.prixUnitaireHt,
-            uniteId: l.uniteId,
-            referenceFournisseur: l.referenceFournisseur,
-            quantiteMin: l.quantiteMin,
-            notes: l.notes,
-          })),
-        );
+      // Remplacement complet des lignes : approche simple, sûre, et qui évite
+      // de devoir gérer un diff côté UI. Vu le volume (quelques dizaines à
+      // quelques centaines de lignes par grille), c'est acceptable.
+      await tx.delete(grilleTarifaireLignes).where(eq(grilleTarifaireLignes.grilleId, id));
+      await tx.insert(grilleTarifaireLignes).values(
+        parsed.data.lignes.map((l) => ({
+          entrepriseId: ctx.entreprise.id,
+          grilleId: id,
+          articleId: l.articleId,
+          prixUnitaireHt: l.prixUnitaireHt,
+          uniteId: l.uniteId,
+          referenceFournisseur: l.referenceFournisseur,
+          quantiteMin: l.quantiteMin,
+          notes: l.notes,
+        })),
+      );
 
-        await auditLogIn(tx, {
-          action: 'update',
-          tableName: 'grilles_tarifaires',
-          rowId: id,
-          before,
-          after: parsed.data,
-        });
+      await auditLogIn(tx, {
+        action: 'update',
+        tableName: 'grilles_tarifaires',
+        rowId: id,
+        before,
+        after: parsed.data,
+      });
 
-        return {
-          fournisseurId: before.fournisseurId,
-          chantierId: parsed.data.chantierId ?? before.chantierId,
-        };
-      },
-    );
+      return {
+        fournisseurId: before.fournisseurId,
+        chantierId: parsed.data.chantierId ?? before.chantierId,
+      };
+    });
 
     revalidatePath(`/${ctx.entreprise.slug}/tiers/fournisseurs/${fournisseurId}`);
     revalidatePath(`/${ctx.entreprise.slug}/tiers/fournisseurs/${fournisseurId}/grilles`);

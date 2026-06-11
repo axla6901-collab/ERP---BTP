@@ -39,7 +39,11 @@ import {
   ROLES_COMPTE_PRORATA_WRITE,
   ROLES_COMPTE_PRORATA_ARRETE,
 } from '@/lib/chantiers/compte-prorata-permissions';
-import { genererArrete, type DepenseCalcul, type ParticipantCalcul } from '@/lib/chantiers/compte-prorata';
+import {
+  genererArrete,
+  type DepenseCalcul,
+  type ParticipantCalcul,
+} from '@/lib/chantiers/compte-prorata';
 
 // ─────────────────────────────────────────────────────────────
 // Types renvoyés au client (sérialisables)
@@ -381,7 +385,11 @@ export async function enregistrerParticipant(
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = compteProrataParticipantSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const ctx = await requireTenantContextWithMfa();
   if (!ROLES_COMPTE_PRORATA_WRITE.includes(ctx.utilisateur.role)) {
@@ -428,7 +436,10 @@ export async function enregistrerParticipant(
         .select()
         .from(compteProrataParticipants)
         .where(
-          and(eq(compteProrataParticipants.id, data.id), isNull(compteProrataParticipants.deletedAt)),
+          and(
+            eq(compteProrataParticipants.id, data.id),
+            isNull(compteProrataParticipants.deletedAt),
+          ),
         );
       if (!before) return { error: 'Participant introuvable.' };
       const patch = { ...valeurs, updatedAt: new Date(), updatedBy: ctx.utilisateur.id };
@@ -495,7 +506,9 @@ export async function supprimerParticipant(id: string): Promise<ActionResult<voi
     const [before] = await tx
       .select()
       .from(compteProrataParticipants)
-      .where(and(eq(compteProrataParticipants.id, id), isNull(compteProrataParticipants.deletedAt)));
+      .where(
+        and(eq(compteProrataParticipants.id, id), isNull(compteProrataParticipants.deletedAt)),
+      );
     if (!before) return 'Participant introuvable.';
 
     const compte = await chargerCompteParId(tx, before.compteProrataId);
@@ -549,7 +562,11 @@ export async function enregistrerDepense(
 ): Promise<ActionResult<{ id: string }>> {
   const parsed = compteProrataDepenseSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const ctx = await requireTenantContextWithMfa();
   if (!ROLES_COMPTE_PRORATA_WRITE.includes(ctx.utilisateur.role)) {
@@ -573,7 +590,7 @@ export async function enregistrerDepense(
           isNull(compteProrataParticipants.deletedAt),
         ),
       );
-    if (!payeur) return { error: "Le participant qui a avancé la dépense est introuvable." };
+    if (!payeur) return { error: 'Le participant qui a avancé la dépense est introuvable.' };
 
     const valeurs = {
       avanceParParticipantId: data.avanceParParticipantId,
@@ -591,7 +608,10 @@ export async function enregistrerDepense(
         .where(and(eq(compteProrataDepenses.id, data.id), isNull(compteProrataDepenses.deletedAt)));
       if (!before) return { error: 'Dépense introuvable.' };
       const patch = { ...valeurs, updatedAt: new Date(), updatedBy: ctx.utilisateur.id };
-      await tx.update(compteProrataDepenses).set(patch).where(eq(compteProrataDepenses.id, data.id));
+      await tx
+        .update(compteProrataDepenses)
+        .set(patch)
+        .where(eq(compteProrataDepenses.id, data.id));
       await auditLogIn(tx, {
         action: 'update',
         tableName: 'compte_prorata_depenses',

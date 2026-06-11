@@ -29,8 +29,7 @@ async function compter() {
 const TUILES = [
   {
     titre: 'Utilisateurs',
-    description:
-      "Comptes, rôles, MFA, activation. Assignation d'un rôle par utilisateur.",
+    description: "Comptes, rôles, MFA, activation. Assignation d'un rôle par utilisateur.",
     href: '/administration/utilisateurs',
     cleCompteur: 'utilisateurs' as const,
   },

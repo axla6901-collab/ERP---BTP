@@ -33,18 +33,12 @@ function pillClasses(active: boolean, tone: 'default' | 'danger'): string {
   return 'border bg-card text-neutral-700 hover:bg-muted dark:text-neutral-300';
 }
 
-function PillInner({
-  label,
-  count,
-}: {
-  label: React.ReactNode;
-  count?: number | undefined;
-}) {
+function PillInner({ label, count }: { label: React.ReactNode; count?: number | undefined }) {
   return (
     <>
       {label}
       {typeof count === 'number' && (
-        <span className="ml-1 text-current/60 tabular-nums">{count}</span>
+        <span className="text-current/60 ml-1 tabular-nums">{count}</span>
       )}
     </>
   );

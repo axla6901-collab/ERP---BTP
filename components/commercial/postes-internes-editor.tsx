@@ -59,9 +59,7 @@ export function PostesInternesEditor({ form, forcerAffichage = false }: Props) {
     .filter((s) => s.type !== 'section');
 
   function articlesDuChapitre(ordreSection: number) {
-    const idx = lignes.findIndex(
-      (_, i) => i === ordreSection && lignes[i]?.type === 'section',
-    );
+    const idx = lignes.findIndex((_, i) => i === ordreSection && lignes[i]?.type === 'section');
     if (idx === -1) return [];
     const res: Array<{ ordre: number; libelle: string }> = [];
     for (let i = idx + 1; i < lignes.length; i++) {
@@ -100,10 +98,9 @@ export function PostesInternesEditor({ form, forcerAffichage = false }: Props) {
         Postes internes ventilés — invisibles au client ({fields.length})
       </div>
       <div className="space-y-2 p-3 text-xs text-muted-foreground">
-        Ces postes (frais généraux, aléas, marge…) sont répartis sur les lignes
-        visibles selon la portée et les poids choisis. Le client ne voit que les
-        PU effectifs (PU nu + apport ventilé). Sans poids défini, la ventilation
-        est uniforme dans la portée.
+        Ces postes (frais généraux, aléas, marge…) sont répartis sur les lignes visibles selon la
+        portée et les poids choisis. Le client ne voit que les PU effectifs (PU nu + apport
+        ventilé). Sans poids défini, la ventilation est uniforme dans la portée.
       </div>
       <div className="divide-y">
         {fields.map((field, idx) => {
@@ -131,18 +128,13 @@ export function PostesInternesEditor({ form, forcerAffichage = false }: Props) {
         })}
         {fields.length === 0 && (
           <p className="px-3 py-2 text-xs italic text-muted-foreground">
-            Aucun poste interne. Ajoutez-en un pour gonfler les PU des lignes
-            sans rendre le montant visible au client.
+            Aucun poste interne. Ajoutez-en un pour gonfler les PU des lignes sans rendre le montant
+            visible au client.
           </p>
         )}
       </div>
       <div className="border-t bg-amber-100/30 p-2 dark:bg-amber-900/10">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => append(nouveauPoste())}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={() => append(nouveauPoste())}>
           + Ajouter un poste interne
         </Button>
       </div>
@@ -219,9 +211,7 @@ function PosteRow({
           <span className="text-xs">Portée</span>
           <Select
             value={poste.portee}
-            onValueChange={(v) =>
-              v && onPortee(v === 'chapitre' ? 'chapitre' : 'devis')
-            }
+            onValueChange={(v) => v && onPortee(v === 'chapitre' ? 'chapitre' : 'devis')}
           >
             <SelectTrigger className="h-9">
               <SelectValue />
@@ -238,16 +228,12 @@ function PosteRow({
           <label className="flex flex-col gap-1">
             <span className="text-xs">Chapitre</span>
             <Select
-              value={
-                poste.chapitreOrdre !== null ? String(poste.chapitreOrdre) : ''
-              }
+              value={poste.chapitreOrdre !== null ? String(poste.chapitreOrdre) : ''}
               onValueChange={(v) => {
                 if (!v) return;
-                form.setValue(
-                  `postesInternes.${idx}.chapitreOrdre` as never,
-                  Number(v) as never,
-                  { shouldDirty: true },
-                );
+                form.setValue(`postesInternes.${idx}.chapitreOrdre` as never, Number(v) as never, {
+                  shouldDirty: true,
+                });
                 // Vide les répartitions car le scope change.
                 form.setValue(`postesInternes.${idx}.repartitions`, [], {
                   shouldDirty: true,
@@ -271,15 +257,14 @@ function PosteRow({
 
       <details className="rounded border bg-background/50 p-2">
         <summary className="cursor-pointer text-xs font-medium">
-          Pondération {aPoids ? 'manuelle' : 'uniforme (par défaut)'} ·{' '}
-          {articlesPortee.length} ligne{articlesPortee.length > 1 ? 's' : ''}{' '}
-          dans la portée
+          Pondération {aPoids ? 'manuelle' : 'uniforme (par défaut)'} · {articlesPortee.length}{' '}
+          ligne{articlesPortee.length > 1 ? 's' : ''} dans la portée
         </summary>
         <div className="mt-2 space-y-2">
           <p className="text-[11px] text-muted-foreground">
-            Définissez un poids par ligne pour pondérer la répartition. Une
-            ligne sans poids reçoit 0 dès qu&apos;un poids est défini ailleurs (mode
-            sélectif). Vidé = ventilation uniforme sur toute la portée.
+            Définissez un poids par ligne pour pondérer la répartition. Une ligne sans poids reçoit
+            0 dès qu&apos;un poids est défini ailleurs (mode sélectif). Vidé = ventilation uniforme
+            sur toute la portée.
           </p>
           <div className="max-h-48 overflow-auto rounded border">
             <table className="w-full text-xs">
@@ -293,8 +278,7 @@ function PosteRow({
                 {articlesPortee.length === 0 && (
                   <tr>
                     <td colSpan={2} className="px-2 py-2 italic text-muted-foreground">
-                      Aucune ligne dans la portée. Ajoutez des articles ou
-                      changez la portée.
+                      Aucune ligne dans la portée. Ajoutez des articles ou changez la portée.
                     </td>
                   </tr>
                 )}

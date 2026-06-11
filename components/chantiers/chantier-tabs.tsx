@@ -48,9 +48,7 @@ export function ChantierTabs({ activeTab, basePath, counts, tabs = CHANTIER_TABS
               <span
                 className={cn(
                   'rounded-full px-1.5 text-xs font-normal',
-                  active
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-muted text-muted-foreground',
+                  active ? 'bg-amber-100 text-amber-800' : 'bg-muted text-muted-foreground',
                 )}
               >
                 {count}

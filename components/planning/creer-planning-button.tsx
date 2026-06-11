@@ -25,10 +25,7 @@ const LIBELLES_STATUT: Record<PlanningChantierSommaire['statut'], string> = {
 };
 
 function normaliser(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
 type Props = {
@@ -54,9 +51,7 @@ export function CreerPlanningButton({ chantiersSansPlanning, entrepriseSlug }: P
   const filtres = useMemo(() => {
     const q = normaliser(query.trim());
     if (q.length === 0) return chantiersSansPlanning;
-    return chantiersSansPlanning.filter((c) =>
-      normaliser(`${c.numero} ${c.libelle}`).includes(q),
-    );
+    return chantiersSansPlanning.filter((c) => normaliser(`${c.numero} ${c.libelle}`).includes(q));
   }, [chantiersSansPlanning, query]);
 
   const disabled = chantiersSansPlanning.length === 0;
@@ -68,12 +63,7 @@ export function CreerPlanningButton({ chantiersSansPlanning, entrepriseSlug }: P
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button
-            type="button"
-            disabled={disabled}
-            title={titre}
-            className="gap-2"
-          >
+          <Button type="button" disabled={disabled} title={titre} className="gap-2">
             <PlusIcon className="size-4" aria-hidden="true" />
             Créer un planning
           </Button>
@@ -83,8 +73,8 @@ export function CreerPlanningButton({ chantiersSansPlanning, entrepriseSlug }: P
         <DialogHeader>
           <DialogTitle>Créer un planning</DialogTitle>
           <DialogDescription>
-            Choisis un chantier sans planning pour démarrer son diagramme de Gantt.
-            La première tâche se crée depuis la page du chantier.
+            Choisis un chantier sans planning pour démarrer son diagramme de Gantt. La première
+            tâche se crée depuis la page du chantier.
           </DialogDescription>
         </DialogHeader>
 
@@ -109,9 +99,7 @@ export function CreerPlanningButton({ chantiersSansPlanning, entrepriseSlug }: P
         >
           {filtres.length === 0 ? (
             <li className="p-4 text-center text-sm text-muted-foreground">
-              {query
-                ? `Aucun résultat pour « ${query} ».`
-                : 'Aucun chantier disponible.'}
+              {query ? `Aucun résultat pour « ${query} ».` : 'Aucun chantier disponible.'}
             </li>
           ) : (
             filtres.map((c) => (
@@ -122,9 +110,7 @@ export function CreerPlanningButton({ chantiersSansPlanning, entrepriseSlug }: P
                   onClick={() => setOpen(false)}
                 >
                   <span className="flex items-baseline gap-2 truncate">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {c.numero}
-                    </span>
+                    <span className="font-mono text-xs text-muted-foreground">{c.numero}</span>
                     <span className="truncate font-medium">{c.libelle}</span>
                   </span>
                   <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">

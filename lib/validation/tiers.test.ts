@@ -160,8 +160,12 @@ describe('sousTraitantSchema', () => {
 
   it('normalise le taux de retenue (nombre et virgule) en chaîne toFixed(2)', () => {
     expect(
-      sousTraitantSchema.parse({ code: 'XX', nom: 'X X', qualifications: [], tauxRetenueGarantie: 5 })
-        .tauxRetenueGarantie,
+      sousTraitantSchema.parse({
+        code: 'XX',
+        nom: 'X X',
+        qualifications: [],
+        tauxRetenueGarantie: 5,
+      }).tauxRetenueGarantie,
     ).toBe('5.00');
     expect(
       sousTraitantSchema.parse({

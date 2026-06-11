@@ -98,9 +98,7 @@ export type ModeleInput = z.infer<typeof modeleInputSchema>;
  * Upsert d'un modèle de numérotation pour un type de doc donné. Valide la
  * syntaxe côté serveur (mirror du CHECK Postgres) avant d'écrire.
  */
-export async function mettreAJourModeleNumerotation(
-  input: ModeleInput,
-): Promise<ActionResult> {
+export async function mettreAJourModeleNumerotation(input: ModeleInput): Promise<ActionResult> {
   const ctx = await requireAdmin();
   const parsed = modeleInputSchema.safeParse(input);
   if (!parsed.success) {

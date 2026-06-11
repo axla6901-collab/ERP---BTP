@@ -107,7 +107,8 @@ export function SituationActions({
           )}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          La facture créée est en <strong>brouillon</strong> : tu peux la modifier puis l&apos;émettre depuis sa fiche.
+          La facture créée est en <strong>brouillon</strong> : tu peux la modifier puis
+          l&apos;émettre depuis sa fiche.
         </p>
       </CardContent>
     </Card>

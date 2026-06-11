@@ -1,8 +1,5 @@
 import { Badge, type BadgeTone } from '@/components/ui/badge';
-import {
-  LIBELLES_STATUT_LIGNE,
-  type StatutLigneDocument,
-} from '@/lib/referencement/conformite';
+import { LIBELLES_STATUT_LIGNE, type StatutLigneDocument } from '@/lib/referencement/conformite';
 
 const TONE_STATUT_LIGNE: Record<StatutLigneDocument, BadgeTone> = {
   a_jour: 'emerald',

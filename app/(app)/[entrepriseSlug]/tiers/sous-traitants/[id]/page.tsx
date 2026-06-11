@@ -103,7 +103,7 @@ export default async function SousTraitantDetailPage({
 
   if (!peutEcrire) {
     return (
-      <div className="space-y-4 max-w-xl">
+      <div className="max-w-xl space-y-4">
         <h2 className="text-xl font-medium">{sousTraitant.nom}</h2>
         <Card>
           <CardHeader>
@@ -207,7 +207,7 @@ export default async function SousTraitantDetailPage({
 
       {documentsSection}
 
-      <div className="border-t pt-6 max-w-xl">
+      <div className="max-w-xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer ce sous-traitant"

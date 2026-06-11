@@ -35,13 +35,10 @@ export const planningTacheSchema = z
     predecesseurId: z.string().uuid().nullable().optional(),
     notes: z.string().trim().max(5000).nullable().optional(),
   })
-  .refine(
-    (v) =>
-      !v.dateDebutPrevue ||
-      !v.dateFinPrevue ||
-      v.dateFinPrevue >= v.dateDebutPrevue,
-    { message: 'La date de fin doit être postérieure à la date de début.', path: ['dateFinPrevue'] },
-  )
+  .refine((v) => !v.dateDebutPrevue || !v.dateFinPrevue || v.dateFinPrevue >= v.dateDebutPrevue, {
+    message: 'La date de fin doit être postérieure à la date de début.',
+    path: ['dateFinPrevue'],
+  })
   .refine(
     (v) =>
       !v.estJalon ||
@@ -88,13 +85,10 @@ export const planningCreationSchema = z
     heuresPlanifiees: z.coerce.number().int().min(0).default(0),
     estJalon: z.boolean().default(false),
   })
-  .refine(
-    (v) =>
-      !v.dateDebutPrevue ||
-      !v.dateFinPrevue ||
-      v.dateFinPrevue >= v.dateDebutPrevue,
-    { message: 'La date de fin doit être postérieure à la date de début.', path: ['dateFinPrevue'] },
-  );
+  .refine((v) => !v.dateDebutPrevue || !v.dateFinPrevue || v.dateFinPrevue >= v.dateDebutPrevue, {
+    message: 'La date de fin doit être postérieure à la date de début.',
+    path: ['dateFinPrevue'],
+  });
 export type PlanningCreationInput = z.infer<typeof planningCreationSchema>;
 
 /**

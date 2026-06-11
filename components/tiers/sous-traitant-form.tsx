@@ -3,7 +3,7 @@
 import { XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -279,7 +279,12 @@ export function SousTraitantForm({
                   <FormItem>
                     <FormLabel>SIRET</FormLabel>
                     <FormControl>
-                      <Input placeholder="14 chiffres" maxLength={14} {...field} value={field.value ?? ''} />
+                      <Input
+                        placeholder="14 chiffres"
+                        maxLength={14}
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormDescription>14 chiffres sans espace.</FormDescription>
                     <FormMessage />
@@ -293,7 +298,12 @@ export function SousTraitantForm({
                   <FormItem>
                     <FormLabel>N° TVA intracom</FormLabel>
                     <FormControl>
-                      <Input placeholder="FR12345678901" maxLength={15} {...field} value={field.value ?? ''} />
+                      <Input
+                        placeholder="FR12345678901"
+                        maxLength={15}
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -356,7 +366,8 @@ export function SousTraitantForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      0 à 10 % (usage CCAG). Repris sur les contrats et factures de ce sous-traitant.
+                      0 à 10 % (usage CCAG). Repris sur les contrats et factures de ce
+                      sous-traitant.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -471,11 +482,7 @@ export function SousTraitantForm({
           </div>
         </FormSection>
 
-        <FormSection
-          number={4}
-          title="Qualifications"
-          storageKey="sous-traitant:qualifications"
-        >
+        <FormSection number={4} title="Qualifications" storageKey="sous-traitant:qualifications">
           <div className="space-y-2">
             <div className="flex gap-2">
               <Input
@@ -519,7 +526,6 @@ export function SousTraitantForm({
             </p>
           </div>
         </FormSection>
-
       </form>
     </Form>
   );

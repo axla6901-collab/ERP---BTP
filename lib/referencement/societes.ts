@@ -3,12 +3,7 @@
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
-import {
-  societes,
-  societesRegles,
-  type Societe,
-  type SocieteRegle,
-} from '@/db/schema/societes';
+import { societes, societesRegles, type Societe, type SocieteRegle } from '@/db/schema/societes';
 import { tierSocietesAutorisees } from '@/db/schema/tiers-registre';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
@@ -58,7 +53,11 @@ export async function creerSociete(input: SocieteInput): Promise<ActionResult<{ 
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = societeSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -75,7 +74,12 @@ export async function creerSociete(input: SocieteInput): Promise<ActionResult<{ 
         })
         .returning({ id: societes.id });
       if (!inserted) throw new Error('INSERT failed silently');
-      await auditLogIn(tx, { action: 'insert', tableName: 'societes', rowId: inserted.id, after: parsed.data });
+      await auditLogIn(tx, {
+        action: 'insert',
+        tableName: 'societes',
+        rowId: inserted.id,
+        after: parsed.data,
+      });
       return inserted.id;
     });
     revalidatePath(pathBase(ctx.entreprise.slug));
@@ -92,7 +96,11 @@ export async function mettreAJourSociete(id: string, input: SocieteInput): Promi
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = societeSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     await withTenant(ctx.entreprise.id, async (tx) => {
@@ -111,7 +119,13 @@ export async function mettreAJourSociete(id: string, input: SocieteInput): Promi
           updatedBy: ctx.utilisateur.id,
         })
         .where(eq(societes.id, id));
-      await auditLogIn(tx, { action: 'update', tableName: 'societes', rowId: id, before, after: parsed.data });
+      await auditLogIn(tx, {
+        action: 'update',
+        tableName: 'societes',
+        rowId: id,
+        before,
+        after: parsed.data,
+      });
     });
     revalidatePath(pathBase(ctx.entreprise.slug));
     revalidatePath(`${pathBase(ctx.entreprise.slug)}/${id}`);
@@ -167,7 +181,11 @@ export async function ajouterRegleSociete(
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = societeRegleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -197,7 +215,10 @@ export async function ajouterRegleSociete(
     return { ok: true, data: { id } };
   } catch (err) {
     if (err instanceof Error && /unique/i.test(err.message)) {
-      return { ok: false, error: `La règle "${parsed.data.codeRegle}" existe déjà pour cette société.` };
+      return {
+        ok: false,
+        error: `La règle "${parsed.data.codeRegle}" existe déjà pour cette société.`,
+      };
     }
     throw err;
   }
@@ -241,7 +262,12 @@ export async function supprimerRegleSociete(regleId: string): Promise<ActionResu
       .limit(1);
     if (!before) return { ok: true, data: undefined };
     await tx.delete(societesRegles).where(eq(societesRegles.id, regleId));
-    await auditLogIn(tx, { action: 'delete', tableName: 'societes_regles', rowId: regleId, before });
+    await auditLogIn(tx, {
+      action: 'delete',
+      tableName: 'societes_regles',
+      rowId: regleId,
+      before,
+    });
     revalidatePath(`${pathBase(ctx.entreprise.slug)}/${before.societeId}`);
     return { ok: true, data: undefined };
   });

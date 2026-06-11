@@ -7,7 +7,13 @@ import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
-import { clientContacts, clients, devis, type Client, type ClientContact } from '@/db/schema/commercial';
+import {
+  clientContacts,
+  clients,
+  devis,
+  type Client,
+  type ClientContact,
+} from '@/db/schema/commercial';
 import { chantiers } from '@/db/schema/chantiers';
 import { factures } from '@/db/schema/facturation';
 import { clientSchema, type ClientInput } from '@/lib/validation/commercial';
@@ -18,11 +24,7 @@ import type { ActionResult } from '@/lib/catalogue/types';
 export async function listerClients(): Promise<Client[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, (tx) =>
-    tx
-      .select()
-      .from(clients)
-      .where(isNull(clients.deletedAt))
-      .orderBy(asc(clients.code)),
+    tx.select().from(clients).where(isNull(clients.deletedAt)).orderBy(asc(clients.code)),
   );
 }
 
@@ -44,9 +46,7 @@ export async function listerClientContacts(clientId: string): Promise<ClientCont
     tx
       .select()
       .from(clientContacts)
-      .where(
-        and(eq(clientContacts.clientId, clientId), isNull(clientContacts.deletedAt)),
-      )
+      .where(and(eq(clientContacts.clientId, clientId), isNull(clientContacts.deletedAt)))
       .orderBy(
         // Principaux en premier, puis actifs, puis par nom.
         sql`${clientContacts.principal} DESC, ${clientContacts.actif} DESC, ${clientContacts.nom} ASC`,
@@ -111,10 +111,7 @@ export async function creerClient(input: ClientInput): Promise<ActionResult<{ id
   }
 }
 
-export async function mettreAJourClient(
-  id: string,
-  input: ClientInput,
-): Promise<ActionResult> {
+export async function mettreAJourClient(id: string, input: ClientInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_COMMERCIAL_WRITE);
   const parsed = clientSchema.safeParse(input);
   if (!parsed.success) {
@@ -193,10 +190,7 @@ export async function supprimerClient(id: string): Promise<ActionResult> {
 
     // Toutes les lignes comptent, archivées comprises : un document historisé
     // référence toujours le client (cohérence des archives).
-    const [rDevis] = await tx
-      .select({ n: count() })
-      .from(devis)
-      .where(eq(devis.clientId, id));
+    const [rDevis] = await tx.select({ n: count() }).from(devis).where(eq(devis.clientId, id));
     const [rFactures] = await tx
       .select({ n: count() })
       .from(factures)

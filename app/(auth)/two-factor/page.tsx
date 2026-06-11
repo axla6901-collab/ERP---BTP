@@ -6,7 +6,14 @@ import { useState } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth/client';
@@ -92,9 +99,7 @@ export default function TwoFactorPage() {
           }}
           className="underline underline-offset-4"
         >
-          {mode === 'totp'
-            ? 'Utiliser un code de secours à la place'
-            : 'Revenir au code TOTP'}
+          {mode === 'totp' ? 'Utiliser un code de secours à la place' : 'Revenir au code TOTP'}
         </button>
         <Link href="/login" className="underline underline-offset-4">
           Retour à la connexion

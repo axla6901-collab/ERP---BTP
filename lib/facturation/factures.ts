@@ -226,10 +226,7 @@ export async function creerFacture(
   }
 }
 
-export async function mettreAJourFacture(
-  id: string,
-  input: FactureInput,
-): Promise<ActionResult> {
+export async function mettreAJourFacture(id: string, input: FactureInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
   const parsed = factureSchema.safeParse(input);
   if (!parsed.success) {

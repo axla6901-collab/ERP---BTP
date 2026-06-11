@@ -49,9 +49,7 @@ export function UnitesTable({ items, rightActions, peutEcrire }: Props) {
       id: 'type',
       header: 'Type',
       cell: (u) => (
-        <span className="text-xs text-muted-foreground">
-          {LIBELLES_TYPE[u.type] ?? u.type}
-        </span>
+        <span className="text-xs text-muted-foreground">{LIBELLES_TYPE[u.type] ?? u.type}</span>
       ),
       sortAccessor: (u) => LIBELLES_TYPE[u.type] ?? u.type,
       searchAccessor: (u) => LIBELLES_TYPE[u.type] ?? u.type,
@@ -71,7 +69,10 @@ export function UnitesTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (u) => (
-        <Link href={`/administration/unites/${u.id}`} className="text-sm underline underline-offset-4">
+        <Link
+          href={`/administration/unites/${u.id}`}
+          className="text-sm underline underline-offset-4"
+        >
           {peutEcrire ? 'Modifier' : 'Voir'}
         </Link>
       ),

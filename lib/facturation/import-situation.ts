@@ -1,8 +1,7 @@
 'use server';
 
-import * as XLSX from 'xlsx';
-
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
+import { lireClasseur, ClasseurFormatError, type Classeur } from '@/lib/import/classeur';
 
 import {
   estLigneTotalOuTva,
@@ -60,24 +59,19 @@ export async function parserFichierSituation(
 > {
   await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
 
-  let workbook: XLSX.WorkBook;
+  let classeur: Classeur;
   try {
-    const bytes = Buffer.from(fichierBase64, 'base64');
-    workbook = XLSX.read(bytes, { type: 'buffer' });
-  } catch {
+    classeur = await lireClasseur(fichierBase64, nomFichier);
+  } catch (e) {
+    if (e instanceof ClasseurFormatError) return { ok: false, error: e.message };
     return { ok: false, error: `Fichier illisible : ${nomFichier}` };
   }
 
-  const sheetName = workbook.SheetNames[0];
+  const sheetName = classeur.sheetNames[0];
   if (!sheetName) {
     return { ok: false, error: 'Le fichier ne contient aucune feuille.' };
   }
-  const sheet = workbook.Sheets[sheetName]!;
-  const data = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
-    header: 1,
-    defval: null,
-    raw: true,
-  });
+  const data = classeur.feuille(sheetName);
 
   if (data.length < 2) {
     return {
@@ -131,8 +125,7 @@ export async function parserFichierSituation(
   if (idxPct === null) {
     return {
       ok: false,
-      error:
-        'Colonne « % avancement » introuvable. Alias acceptés : pct, avancement, pourcentage.',
+      error: 'Colonne « % avancement » introuvable. Alias acceptés : pct, avancement, pourcentage.',
     };
   }
   if (idxMontant === null && (idxQuantite === null || idxPu === null)) {
@@ -191,9 +184,7 @@ export async function parserFichierSituation(
     if (!row || row.length === 0) continue;
 
     const position =
-      idxPosition !== null && row[idxPosition] != null
-        ? String(row[idxPosition]).trim()
-        : '';
+      idxPosition !== null && row[idxPosition] != null ? String(row[idxPosition]).trim() : '';
     const designationBrute = String(row[idxDesignation] ?? '').trim();
     if (designationBrute === '') continue;
 

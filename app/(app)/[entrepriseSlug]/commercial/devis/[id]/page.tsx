@@ -148,20 +148,20 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
     remiseGlobaleValeur: devis.remiseGlobaleValeur,
   };
 
-  const editionPossible =
-    peutEcrire && (devis.statut === 'brouillon' || devis.statut === 'refuse');
+  const editionPossible = peutEcrire && (devis.statut === 'brouillon' || devis.statut === 'refuse');
   const peutCreerChantier = peutEcrireChantier(utilisateur.role);
   const peutFacturer = peutEcrireFacturation(utilisateur.role);
   const chantierLie = devis.chantierId ?? null;
 
-  const [clients, articles, unites, peutImporterDpgf, peutGererPostesInternes, peutVersionner] = await Promise.all([
-    listerClients(),
-    listerArticlesAvecPrix(),
-    listerUnites(),
-    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_IMPORT_DPGF'),
-    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_POSTES_INTERNES'),
-    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_VERSION'),
-  ]);
+  const [clients, articles, unites, peutImporterDpgf, peutGererPostesInternes, peutVersionner] =
+    await Promise.all([
+      listerClients(),
+      listerArticlesAvecPrix(),
+      listerUnites(),
+      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_IMPORT_DPGF'),
+      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_POSTES_INTERNES'),
+      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_VERSION'),
+    ]);
 
   const changerStatutAction = async (devisId: string, nouveau: StatutDevis) => {
     'use server';
@@ -189,10 +189,7 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
             {chantierLie ? (
               <p>
                 Devis lié au chantier :{' '}
-                <Link
-                  href={`/chantiers/${chantierLie}`}
-                  className="underline underline-offset-4"
-                >
+                <Link href={`/chantiers/${chantierLie}`} className="underline underline-offset-4">
                   voir le chantier
                 </Link>
                 .
@@ -213,7 +210,8 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
             {chantierLie && peutFacturer && (
               <div className="border-t pt-3">
                 <p className="mb-2 text-muted-foreground">
-                  Les lignes du devis serviront de base à la situation : tu n&apos;auras qu&apos;à saisir le % d&apos;avancement par poste.
+                  Les lignes du devis serviront de base à la situation : tu n&apos;auras qu&apos;à
+                  saisir le % d&apos;avancement par poste.
                 </p>
                 <Link
                   href={`/facturation/situations/nouveau?chantierId=${chantierLie}&devisId=${id}`}
@@ -288,7 +286,7 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
             {devis.statut === 'brouillon' || devis.statut === 'refuse'
-              ? 'Tu n\'as pas les droits pour modifier ce devis.'
+              ? "Tu n'as pas les droits pour modifier ce devis."
               : 'Seuls les devis en brouillon ou refusés peuvent être modifiés. Pour ce devis, créer un nouveau devis (clone à venir en M3.2) ou changer le statut.'}
           </CardContent>
         </Card>

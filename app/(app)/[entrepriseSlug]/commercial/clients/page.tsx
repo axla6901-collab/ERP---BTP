@@ -18,10 +18,7 @@ export default async function ClientsPage() {
         title="Clients"
         actions={
           peutEcrire ? (
-            <Link
-              href="/commercial/clients/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/commercial/clients/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouveau client
             </Link>
           ) : null

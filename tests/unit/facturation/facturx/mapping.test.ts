@@ -190,15 +190,18 @@ describe('construireDocumentFacturX — facture standard', () => {
   it('moyen de paiement = virement avec IBAN', () => {
     const pi = obj(settlement.paymentInstruction);
     expect(pi.typeCode).toBe('30');
-    expect(obj(arr(pi.transfers)[0]).paymentAccountIdentifier).toBe(
-      'FR7630006000011234567890189',
-    );
+    expect(obj(arr(pi.transfers)[0]).paymentAccountIdentifier).toBe('FR7630006000011234567890189');
   });
 });
 
 describe('construireDocumentFacturX — auto-liquidation', () => {
   const doc = construireDocumentFacturX(
-    modeleBase({ autoLiquidation: true, totalTva: 0, totalTtc: 1000, tva: [{ taux: 20, base: 1000, montant: 0 }] }),
+    modeleBase({
+      autoLiquidation: true,
+      totalTva: 0,
+      totalTtc: 1000,
+      tva: [{ taux: 20, base: 1000, montant: 0 }],
+    }),
   );
   const tx = obj(doc.transaction);
   const settlement = obj(tx.tradeSettlement);

@@ -1,7 +1,5 @@
 'use server';
 
-import * as XLSX from 'xlsx';
-
 import { requirePermission } from '@/lib/auth/guards';
 import {
   estLigneTotalOuTva,
@@ -9,6 +7,7 @@ import {
   ressembleAPosition,
   trouverColonne,
 } from '@/lib/facturation/import-situation-helpers';
+import { lireClasseur, ClasseurFormatError, type Classeur } from '@/lib/import/classeur';
 
 import type { ActionResult } from '@/lib/catalogue/types';
 
@@ -67,14 +66,6 @@ function normaliserUnite(raw: unknown): string | null {
   return s;
 }
 
-function lireFeuille(sheet: XLSX.WorkSheet): unknown[][] {
-  return XLSX.utils.sheet_to_json<unknown[]>(sheet, {
-    header: 1,
-    defval: null,
-    raw: true,
-  });
-}
-
 function nbLignesNonVides(data: unknown[][]): number {
   return data.filter(
     (r) => r && r.some((v) => v !== null && v !== undefined && String(v).trim() !== ''),
@@ -102,9 +93,7 @@ function compterPositions(
  * Détecte le mapping le plus plausible pour une feuille : ligne d'en-tête,
  * colonnes position / désignation / unité / quantité.
  */
-function deviner(
-  data: unknown[][],
-): {
+function deviner(data: unknown[][]): {
   headerRow: number;
   idxPosition: number | null;
   idxDesignation: number;
@@ -199,15 +188,15 @@ export async function analyserClasseurDpgf(
 ): Promise<ActionResult<DpgfAnalyse>> {
   await requirePermission(PERM_IMPORT_DPGF);
 
-  let workbook: XLSX.WorkBook;
+  let classeur: Classeur;
   try {
-    const bytes = Buffer.from(fichierBase64, 'base64');
-    workbook = XLSX.read(bytes, { type: 'buffer' });
-  } catch {
+    classeur = await lireClasseur(fichierBase64, nomFichier);
+  } catch (e) {
+    if (e instanceof ClasseurFormatError) return { ok: false, error: e.message };
     return { ok: false, error: `Fichier illisible : ${nomFichier}` };
   }
 
-  if (workbook.SheetNames.length === 0) {
+  if (classeur.sheetNames.length === 0) {
     return { ok: false, error: 'Le fichier ne contient aucune feuille.' };
   }
 
@@ -215,19 +204,13 @@ export async function analyserClasseurDpgf(
   let meilleureSuggestion: MappingDpgfSuggere | null = null;
   let meilleurNbLignes = 0;
 
-  for (const nom of workbook.SheetNames) {
-    const sheet = workbook.Sheets[nom]!;
-    const data = lireFeuille(sheet);
+  for (const nom of classeur.sheetNames) {
+    const data = classeur.feuille(nom);
     const nbLignes = nbLignesNonVides(data);
     const apercuRaw = data.slice(0, NB_LIGNES_APERCU);
-    const nbColonnes = apercuRaw.reduce(
-      (max, row) => Math.max(max, row?.length ?? 0),
-      0,
-    );
+    const nbColonnes = apercuRaw.reduce((max, row) => Math.max(max, row?.length ?? 0), 0);
     const apercu = apercuRaw.map((row) =>
-      Array.from({ length: nbColonnes }, (_, i) =>
-        normaliserCellule(row?.[i] ?? null),
-      ),
+      Array.from({ length: nbColonnes }, (_, i) => normaliserCellule(row?.[i] ?? null)),
     );
     feuilles.push({ nom, nbLignes, apercu, nbColonnes });
 
@@ -306,23 +289,19 @@ export async function importerAvecMappingDpgf(
 ): Promise<ActionResult<DpgfImportResult>> {
   await requirePermission(PERM_IMPORT_DPGF);
 
-  let workbook: XLSX.WorkBook;
+  let classeur: Classeur;
   try {
-    const bytes = Buffer.from(fichierBase64, 'base64');
-    workbook = XLSX.read(bytes, { type: 'buffer' });
-  } catch {
+    classeur = await lireClasseur(fichierBase64, nomFichier);
+  } catch (e) {
+    if (e instanceof ClasseurFormatError) return { ok: false, error: e.message };
     return { ok: false, error: `Fichier illisible : ${nomFichier}` };
   }
 
-  const sheet = workbook.Sheets[mapping.feuille];
-  if (!sheet) {
+  if (!classeur.sheetNames.includes(mapping.feuille)) {
     return { ok: false, error: `Feuille « ${mapping.feuille} » introuvable.` };
   }
-  const data = lireFeuille(sheet);
-  const nbColonnes = data.reduce(
-    (max, row) => Math.max(max, row?.length ?? 0),
-    0,
-  );
+  const data = classeur.feuille(mapping.feuille);
+  const nbColonnes = data.reduce((max, row) => Math.max(max, row?.length ?? 0), 0);
   const erreurMapping = valider(mapping, nbColonnes);
   if (erreurMapping) {
     return { ok: false, error: erreurMapping };
@@ -351,8 +330,7 @@ export async function importerAvecMappingDpgf(
     if (designationBrute === '') continue;
     if (estLigneTotalOuTva(designationBrute)) continue;
 
-    const quantite =
-      mapping.idxQuantite !== null ? nettoyerNombre(row[mapping.idxQuantite]) : null;
+    const quantite = mapping.idxQuantite !== null ? nettoyerNombre(row[mapping.idxQuantite]) : null;
     const unite = mapping.idxUnite !== null ? normaliserUnite(row[mapping.idxUnite]) : null;
 
     const qNum = quantite === null ? null : Number(quantite);

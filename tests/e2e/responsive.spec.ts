@@ -119,9 +119,7 @@ test.describe('Responsive — pas de scroll horizontal sur les pages clés', () 
     // préfixe = 1 col par défaut, 2 col à sm+.
     const grid = page.locator('ul.grid').first();
     await expect(grid).toBeVisible();
-    const tpl = await grid.evaluate(
-      (el) => getComputedStyle(el).gridTemplateColumns,
-    );
+    const tpl = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns);
     const colCount = tpl.trim().split(/\s+/).length;
     if (isMobile) {
       expect(colCount, `dashboard grid columns sur mobile = ${tpl}`).toBe(1);

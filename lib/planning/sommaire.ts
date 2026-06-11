@@ -52,9 +52,14 @@ export function agregerSommaireChantiers(
   const parChantier = new Map<string, Acc>();
 
   for (const t of taches) {
-    const acc =
-      parChantier.get(t.chantierId) ??
-      { nb: 0, sommeAv: 0, sommeAvxH: 0, sommeH: 0, dateMin: null, dateMax: null };
+    const acc = parChantier.get(t.chantierId) ?? {
+      nb: 0,
+      sommeAv: 0,
+      sommeAvxH: 0,
+      sommeH: 0,
+      dateMin: null,
+      dateMax: null,
+    };
     acc.nb += 1;
     acc.sommeAv += t.avancementPourcent;
     acc.sommeAvxH += t.avancementPourcent * t.heuresPlanifiees;

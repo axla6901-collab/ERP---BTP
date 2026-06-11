@@ -47,9 +47,9 @@ pnpm test:e2e:ui     # UI interactive (debug)
 
 ## Dépannage
 
-| Symptôme | Cause probable | Solution |
-|---|---|---|
-| Tests timeout 30s | Stack pas démarrée | `docker compose up -d` |
-| `Mailpit: aucun message reçu` | Mailpit éteint ou SMTP mal configuré | Vérifier `docker compose ps` + `http://localhost:8025` |
-| `Authentication failed for user app_rw` | Mauvais `.env.local` | Recréer depuis `.env.example` (cf. infra-locale.md) |
-| Test 1 échoue à `verify-email` | Hook `databaseHooks.user.create.after` plante | Vérifier les logs Next dev pour erreur audit_log / utilisateurs |
+| Symptôme                                | Cause probable                                | Solution                                                        |
+| --------------------------------------- | --------------------------------------------- | --------------------------------------------------------------- |
+| Tests timeout 30s                       | Stack pas démarrée                            | `docker compose up -d`                                          |
+| `Mailpit: aucun message reçu`           | Mailpit éteint ou SMTP mal configuré          | Vérifier `docker compose ps` + `http://localhost:8025`          |
+| `Authentication failed for user app_rw` | Mauvais `.env.local`                          | Recréer depuis `.env.example` (cf. infra-locale.md)             |
+| Test 1 échoue à `verify-email`          | Hook `databaseHooks.user.create.after` plante | Vérifier les logs Next dev pour erreur audit_log / utilisateurs |

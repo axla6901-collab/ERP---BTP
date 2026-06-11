@@ -223,14 +223,8 @@ export const employes = pgTable(
     // Les CHECK regex sur `numero_secu` et `iban` ont été retirés (migration 0067) :
     // ces colonnes sont désormais chiffrées (bytea), le motif ne s'applique plus.
     // Le format est validé en amont par Zod (lib/validation/rh.ts : optionalSecu / optionalIban).
-    check(
-      'chk_employes_code_postal',
-      sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`,
-    ),
-    check(
-      'chk_employes_nombre_enfants',
-      sql`nombre_enfants >= 0 AND nombre_enfants <= 20`,
-    ),
+    check('chk_employes_code_postal', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
+    check('chk_employes_nombre_enfants', sql`nombre_enfants >= 0 AND nombre_enfants <= 20`),
   ],
 );
 
@@ -341,10 +335,7 @@ export const employeDocuments = pgTable(
   (t) => [
     index('idx_employe_documents_employe').on(t.employeId),
     index('idx_employe_documents_validite').on(t.dateValidite),
-    check(
-      'chk_employe_documents_taille',
-      sql`taille_bytes IS NULL OR taille_bytes > 0`,
-    ),
+    check('chk_employe_documents_taille', sql`taille_bytes IS NULL OR taille_bytes > 0`),
   ],
 );
 

@@ -27,13 +27,13 @@ Tous les numéros applicatifs suivent le format :
 <PRÉFIXE>-<ANNÉE>-<SÉQUENCE 6 chiffres>
 ```
 
-| Document | Préfixe | Exemple |
-|---|---|---|
-| Devis | `D` | `D-2026-000042` |
-| Facture | `F` | `F-2026-000017` |
-| Commande | `C` | `C-2026-000231` |
-| Contrat sous-traitance | `ST` | `ST-2026-000004` |
-| Facture sous-traitant | `FST` | `FST-2026-000019` |
+| Document               | Préfixe | Exemple           |
+| ---------------------- | ------- | ----------------- |
+| Devis                  | `D`     | `D-2026-000042`   |
+| Facture                | `F`     | `F-2026-000017`   |
+| Commande               | `C`     | `C-2026-000231`   |
+| Contrat sous-traitance | `ST`    | `ST-2026-000004`  |
+| Facture sous-traitant  | `FST`   | `FST-2026-000019` |
 
 La séquence **redémarre à 1 au 1er janvier** de chaque année (pratique FR standard, cohérent avec l'exercice comptable).
 
@@ -175,5 +175,6 @@ Le 1er janvier, les nouvelles séquences sont créées **automatiquement à la p
 ## Révision
 
 À revisiter si :
+
 - L'administration fiscale renforce l'exigence de continuité stricte (alors : passer à un mécanisme garantissant zéro saut, potentiellement via 2-phase commit).
 - Introduction d'un multi-établissement : préfixe par établissement (`D-PAR-2026-000042` vs `D-LYO-2026-000042`).

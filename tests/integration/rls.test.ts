@@ -41,7 +41,7 @@ const SLUG_B = `rls-b-${Date.now()}`;
 beforeAll(async () => {
   if (!SHOULD_RUN) {
     console.warn(
-      '[rls.test] RUN_INTEGRATION_TESTS!=true — tests d\'intégration skippés ' +
+      "[rls.test] RUN_INTEGRATION_TESTS!=true — tests d'intégration skippés " +
         '(set RUN_INTEGRATION_TESTS=true pour les activer).',
     );
     return;
@@ -107,7 +107,8 @@ describe('Row Level Security multi-tenant', () => {
       return;
     }
     // Pas de SET LOCAL → la policy bloque tout
-    const rows = await sqlRw`SELECT count(*)::int AS n FROM familles WHERE code IN ('RLS-A', 'RLS-B')`;
+    const rows =
+      await sqlRw`SELECT count(*)::int AS n FROM familles WHERE code IN ('RLS-A', 'RLS-B')`;
     expect(rows[0]?.n).toBe(0);
   });
 

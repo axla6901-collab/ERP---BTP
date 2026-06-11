@@ -11,14 +11,14 @@ sécurité **B1**, RGPD). À l'issue, un dump SQL volé n'expose plus en clair :
 
 ## Pièces concernées
 
-| Fichier | Rôle |
-|---|---|
-| `lib/crypto/encryption.ts` | Primitive AES-256-GCM + trousseau de clés (env) |
-| `lib/crypto/encrypted-column.ts` | Type Drizzle `encryptedText` (chiffre/déchiffre en transparence) |
-| `lib/audit/redaction.ts` | Caviardage des champs sensibles dans `audit_log.before/after` |
-| `db/migrations/0067_chiffrement_champs_sensibles_prep.sql` | Étape 1 — ajoute les colonnes `*_enc` + retire les CHECK regex |
-| `scripts/encrypt-sensitive-backfill.ts` | Étape 2 — chiffre les lignes existantes (app_admin) |
-| `db/migrations/0068_chiffrement_champs_sensibles_swap.sql` | Étape 3 — supprime le clair + renomme `*_enc` → final |
+| Fichier                                                    | Rôle                                                             |
+| ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| `lib/crypto/encryption.ts`                                 | Primitive AES-256-GCM + trousseau de clés (env)                  |
+| `lib/crypto/encrypted-column.ts`                           | Type Drizzle `encryptedText` (chiffre/déchiffre en transparence) |
+| `lib/audit/redaction.ts`                                   | Caviardage des champs sensibles dans `audit_log.before/after`    |
+| `db/migrations/0067_chiffrement_champs_sensibles_prep.sql` | Étape 1 — ajoute les colonnes `*_enc` + retire les CHECK regex   |
+| `scripts/encrypt-sensitive-backfill.ts`                    | Étape 2 — chiffre les lignes existantes (app_admin)              |
+| `db/migrations/0068_chiffrement_champs_sensibles_swap.sql` | Étape 3 — supprime le clair + renomme `*_enc` → final            |
 
 ## Préalables
 

@@ -75,7 +75,13 @@ describe('ContactDialog', () => {
       actif: true,
     };
     render(
-      <ContactDialog source="fournisseur" tiersId="t1" contact={contact} open onOpenChange={vi.fn()} />,
+      <ContactDialog
+        source="fournisseur"
+        tiersId="t1"
+        contact={contact}
+        open
+        onOpenChange={vi.fn()}
+      />,
     );
     expect(screen.getByText('Modifier le contact')).toBeInTheDocument();
     const nom = screen.getByLabelText('Nom *');

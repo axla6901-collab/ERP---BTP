@@ -18,10 +18,7 @@ export default async function SituationsPage() {
         title="Situations de travaux"
         actions={
           peutEcrire ? (
-            <Link
-              href="/facturation/situations/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/facturation/situations/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouvelle situation
             </Link>
           ) : null

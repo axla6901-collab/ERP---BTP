@@ -51,10 +51,7 @@ export function FormSection({
       const next = !prev;
       if (storageKey && typeof window !== 'undefined') {
         try {
-          window.localStorage.setItem(
-            STORAGE_PREFIX + storageKey,
-            next ? 'open' : 'closed',
-          );
+          window.localStorage.setItem(STORAGE_PREFIX + storageKey, next ? 'open' : 'closed');
         } catch {
           /* ignore */
         }
@@ -114,9 +111,7 @@ export function FormSection({
         ) : null}
       </div>
       {description && open ? (
-        <p className="-mt-1 px-4 pb-2 text-sm text-muted-foreground sm:px-5">
-          {description}
-        </p>
+        <p className="-mt-1 px-4 pb-2 text-sm text-muted-foreground sm:px-5">{description}</p>
       ) : null}
       <div
         id={panelId}
@@ -149,16 +144,11 @@ export function FormSubCard({
   return (
     <div
       data-slot="form-subcard"
-      className={cn(
-        'overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10',
-        className,
-      )}
+      className={cn('overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10', className)}
     >
       <div className="flex items-center justify-between gap-2 bg-slate-800 px-3 py-2 text-white">
         <h3 className="text-sm font-semibold leading-snug">{title}</h3>
-        {action ? (
-          <div className="text-xs text-white/80">{action}</div>
-        ) : null}
+        {action ? <div className="text-xs text-white/80">{action}</div> : null}
       </div>
       <div className={cn('space-y-3 p-3 sm:p-4', bodyClassName)}>{children}</div>
     </div>
@@ -175,7 +165,7 @@ export function SectionTotal({ label, value, className }: SectionTotalProps) {
   return (
     <div className={cn('flex flex-col items-end gap-0.5', className)}>
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-heading text-lg font-semibold text-foreground tabular-nums">
+      <span className="font-heading text-lg font-semibold tabular-nums text-foreground">
         {value}
       </span>
     </div>

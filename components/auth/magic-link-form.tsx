@@ -67,7 +67,12 @@ export function MagicLinkForm({ redirectTo }: { redirectTo: string }) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" autoComplete="email" placeholder="vous@exemple.fr" {...field} />
+                  <Input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="vous@exemple.fr"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

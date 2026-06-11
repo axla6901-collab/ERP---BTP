@@ -37,7 +37,7 @@ export default async function ImportPage() {
           <div>
             <p className="font-semibold">JSON (export du site Pointage) :</p>
             <pre className="mt-1 overflow-x-auto rounded bg-muted/50 p-3 text-xs">
-{`{
+              {`{
   "pointage": [
     {
       "chantier": "BOURGOIN - MALADIUM - Z1",
@@ -60,14 +60,14 @@ export default async function ImportPage() {
             <p className="text-muted-foreground">
               Colonnes attendues (1re ligne = en-têtes, insensibles à la casse) :{' '}
               <code className="text-xs">
-                chantier, collaborateur, date, nbr_heures_kg, type_document, motif_absence,
-                panier, grand_panier, nuit_panier_soir
+                chantier, collaborateur, date, nbr_heures_kg, type_document, motif_absence, panier,
+                grand_panier, nuit_panier_soir
               </code>
             </p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Les employés et chantiers manquants sont créés automatiquement (chantiers
-            rattachés au client générique « PTG-HIST »). Le statut par défaut est{' '}
+            Les employés et chantiers manquants sont créés automatiquement (chantiers rattachés au
+            client générique « PTG-HIST »). Le statut par défaut est{' '}
             <code className="text-xs">terminé</code>.
           </p>
         </CardContent>

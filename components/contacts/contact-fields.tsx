@@ -8,13 +8,7 @@ import {
   useWatch,
 } from 'react-hook-form';
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
@@ -94,7 +88,12 @@ export function ContactFields<T extends FieldValues>({ control }: Props<T>) {
           <FormItem>
             <FormLabel>Email</FormLabel>
             <FormControl>
-              <Input type="email" maxLength={200} {...field} value={(field.value as string | null) ?? ''} />
+              <Input
+                type="email"
+                maxLength={200}
+                {...field}
+                value={(field.value as string | null) ?? ''}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -156,7 +155,8 @@ export function ContactFields<T extends FieldValues>({ control }: Props<T>) {
                   onCheckedChange={(v) => {
                     field.onChange(v);
                     // Un contact inactif ne peut pas être principal.
-                    if (!v) form.setValue('principal' as Path<T>, false as never, { shouldDirty: true });
+                    if (!v)
+                      form.setValue('principal' as Path<T>, false as never, { shouldDirty: true });
                   }}
                 />
               </FormControl>

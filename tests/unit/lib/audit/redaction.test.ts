@@ -7,7 +7,7 @@ import {
 } from '@/lib/audit/redaction';
 
 describe('caviarderChampsSensibles', () => {
-  it('masque les champs sensibles d\'une ligne employes', () => {
+  it("masque les champs sensibles d'une ligne employes", () => {
     const before = {
       id: 'e1',
       nom: 'Dupont',
@@ -27,7 +27,7 @@ describe('caviarderChampsSensibles', () => {
     expect(out.tauxHoraireBrut).toBe(MARQUEUR_CAVIARDAGE);
   });
 
-  it('masque iban/bic d\'une ligne entreprises', () => {
+  it("masque iban/bic d'une ligne entreprises", () => {
     const out = caviarderChampsSensibles('entreprises', {
       raisonSociale: 'ACME',
       iban: 'FR76...',
@@ -49,12 +49,12 @@ describe('caviarderChampsSensibles', () => {
     expect(out.bic).toBe(MARQUEUR_CAVIARDAGE);
   });
 
-  it('renvoie l\'objet d\'origine si aucun champ sensible n\'est présent', () => {
+  it("renvoie l'objet d'origine si aucun champ sensible n'est présent", () => {
     const payload = { nom: 'Dupont', ville: 'Lyon' };
     expect(caviarderChampsSensibles('employes', payload)).toBe(payload);
   });
 
-  it('ne mute pas l\'objet source', () => {
+  it("ne mute pas l'objet source", () => {
     const before = { numeroSecu: '2806990412345', nom: 'Dupont' };
     caviarderChampsSensibles('employes', before);
     expect(before.numeroSecu).toBe('2806990412345');

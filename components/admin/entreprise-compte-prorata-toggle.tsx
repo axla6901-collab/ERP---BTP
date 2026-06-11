@@ -53,10 +53,9 @@ export function EntrepriseCompteProrataToggle({ initialActif, onToggle }: Props)
           Module Compte prorata (NF P03-001)
         </Label>
         <p className="text-xs text-muted-foreground">
-          Active l&apos;onglet « Compte prorata » sur chaque fiche chantier et l&apos;entrée
-          dédiée dans la barre latérale. Permet de répartir les dépenses communes d&apos;un
-          chantier entre intervenants au prorata de leur marché et de suivre avances, soldes
-          et arrêté de compte.
+          Active l&apos;onglet « Compte prorata » sur chaque fiche chantier et l&apos;entrée dédiée
+          dans la barre latérale. Permet de répartir les dépenses communes d&apos;un chantier entre
+          intervenants au prorata de leur marché et de suivre avances, soldes et arrêté de compte.
         </p>
       </div>
     </div>

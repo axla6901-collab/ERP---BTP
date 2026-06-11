@@ -74,10 +74,7 @@ export async function creerPermis(
   }
 }
 
-export async function mettreAJourPermis(
-  id: string,
-  input: PermisInput,
-): Promise<ActionResult> {
+export async function mettreAJourPermis(id: string, input: PermisInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_RH_WRITE);
   const parsed = permisSchema.safeParse(input);
   if (!parsed.success) {

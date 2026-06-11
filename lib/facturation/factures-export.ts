@@ -17,9 +17,7 @@ import { clients } from '@/db/schema/commercial';
 import { entreprises } from '@/db/schema/entreprises';
 import { factureDocuments, factures, lignesFacture } from '@/db/schema/facturation';
 
-type ActionResult<T = void> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
+type ActionResult<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 const num = (v: string | number | null | undefined): number => {
@@ -52,9 +50,7 @@ function construireModele(
 
   const totalHt = num(facture.totalHt);
   const grossHt = round2(
-    lignesModele
-      .filter((l) => !l.estSection)
-      .reduce((s, l) => s + (l.montantHt ?? 0), 0),
+    lignesModele.filter((l) => !l.estSection).reduce((s, l) => s + (l.montantHt ?? 0), 0),
   );
   const remiseGlobaleMontant =
     facture.remiseGlobaleType && grossHt > totalHt ? round2(grossHt - totalHt) : 0;
@@ -142,9 +138,7 @@ function cleObjet(factureId: string, numero: string): string {
  * Génère (ou régénère) le Factur-X PDF/A-3 d'une facture, l'archive en MinIO et
  * enregistre une ligne `facture_documents`. Renvoie une URL de téléchargement.
  */
-export async function genererFacturX(
-  factureId: string,
-): Promise<ActionResult<{ url: string }>> {
+export async function genererFacturX(factureId: string): Promise<ActionResult<{ url: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
 
   // 1. Lecture (RLS posée par withTenant).
@@ -205,9 +199,7 @@ export async function genererFacturX(
       await tx
         .update(factureDocuments)
         .set({ deletedAt: new Date() })
-        .where(
-          and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)),
-        );
+        .where(and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)));
 
       const [inserted] = await tx
         .insert(factureDocuments)
@@ -258,9 +250,7 @@ export async function urlTelechargementFacturX(
     const [row] = await tx
       .select({ minioKey: factureDocuments.minioKey })
       .from(factureDocuments)
-      .where(
-        and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)),
-      )
+      .where(and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)))
       .orderBy(desc(factureDocuments.genereAt))
       .limit(1);
     return row ?? null;
@@ -278,9 +268,7 @@ export async function aFacturXGenere(factureId: string): Promise<boolean> {
     const [row] = await tx
       .select({ id: factureDocuments.id })
       .from(factureDocuments)
-      .where(
-        and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)),
-      )
+      .where(and(eq(factureDocuments.factureId, factureId), isNull(factureDocuments.deletedAt)))
       .limit(1);
     return Boolean(row);
   });

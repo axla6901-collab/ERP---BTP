@@ -5,17 +5,11 @@ import { revalidatePath } from 'next/cache';
 
 import { peutAdministrer, ROLES_ADMINISTRATION } from '@/lib/admin/permissions';
 import { auditLogIn } from '@/lib/audit/log';
-import {
-  requireTenantContextWithMfa,
-  type TenantContext,
-} from '@/lib/auth/tenant-guards';
+import { requireTenantContextWithMfa, type TenantContext } from '@/lib/auth/tenant-guards';
 import { withTenant, type TenantTx } from '@/lib/db/with-tenant';
 import { roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
-import {
-  utilisateurEditSchema,
-  type UtilisateurEditInput,
-} from '@/lib/validation/admin';
+import { utilisateurEditSchema, type UtilisateurEditInput } from '@/lib/validation/admin';
 
 type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -106,12 +100,12 @@ export async function mettreAJourUtilisateur(
       // Garde-fous : ne pas perdre le dernier admin actif
       if (cibleEstSeulAdmin && !nouveauRoleEstAdmin) {
         throw new Error(
-          'Action refusée : c\'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d\'abord.',
+          "Action refusée : c'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d'abord.",
         );
       }
       if (cibleEstSeulAdmin && !parsed.data.actif) {
         throw new Error(
-          'Action refusée : c\'est le dernier administrateur actif. Impossible de le désactiver.',
+          "Action refusée : c'est le dernier administrateur actif. Impossible de le désactiver.",
         );
       }
       // Garde-fou : on ne se rétrograde pas soi-même
@@ -150,10 +144,7 @@ export async function mettreAJourUtilisateur(
   }
 }
 
-export async function assignerRole(
-  utilisateurId: string,
-  roleId: string,
-): Promise<ActionResult> {
+export async function assignerRole(utilisateurId: string, roleId: string): Promise<ActionResult> {
   const ctx = await requireAdmin();
   const moi = ctx.utilisateur;
   try {
@@ -170,7 +161,7 @@ export async function assignerRole(
 
       if (cibleEstSeulAdmin && !nouveauRoleEstAdmin) {
         throw new Error(
-          'Action refusée : c\'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d\'abord.',
+          "Action refusée : c'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d'abord.",
         );
       }
       if (utilisateurId === moi.id && !nouveauRoleEstAdmin) {
@@ -223,7 +214,7 @@ export async function basculerActifUtilisateur(
         const cibleEstSeulAdmin = await estSeulAdminActif(tx, utilisateurId);
         if (cibleEstSeulAdmin) {
           throw new Error(
-            'Action refusée : c\'est le dernier administrateur actif. Impossible de le désactiver.',
+            "Action refusée : c'est le dernier administrateur actif. Impossible de le désactiver.",
           );
         }
       }
@@ -275,7 +266,7 @@ export async function supprimerUtilisateur(utilisateurId: string): Promise<Actio
       const cibleEstSeulAdmin = await estSeulAdminActif(tx, utilisateurId);
       if (cibleEstSeulAdmin) {
         throw new Error(
-          'Action refusée : c\'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d\'abord.',
+          "Action refusée : c'est le dernier administrateur actif. Promouvoir un autre utilisateur admin d'abord.",
         );
       }
 

@@ -78,7 +78,9 @@ const actions = {
   rouvrir: noop,
 };
 
-function renderTab(over: { peutEcrire?: boolean; peutArreter?: boolean; statut?: 'ouvert' | 'arrete' } = {}) {
+function renderTab(
+  over: { peutEcrire?: boolean; peutArreter?: boolean; statut?: 'ouvert' | 'arrete' } = {},
+) {
   return render(
     <CompteProrataTab
       compteId="cp1"

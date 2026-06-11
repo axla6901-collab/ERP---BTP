@@ -12,15 +12,11 @@ describe('FilterPills', () => {
     const { getByText } = render(
       <FilterPills items={[{ key: 'all', label: 'Toutes', active: true }]} />,
     );
-    expect(getByText('Toutes').closest('span, a, button')?.className).toContain(
-      'bg-neutral-900',
-    );
+    expect(getByText('Toutes').closest('span, a, button')?.className).toContain('bg-neutral-900');
   });
 
   it('pill inactive = bordure + fond carte', () => {
-    const { getByText } = render(
-      <FilterPills items={[{ key: 'draft', label: 'Brouillon' }]} />,
-    );
+    const { getByText } = render(<FilterPills items={[{ key: 'draft', label: 'Brouillon' }]} />);
     const el = getByText('Brouillon').closest('span, a, button');
     expect(el?.className).toContain('bg-card');
   });
@@ -54,9 +50,6 @@ describe('FilterPills', () => {
     const { getByRole } = render(
       <FilterPills items={[{ key: 'all', label: 'Toutes', href: '/factures?statut=all' }]} />,
     );
-    expect(getByRole('link', { name: /Toutes/ })).toHaveAttribute(
-      'href',
-      '/factures?statut=all',
-    );
+    expect(getByRole('link', { name: /Toutes/ })).toHaveAttribute('href', '/factures?statut=all');
   });
 });

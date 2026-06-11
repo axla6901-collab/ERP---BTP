@@ -7,11 +7,7 @@ import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant, type TenantTx } from '@/lib/db/with-tenant';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
-import {
-  chantierTaches,
-  chantiers,
-  type ChantierTache,
-} from '@/db/schema/chantiers';
+import { chantierTaches, chantiers, type ChantierTache } from '@/db/schema/chantiers';
 import { pointages } from '@/db/schema/pointages';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import {
@@ -86,9 +82,7 @@ export async function creerTache(
       const [agg] = await tx
         .select({ maxOrdre: sqlMax(chantierTaches.ordre) })
         .from(chantierTaches)
-        .where(
-          and(eq(chantierTaches.chantierId, chantierId), isNull(chantierTaches.deletedAt)),
-        );
+        .where(and(eq(chantierTaches.chantierId, chantierId), isNull(chantierTaches.deletedAt)));
       const ordre = (agg?.maxOrdre ?? -1) + 1;
 
       const [inserted] = await tx
@@ -245,10 +239,7 @@ export async function changerStatutTache(
   }
 }
 
-export async function mettreAJourAvancement(
-  id: string,
-  pourcent: number,
-): Promise<ActionResult> {
+export async function mettreAJourAvancement(id: string, pourcent: number): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_CHANTIER_WRITE);
   if (!Number.isFinite(pourcent) || pourcent < 0 || pourcent > 100) {
     return { ok: false, error: 'Avancement entre 0 et 100.' };
@@ -338,10 +329,7 @@ export async function supprimerTache(id: string): Promise<ActionResult> {
  * Déplace une tâche d'une position vers le haut (`direction = -1`) ou
  * vers le bas (`+1`) en échangeant son `ordre` avec celle voisine.
  */
-export async function deplacerTache(
-  id: string,
-  direction: -1 | 1,
-): Promise<ActionResult> {
+export async function deplacerTache(id: string, direction: -1 | 1): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_CHANTIER_WRITE);
   try {
     const chantierId = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -355,10 +343,7 @@ export async function deplacerTache(
         .select()
         .from(chantierTaches)
         .where(
-          and(
-            eq(chantierTaches.chantierId, tache.chantierId),
-            isNull(chantierTaches.deletedAt),
-          ),
+          and(eq(chantierTaches.chantierId, tache.chantierId), isNull(chantierTaches.deletedAt)),
         )
         .orderBy(asc(chantierTaches.ordre), asc(chantierTaches.createdAt));
 

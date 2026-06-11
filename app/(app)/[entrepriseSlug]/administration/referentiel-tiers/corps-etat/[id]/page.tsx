@@ -12,11 +12,7 @@ import { peutAdministrerReferentielTiers } from '@/lib/referencement/permissions
 
 const BASE = '/administration/referentiel-tiers/corps-etat';
 
-export default async function CorpsEtatDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CorpsEtatDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const corps = await lireCorpsEtat(id);

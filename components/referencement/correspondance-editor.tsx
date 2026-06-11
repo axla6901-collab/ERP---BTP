@@ -88,7 +88,11 @@ export function CorrespondanceEditor({
       for (const nature of NATURES_TIERS) {
         const c = etat[cle(doc.id, nature)];
         if (c?.requis) {
-          lignes.push({ natureDocumentId: doc.id, natureTiers: nature, estBloquant: c.estBloquant });
+          lignes.push({
+            natureDocumentId: doc.id,
+            natureTiers: nature,
+            estBloquant: c.estBloquant,
+          });
         }
       }
     }
@@ -134,7 +138,13 @@ export function CorrespondanceEditor({
           </SelectContent>
         </Select>
         {peutEcrire && (
-          <Button type="button" size="sm" className="ml-auto" disabled={isPending} onClick={enregistrer}>
+          <Button
+            type="button"
+            size="sm"
+            className="ml-auto"
+            disabled={isPending}
+            onClick={enregistrer}
+          >
             {isPending ? 'Enregistrement…' : 'Enregistrer la correspondance'}
           </Button>
         )}
@@ -193,8 +203,8 @@ export function CorrespondanceEditor({
         </table>
       </div>
       <p className="text-xs text-muted-foreground">
-        Cochez les documents requis pour ce corps d’état selon la nature du tiers. « Bloquant » : l’agrément
-        ne peut être validé sans ce document valide.
+        Cochez les documents requis pour ce corps d’état selon la nature du tiers. « Bloquant » :
+        l’agrément ne peut être validé sans ce document valide.
       </p>
     </div>
   );

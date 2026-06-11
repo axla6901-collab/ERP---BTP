@@ -166,9 +166,7 @@ export function PermisList({ items, peutEcrire, actions }: Props) {
                 <Label>Catégorie</Label>
                 <Select
                   value={form.categorie}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, categorie: v as CategoriePermis }))
-                  }
+                  onValueChange={(v) => setForm((f) => ({ ...f, categorie: v as CategoriePermis }))}
                 >
                   <SelectTrigger>
                     <SelectValue>
@@ -210,14 +208,17 @@ export function PermisList({ items, peutEcrire, actions }: Props) {
                 <Label>N° du permis</Label>
                 <Input
                   value={form.numeroPermis ?? ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, numeroPermis: e.target.value || null }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, numeroPermis: e.target.value || null }))}
                   maxLength={30}
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setShowAdd(false)} disabled={isPending}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAdd(false)}
+                  disabled={isPending}
+                >
                   Annuler
                 </Button>
                 <Button size="sm" onClick={handleAdd} disabled={isPending}>

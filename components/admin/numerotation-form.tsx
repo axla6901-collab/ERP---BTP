@@ -69,9 +69,7 @@ function AideTokens() {
         <ul className="grid gap-1 sm:grid-cols-2">
           {TOKENS_AIDE.map((t) => (
             <li key={t.token} className="flex items-baseline gap-2">
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-                {t.token}
-              </code>
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{t.token}</code>
               <span className="text-muted-foreground">
                 {t.description} — ex. <span className="font-mono">{t.exemple}</span>
               </span>
@@ -79,12 +77,11 @@ function AideTokens() {
           ))}
         </ul>
         <p className="text-xs text-muted-foreground">
-          La cadence de reset du compteur se choisit explicitement par document.
-          Elle doit rester cohérente avec les tokens du template : un reset
-          quotidien exige <code className="font-mono">[@Day]</code>, un reset
-          mensuel exige <code className="font-mono">[@Month]</code> ou{' '}
-          <code className="font-mono">[@Day]</code>, etc. Sans token date, seul
-          le compteur global continu est possible.
+          La cadence de reset du compteur se choisit explicitement par document. Elle doit rester
+          cohérente avec les tokens du template : un reset quotidien exige{' '}
+          <code className="font-mono">[@Day]</code>, un reset mensuel exige{' '}
+          <code className="font-mono">[@Month]</code> ou <code className="font-mono">[@Day]</code>,
+          etc. Sans token date, seul le compteur global continu est possible.
         </p>
       </div>
     </FormSection>
@@ -109,8 +106,7 @@ function LigneModele({
   const autorisees = parsed.ok ? cadencesAutorisees(template) : [];
   const cadenceErreur = parsed.ok ? validerCadence(template, cadence) : { ok: true as const };
   const apercu = parsed.ok && cadenceErreur.ok ? formatNumero(template, 1) : '—';
-  const dirty =
-    template.trim() !== modele.template.trim() || cadence !== modele.cadenceReset;
+  const dirty = template.trim() !== modele.template.trim() || cadence !== modele.cadenceReset;
   const peutEnregistrer = dirty && parsed.ok && cadenceErreur.ok && !isPending;
 
   // Si le template change et rend la cadence courante invalide, on bascule
@@ -218,14 +214,8 @@ function LigneModele({
 
       <div className="space-y-1">
         <Label htmlFor={`cadence-${modele.typeDoc}`}>Cadence de reset</Label>
-        <Select
-          value={cadence}
-          onValueChange={(v) => setCadence(v as CadenceReset)}
-        >
-          <SelectTrigger
-            id={`cadence-${modele.typeDoc}`}
-            data-testid={`cadence-${modele.typeDoc}`}
-          >
+        <Select value={cadence} onValueChange={(v) => setCadence(v as CadenceReset)}>
+          <SelectTrigger id={`cadence-${modele.typeDoc}`} data-testid={`cadence-${modele.typeDoc}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

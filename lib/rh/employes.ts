@@ -48,7 +48,9 @@ export async function lireEmploye(id: string): Promise<Employe | null> {
   return row ?? null;
 }
 
-function buildValues(parsed: EmployeInput): Omit<typeof employes.$inferInsert, 'createdBy' | 'updatedBy' | 'entrepriseId'> {
+function buildValues(
+  parsed: EmployeInput,
+): Omit<typeof employes.$inferInsert, 'createdBy' | 'updatedBy' | 'entrepriseId'> {
   return {
     nom: parsed.nom,
     prenom: parsed.prenom,
@@ -98,9 +100,7 @@ function buildValues(parsed: EmployeInput): Omit<typeof employes.$inferInsert, '
   };
 }
 
-export async function creerEmploye(
-  input: EmployeInput,
-): Promise<ActionResult<{ id: string }>> {
+export async function creerEmploye(input: EmployeInput): Promise<ActionResult<{ id: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_RH_WRITE);
   const parsed = employeSchema.safeParse(input);
   if (!parsed.success) {
@@ -141,10 +141,7 @@ export async function creerEmploye(
   }
 }
 
-export async function mettreAJourEmploye(
-  id: string,
-  input: EmployeInput,
-): Promise<ActionResult> {
+export async function mettreAJourEmploye(id: string, input: EmployeInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_RH_WRITE);
   const parsed = employeSchema.safeParse(input);
   if (!parsed.success) {

@@ -55,9 +55,7 @@ export default async function CatalogueDashboard() {
                 </CardTitle>
                 <CardDescription>{t.description}</CardDescription>
               </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                Voir la liste →
-              </CardContent>
+              <CardContent className="text-sm text-muted-foreground">Voir la liste →</CardContent>
             </Card>
           </Link>
         ))}

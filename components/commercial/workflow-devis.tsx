@@ -59,10 +59,7 @@ type Props = {
   /** Mode lecture seule : aucun clic ne déclenche de transition. */
   readOnly?: boolean | undefined;
   action?:
-    | ((
-        id: string,
-        nouveau: StatutDevis,
-      ) => Promise<{ ok: boolean; error?: string }>)
+    | ((id: string, nouveau: StatutDevis) => Promise<{ ok: boolean; error?: string }>)
     | undefined;
   /** Libellé du bouton « Enregistrer » (ex. "Enregistrer", "Enregistrer le devis").
    *  Si fourni, le bouton est rendu en `type="submit"` — il doit donc être
@@ -113,9 +110,7 @@ export function WorkflowDevis({
   function handleRefuser() {
     if (
       typeof window !== 'undefined' &&
-      !window.confirm(
-        'Refuser ce devis ? Il repassera en brouillon pour correction.',
-      )
+      !window.confirm('Refuser ce devis ? Il repassera en brouillon pour correction.')
     ) {
       return;
     }
@@ -139,12 +134,9 @@ export function WorkflowDevis({
   }
 
   const cinqDecidee: 'gagne' | 'perdu' | null =
-    statutCourant === 'gagne' ? 'gagne'
-    : statutCourant === 'perdu' ? 'perdu'
-    : null;
+    statutCourant === 'gagne' ? 'gagne' : statutCourant === 'perdu' ? 'perdu' : null;
 
-  const peutRefuser =
-    !readOnly && !isPending && transitionsPossibles.includes('brouillon');
+  const peutRefuser = !readOnly && !isPending && transitionsPossibles.includes('brouillon');
 
   function classesEtape(etat: EtatEtape, peutCliquer: boolean): string {
     return cn(
@@ -173,15 +165,9 @@ export function WorkflowDevis({
         {numero && (
           <div className="flex shrink-0 flex-col">
             <span className="px-1 text-sm text-muted-foreground">
-              Devis{' '}
-              <span className="font-mono font-medium text-foreground">
-                {numero}
-              </span>
+              Devis <span className="font-mono font-medium text-foreground">{numero}</span>
             </span>
-            <div
-              aria-hidden="true"
-              className="mt-2 h-0 w-full border-t-2 border-transparent"
-            />
+            <div aria-hidden="true" className="mt-2 h-0 w-full border-t-2 border-transparent" />
           </div>
         )}
         <ol className="flex min-w-0 flex-1 items-end">
@@ -191,10 +177,7 @@ export function WorkflowDevis({
             const libelle = LIBELLES_STATUT_DEVIS[etape];
 
             return (
-              <li
-                key={etape}
-                className="flex min-w-0 flex-1 flex-col items-center"
-              >
+              <li key={etape} className="flex min-w-0 flex-1 flex-col items-center">
                 <button
                   type="button"
                   disabled={!peutCliquer}
@@ -203,10 +186,7 @@ export function WorkflowDevis({
                   className={classesEtape(etat, peutCliquer)}
                 >
                   {etat === 'franchie' && (
-                    <CheckIcon
-                      className="size-3.5 shrink-0 text-emerald-600"
-                      aria-hidden="true"
-                    />
+                    <CheckIcon className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
                   )}
                   <span className="truncate">{libelle}</span>
                 </button>
@@ -226,7 +206,10 @@ export function WorkflowDevis({
                   <CheckIcon className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
                   <span className="truncate">Gagné</span>
                 </div>
-                <div aria-hidden="true" className="mt-2 h-0 w-full border-t-2 border-solid border-emerald-500" />
+                <div
+                  aria-hidden="true"
+                  className="mt-2 h-0 w-full border-t-2 border-solid border-emerald-500"
+                />
               </>
             ) : cinqDecidee === 'perdu' ? (
               <>
@@ -237,7 +220,10 @@ export function WorkflowDevis({
                   <XIcon className="size-3.5 shrink-0 text-red-600" aria-hidden="true" />
                   <span className="truncate">Perdu</span>
                 </div>
-                <div aria-hidden="true" className="mt-2 h-0 w-full border-t-2 border-solid border-red-500" />
+                <div
+                  aria-hidden="true"
+                  className="mt-2 h-0 w-full border-t-2 border-solid border-red-500"
+                />
               </>
             ) : (
               <>
@@ -255,7 +241,9 @@ export function WorkflowDevis({
                   >
                     Gagné
                   </button>
-                  <span aria-hidden="true" className="text-slate-300">/</span>
+                  <span aria-hidden="true" className="text-slate-300">
+                    /
+                  </span>
                   <button
                     type="button"
                     disabled={readOnly || !transitionsPossibles.includes('perdu') || isPending}
@@ -270,7 +258,10 @@ export function WorkflowDevis({
                     Perdu
                   </button>
                 </div>
-                <div aria-hidden="true" className="mt-2 h-0 w-full border-t-2 border-dashed border-slate-300" />
+                <div
+                  aria-hidden="true"
+                  className="mt-2 h-0 w-full border-t-2 border-dashed border-slate-300"
+                />
               </>
             )}
           </li>
@@ -305,11 +296,7 @@ export function WorkflowDevis({
             </Button>
           )}
           {enregistrerLabel && (
-            <Button
-              size="sm"
-              type="submit"
-              disabled={isPending || enregistrerDisabled}
-            >
+            <Button size="sm" type="submit" disabled={isPending || enregistrerDisabled}>
               {enregistrerLabel}
             </Button>
           )}

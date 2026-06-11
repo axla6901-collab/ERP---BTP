@@ -11,7 +11,10 @@ import type { ActionResult } from '@/lib/common/action-result';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
 import { withTenant } from '@/lib/db/with-tenant';
 import { ROLES_REFERENTIEL_TIERS_WRITE } from '@/lib/referencement/permissions';
-import { natureDocumentSchema, type NatureDocumentInput } from '@/lib/validation/referencement-tiers';
+import {
+  natureDocumentSchema,
+  type NatureDocumentInput,
+} from '@/lib/validation/referencement-tiers';
 
 function pathBase(slug: string) {
   return `/${slug}/administration/referentiel-tiers/natures-document`;
@@ -46,7 +49,11 @@ export async function creerNatureDocument(
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = natureDocumentSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -91,7 +98,11 @@ export async function mettreAJourNatureDocument(
   const ctx = await requireTenantContextWithMfa(ROLES_REFERENTIEL_TIERS_WRITE);
   const parsed = natureDocumentSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     await withTenant(ctx.entreprise.id, async (tx) => {
@@ -150,7 +161,11 @@ export async function supprimerNatureDocument(id: string): Promise<ActionResult>
       .from(tierDocuments)
       .where(and(eq(tierDocuments.natureDocumentId, id), isNull(tierDocuments.deletedAt)));
     const message = messageBlocageSuppression('cette nature de document', [
-      { nombre: Number(usage?.n ?? 0), singulier: 'document de tier', pluriel: 'documents de tiers' },
+      {
+        nombre: Number(usage?.n ?? 0),
+        singulier: 'document de tier',
+        pluriel: 'documents de tiers',
+      },
     ]);
     if (message) return { ok: false, error: message };
 

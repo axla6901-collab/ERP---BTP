@@ -96,9 +96,7 @@ export function TierForm({
 
   function toggleDansChamp(champ: 'corpsEtatIds' | 'societeIds', id: string) {
     const actuelles = form.getValues(champ) ?? [];
-    const next = actuelles.includes(id)
-      ? actuelles.filter((x) => x !== id)
-      : [...actuelles, id];
+    const next = actuelles.includes(id) ? actuelles.filter((x) => x !== id) : [...actuelles, id];
     form.setValue(champ, next, { shouldDirty: true });
   }
 
@@ -181,7 +179,8 @@ export function TierForm({
                         <SelectTrigger>
                           <SelectValue>
                             {(value) =>
-                              LIBELLES_NATURE_TIERS[value as keyof typeof LIBELLES_NATURE_TIERS] ?? ''
+                              LIBELLES_NATURE_TIERS[value as keyof typeof LIBELLES_NATURE_TIERS] ??
+                              ''
                             }
                           </SelectValue>
                         </SelectTrigger>
@@ -253,7 +252,12 @@ export function TierForm({
                   <FormItem>
                     <FormLabel>SIRET</FormLabel>
                     <FormControl>
-                      <Input placeholder="14 chiffres" maxLength={14} {...field} value={field.value ?? ''} />
+                      <Input
+                        placeholder="14 chiffres"
+                        maxLength={14}
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormDescription>Le SIREN affiché = 9 premiers chiffres.</FormDescription>
                     <FormMessage />
@@ -267,7 +271,12 @@ export function TierForm({
                   <FormItem>
                     <FormLabel>N° TVA intracom</FormLabel>
                     <FormControl>
-                      <Input placeholder="FR12345678901" maxLength={15} {...field} value={field.value ?? ''} />
+                      <Input
+                        placeholder="FR12345678901"
+                        maxLength={15}
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

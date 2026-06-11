@@ -74,7 +74,11 @@ export default async function PointagesPage({
       <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-3">
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-muted-foreground">Mois</span>
-          <select name="mois" defaultValue={mois} className="rounded border bg-background px-2 py-1.5 text-sm">
+          <select
+            name="mois"
+            defaultValue={mois}
+            className="rounded border bg-background px-2 py-1.5 text-sm"
+          >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
                 {String(m).padStart(2, '0')}
@@ -84,7 +88,11 @@ export default async function PointagesPage({
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-muted-foreground">Année</span>
-          <select name="annee" defaultValue={annee} className="rounded border bg-background px-2 py-1.5 text-sm">
+          <select
+            name="annee"
+            defaultValue={annee}
+            className="rounded border bg-background px-2 py-1.5 text-sm"
+          >
             {[annee - 2, annee - 1, annee, annee + 1, annee + 2].map((y) => (
               <option key={y} value={y}>
                 {y}
@@ -92,7 +100,10 @@ export default async function PointagesPage({
             ))}
           </select>
         </label>
-        <button className="rounded border bg-muted px-3 py-1.5 text-sm hover:bg-muted/80" type="submit">
+        <button
+          className="rounded border bg-muted px-3 py-1.5 text-sm hover:bg-muted/80"
+          type="submit"
+        >
           Filtrer
         </button>
       </form>
@@ -128,7 +139,7 @@ export default async function PointagesPage({
                         {p.chantierLibelle}
                       </>
                     ) : (
-                      <span className="text-muted-foreground italic">—</span>
+                      <span className="italic text-muted-foreground">—</span>
                     )}
                   </TableCell>
                   <TableCell className="text-xs">

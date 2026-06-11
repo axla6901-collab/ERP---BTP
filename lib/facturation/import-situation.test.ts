@@ -45,7 +45,7 @@ describe('parserFichierSituation', () => {
       [null, 'LOT 32 - GROS ŒUVRE', null, null, null, null, null],
       ['2.1', 'PRESTATIONS COMPLEMENTAIRES', null, null, null, null, null],
       ['2.1.1', "Études d'exécution", null, null, null, 10394.95, 0.5],
-      ['2.1.2', "État des lieux", null, null, null, 415.8, 0],
+      ['2.1.2', 'État des lieux', null, null, null, 415.8, 0],
       [null, 'Total PRESTATIONS COMPLEMENTAIRES', null, null, null, 10810.75, null],
     ]);
     const res = await parserFichierSituation(base64, 'situation.xlsx');
@@ -86,8 +86,16 @@ describe('parserFichierSituation', () => {
    */
   const racine = process.cwd();
   const situations = [
-    path.join(racine, 'fichier exemple', 'SITUATION 01 FEVRIER COTE MARQUIS BATIMENT COLLECTIF.xlsx'),
-    path.join(racine, 'fichier exemple', 'SITUATION 01 FEVRIER COTE MARQUIS MAISONS INDIVIDUELLES.xlsx'),
+    path.join(
+      racine,
+      'fichier exemple',
+      'SITUATION 01 FEVRIER COTE MARQUIS BATIMENT COLLECTIF.xlsx',
+    ),
+    path.join(
+      racine,
+      'fichier exemple',
+      'SITUATION 01 FEVRIER COTE MARQUIS MAISONS INDIVIDUELLES.xlsx',
+    ),
   ];
   for (const fichier of situations) {
     const itIfFile = existsSync(fichier) ? it : it.skip;

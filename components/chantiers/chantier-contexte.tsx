@@ -80,7 +80,10 @@ export function ChantierContexte({
       }}
       disabled={isPending}
     >
-      <SelectTrigger className="h-9 w-auto gap-2 text-xs text-muted-foreground" aria-label="Activer un contexte chantier">
+      <SelectTrigger
+        className="h-9 w-auto gap-2 text-xs text-muted-foreground"
+        aria-label="Activer un contexte chantier"
+      >
         <MapPinIcon className="size-3.5" aria-hidden="true" />
         <SelectValue placeholder="Contexte chantier…" />
       </SelectTrigger>

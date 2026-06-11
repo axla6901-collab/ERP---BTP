@@ -121,7 +121,9 @@ const LIBRARY: Array<{
 // ─────────────────────────────────────────────────────────────
 
 export type GanttHandlers = {
-  enregistrerTache: (input: PlanningTacheInput) => Promise<{ ok: true } | { ok: false; error: string }>;
+  enregistrerTache: (
+    input: PlanningTacheInput,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>;
   affecterOuvrier: (
     tacheId: string,
     utilisateurId: string,
@@ -133,9 +135,9 @@ export type GanttHandlers = {
     heuresFaites: number,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
   retirerOuvrier: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>;
-  creerTache: (input: PlanningCreationInput) => Promise<
-    { ok: true; id: string } | { ok: false; error: string }
-  >;
+  creerTache: (
+    input: PlanningCreationInput,
+  ) => Promise<{ ok: true; id: string } | { ok: false; error: string }>;
   supprimerTache: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>;
   restaurerTache: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>;
   appliquerCascade: (
@@ -145,8 +147,7 @@ export type GanttHandlers = {
     chantierId: string,
     niveau: string,
   ) => Promise<
-    | { ok: true; niveauCopie: string; tacheIds: string[] }
-    | { ok: false; error: string }
+    { ok: true; niveauCopie: string; tacheIds: string[] } | { ok: false; error: string }
   >;
 };
 
@@ -308,9 +309,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
     let ok = true;
     for (const id of op.tacheIds) {
       const r =
-        dir === 'forward'
-          ? await handlers.restaurerTache(id)
-          : await handlers.supprimerTache(id);
+        dir === 'forward' ? await handlers.restaurerTache(id) : await handlers.supprimerTache(id);
       if (!r.ok) ok = false;
     }
     return { ok };
@@ -463,11 +462,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
    * Commit d'un déplacement de barre (move/resize/jalon) + cascade auto sur tous
    * les successeurs en aval. Un seul appel batch pour rester atomique côté DB.
    */
-  function commitDeplacement(
-    t: PlanningTacheRow,
-    newStart: string,
-    newEnd: string,
-  ) {
+  function commitDeplacement(t: PlanningTacheRow, newStart: string, newEnd: string) {
     if (!t.dateDebutPrevue || !t.dateFinPrevue) return;
     if (newStart === t.dateDebutPrevue && newEnd === t.dateFinPrevue) return;
     // Snapshot des dates AVANT pour la pile undo (capturé sync depuis l'état React).
@@ -479,10 +474,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
     }
     const deltaJours = dnum(newEnd) - dnum(t.dateFinPrevue);
     const cascade = cascadeDelta(taches, t.id, deltaJours);
-    const allChanges = [
-      { id: t.id, dateDebutPrevue: newStart, dateFinPrevue: newEnd },
-      ...cascade,
-    ];
+    const allChanges = [{ id: t.id, dateDebutPrevue: newStart, dateFinPrevue: newEnd }, ...cascade];
     const opChanges = allChanges.map((c) => {
       const old = oldDates.get(c.id);
       return {
@@ -576,7 +568,9 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
     dureeJours: number;
     estJalon?: boolean;
   }) {
-    const fin = opts.estJalon ? opts.dateDebutPrevue : addDays(opts.dateDebutPrevue, Math.max(0, opts.dureeJours - 1));
+    const fin = opts.estJalon
+      ? opts.dateDebutPrevue
+      : addDays(opts.dateDebutPrevue, Math.max(0, opts.dureeJours - 1));
     startMainTransition(async () => {
       const res = await handlers.creerTache({
         chantierId: chantier.id,
@@ -594,7 +588,10 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
       }
       toast.success('Tâche créée');
       setTacheSelectionneeId(res.id);
-      pushOp({ kind: 'create', tacheId: res.id }, `Création de « ${opts.libelle ?? 'Nouvelle tâche'} »`);
+      pushOp(
+        { kind: 'create', tacheId: res.id },
+        `Création de « ${opts.libelle ?? 'Nouvelle tâche'} »`,
+      );
     });
   }
 
@@ -778,9 +775,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
     // le drag (sans snap → la barre suit le curseur 1:1, beaucoup plus fluide
     // que de snaper au jour entier surtout en zoom semaine/mois).
     const oLeftPx = (dnum(oStart) - range.start) * px + (t.estJalon ? px / 2 - 7 : 0);
-    const oWidthPx = t.estJalon
-      ? 14
-      : Math.max(px, (dnum(oEnd) - dnum(oStart) + 1) * px);
+    const oWidthPx = t.estJalon ? 14 : Math.max(px, (dnum(oEnd) - dnum(oStart) + 1) * px);
     let dx = 0;
     const onMove = (ev: MouseEvent) => {
       dx = ev.clientX - startX;
@@ -948,7 +943,9 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
       (r) => r.type === 'group' && !collapsed.has(r.group.key),
     );
     const niveau =
-      premierGroupe?.type === 'group' && groupBy === 'niveau' && premierGroupe.group.key !== '__autres'
+      premierGroupe?.type === 'group' &&
+      groupBy === 'niveau' &&
+      premierGroupe.group.key !== '__autres'
         ? premierGroupe.group.key
         : null;
     creerTache({
@@ -995,7 +992,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
                 onClick={() => setZoom(z)}
                 className={cn(
                   'px-2.5 py-1 transition-colors',
-                  zoom === z ? 'bg-primary text-primary-foreground font-medium' : 'hover:bg-muted',
+                  zoom === z ? 'bg-primary font-medium text-primary-foreground' : 'hover:bg-muted',
                 )}
               >
                 {z === 'jour' ? 'Jour' : z === 'semaine' ? 'Semaine' : 'Mois'}
@@ -1170,10 +1167,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
                       onChange={() => toggleHiddenCat(k)}
                     />
                     <span
-                      className={cn(
-                        'size-2.5',
-                        k === 'livraison' ? 'rotate-45' : 'rounded-full',
-                      )}
+                      className={cn('size-2.5', k === 'livraison' ? 'rotate-45' : 'rounded-full')}
                       style={{ background: CATS[k].fill }}
                     />
                     <span className="flex-1">{CATS[k].label}</span>
@@ -1200,11 +1194,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
             <PrinterIcon className="size-3.5" />
             Imprimer
           </Button>
-          <Button
-            size="sm"
-            onClick={ajouterTache}
-            className="h-8 gap-1 text-xs"
-          >
+          <Button size="sm" onClick={ajouterTache} className="h-8 gap-1 text-xs">
             + Tâche
           </Button>
         </div>
@@ -1298,9 +1288,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="hidden sm:inline">
-              Cliquez une barre pour éditer la tâche
-            </span>
+            <span className="hidden sm:inline">Cliquez une barre pour éditer la tâche</span>
             <Button
               variant="outline"
               size="sm"
@@ -1317,10 +1305,17 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
           </div>
         </div>
 
-        <div data-print="box" className="flex" style={{ height: plein ? 'calc(100vh - 100px)' : 600 }}>
+        <div
+          data-print="box"
+          className="flex"
+          style={{ height: plein ? 'calc(100vh - 100px)' : 600 }}
+        >
           {/* ── Bibliothèque BTP (repliée par défaut) ── */}
           {libOpen && (
-            <aside data-print="hide" className="flex w-[230px] flex-none flex-col border-r bg-muted/30">
+            <aside
+              data-print="hide"
+              className="flex w-[230px] flex-none flex-col border-r bg-muted/30"
+            >
               <div className="border-b p-3">
                 <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Bibliothèque BTP
@@ -1454,10 +1449,7 @@ export function GanttPlanning({ donnees, ouvriers, handlers }: Props) {
                 className={cn('flex items-center gap-1.5 transition-opacity', off && 'opacity-30')}
               >
                 <span
-                  className={cn(
-                    'size-3',
-                    k === 'livraison' ? 'rotate-45' : 'rounded-full',
-                  )}
+                  className={cn('size-3', k === 'livraison' ? 'rotate-45' : 'rounded-full')}
                   style={{ background: CATS[k].fill }}
                 />
                 <span>{CATS[k].label}</span>
@@ -1576,10 +1568,7 @@ function GanttBackground({
 function GanttArrows({ layout, range, zoom }: { layout: Layout; range: Range; zoom: Zoom }) {
   const px = PX_PAR_JOUR[zoom];
   // Position de chaque tâche visible (centre vertical + bornes horizontales).
-  const pos = new Map<
-    string,
-    { yc: number; xStart: number; xEnd: number; milestone: boolean }
-  >();
+  const pos = new Map<string, { yc: number; xStart: number; xEnd: number; milestone: boolean }>();
   for (const r of layout.rows) {
     if (r.type !== 'task') continue;
     const t = r.task;
@@ -1625,7 +1614,14 @@ function GanttArrows({ layout, range, zoom }: { layout: Layout; range: Range; zo
       style={{ zIndex: 5 }}
     >
       <defs>
-        <marker id="planning-arrow" markerWidth={7} markerHeight={7} refX={6} refY={3} orient="auto">
+        <marker
+          id="planning-arrow"
+          markerWidth={7}
+          markerHeight={7}
+          refX={6}
+          refY={3}
+          orient="auto"
+        >
           <path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8" />
         </marker>
       </defs>
@@ -1640,15 +1636,7 @@ function GanttArrows({ layout, range, zoom }: { layout: Layout; range: Range; zo
  * `data-tache-id` (sur le conteneur) et `data-handle` (sur les zones internes).
  * Body du conteneur = move ; left/right = resize ; progress = jauge ; link = poignée.
  */
-function GanttBars({
-  layout,
-  range,
-  zoom,
-}: {
-  layout: Layout;
-  range: Range;
-  zoom: Zoom;
-}) {
+function GanttBars({ layout, range, zoom }: { layout: Layout; range: Range; zoom: Zoom }) {
   const px = PX_PAR_JOUR[zoom];
   const items: React.ReactNode[] = [];
 
@@ -1908,7 +1896,9 @@ function GanttDrawer({
     setEstJalon(tache.estJalon);
     setPredecesseurId(tache.predecesseurId ?? '');
     setNotes(tache.notes ?? '');
-    setNouvelOuvrier(ouvriers.find((o) => !tache.equipe.some((e) => e.utilisateurId === o.id))?.id ?? '');
+    setNouvelOuvrier(
+      ouvriers.find((o) => !tache.equipe.some((e) => e.utilisateurId === o.id))?.id ?? '',
+    );
   }, [tache, ouvriers]);
 
   if (!tache) return null;
@@ -1991,11 +1981,7 @@ function GanttDrawer({
             <Label htmlFor="dw-libelle" className="text-xs font-medium text-muted-foreground">
               Intitulé
             </Label>
-            <Input
-              id="dw-libelle"
-              value={libelle}
-              onChange={(e) => setLibelle(e.target.value)}
-            />
+            <Input id="dw-libelle" value={libelle} onChange={(e) => setLibelle(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -2034,11 +2020,7 @@ function GanttDrawer({
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium text-muted-foreground">Début</Label>
-              <Input
-                type="date"
-                value={dateDebut}
-                onChange={(e) => setDateDebut(e.target.value)}
-              />
+              <Input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium text-muted-foreground">Fin</Label>
@@ -2150,28 +2132,21 @@ function GanttDrawer({
                       key={w.id}
                       className="grid grid-cols-[1fr_64px_64px_28px] items-center gap-2"
                     >
-                      <span
-                        className="truncate text-sm"
-                        title={w.utilisateurEmail ?? ''}
-                      >
+                      <span className="truncate text-sm" title={w.utilisateurEmail ?? ''}>
                         {w.utilisateurEmail ?? w.utilisateurId}
                       </span>
                       <Input
                         type="number"
                         min={0}
                         defaultValue={w.heuresPrevues}
-                        onBlur={(e) =>
-                          majHeures(w.id, +e.target.value || 0, w.heuresFaites ?? 0)
-                        }
+                        onBlur={(e) => majHeures(w.id, +e.target.value || 0, w.heuresFaites ?? 0)}
                         className="h-7 text-right"
                       />
                       <Input
                         type="number"
                         min={0}
                         defaultValue={w.heuresFaites}
-                        onBlur={(e) =>
-                          majHeures(w.id, w.heuresPrevues ?? 0, +e.target.value || 0)
-                        }
+                        onBlur={(e) => majHeures(w.id, w.heuresPrevues ?? 0, +e.target.value || 0)}
                         className="h-7 text-right"
                       />
                       <Button

@@ -34,9 +34,7 @@ export type TerrainFormState = {
   notes: string | null;
 };
 
-export type BuildResult =
-  | { ok: true; entry: OutboxEntry }
-  | { ok: false; error: string };
+export type BuildResult = { ok: true; entry: OutboxEntry } | { ok: false; error: string };
 
 /** Construit (et pré-valide) l'entrée d'outbox. `clientUuid` = idempotency key. */
 export function buildOutboxEntry(
@@ -48,7 +46,7 @@ export function buildOutboxEntry(
 
   const quantite = Number(String(form.quantite).replace(',', '.'));
   if (!Number.isFinite(quantite) || quantite <= 0) {
-    return { ok: false, error: 'Saisissez un nombre d\'heures supérieur à 0.' };
+    return { ok: false, error: "Saisissez un nombre d'heures supérieur à 0." };
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(form.datePointage)) {
     return { ok: false, error: 'Date invalide.' };
@@ -56,7 +54,7 @@ export function buildOutboxEntry(
 
   const estAbsence = form.type === 'absence';
   if (estAbsence) {
-    if (!form.motifAbsence) return { ok: false, error: 'Motif d\'absence requis.' };
+    if (!form.motifAbsence) return { ok: false, error: "Motif d'absence requis." };
   } else if (!form.chantierId) {
     return { ok: false, error: 'Sélectionnez un chantier.' };
   }

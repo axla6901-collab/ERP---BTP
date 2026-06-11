@@ -20,11 +20,7 @@ describe('DpgfImportZone', () => {
 
   it('ne rend aucun encart visible tant qu’aucun fichier n’est sélectionné', () => {
     const { container, queryByText } = render(
-      <DpgfImportZone
-        analyserAction={noop}
-        importerAction={noop}
-        onConfirm={() => {}}
-      />,
+      <DpgfImportZone analyserAction={noop} importerAction={noop} onConfirm={() => {}} />,
     );
 
     // L'input file caché est monté pour permettre le déclenchement via ref…
@@ -36,12 +32,7 @@ describe('DpgfImportZone', () => {
   it('expose une méthode `ouvrir` qui déclenche le sélecteur de fichier', () => {
     const ref = createRef<DpgfImportZoneHandle>();
     const { container } = render(
-      <DpgfImportZone
-        ref={ref}
-        analyserAction={noop}
-        importerAction={noop}
-        onConfirm={() => {}}
-      />,
+      <DpgfImportZone ref={ref} analyserAction={noop} importerAction={noop} onConfirm={() => {}} />,
     );
 
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement;

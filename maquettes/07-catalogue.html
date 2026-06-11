@@ -1,227 +1,387 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Catalogue · M1 · ERP BTP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }</style>
-</head>
-<body class="min-h-screen bg-neutral-50 text-neutral-900">
-
-  <header class="sticky top-0 z-20 border-b bg-white">
-    <div class="flex h-14 items-center gap-4 px-6">
-      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
-      <div class="flex items-center gap-2">
-        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
-        <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700">ERP BTP</a>
-        <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">Compte-R BTP ▾</button>
-      </div>
-      <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
-        <a class="hover:text-neutral-900">Catalogue</a>
-        <span class="text-neutral-300">/</span>
-        <span class="text-neutral-900">Articles</span>
-      </nav>
-      <div class="flex-1"></div>
-      <div class="flex items-center gap-3">
-        <button class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100">
-          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
-        </button>
-        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
-        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
-          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="mx-auto max-w-[1400px] px-6 py-6">
-
-    <!-- Heading + chantier context band -->
-    <div class="mb-4 flex items-end justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Catalogue articles</h1>
-        <p class="mt-1 text-sm text-neutral-500">142 références · 12 familles · mise à jour il y a 3h</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Importer CSV</button>
-        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Exporter</button>
-        <button class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">+ Nouvel article</button>
-      </div>
-    </div>
-
-    <!-- Chantier context (fil rouge M1) -->
-    <div class="mb-5 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-sm">
-      <span class="rounded bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-800">Contexte chantier</span>
-      <span class="text-neutral-700">Articles filtrés en priorité pour <a href="01-chantier-first.html" class="font-semibold text-amber-800 underline-offset-2 hover:underline">École Marguerite</a></span>
-      <span class="text-neutral-400">·</span>
-      <span class="text-xs text-neutral-500">basé sur les devis liés et l'historique des bons de commande</span>
-      <button class="ml-auto text-xs text-neutral-500 hover:text-neutral-900">✕ Retirer</button>
-    </div>
-
-    <div class="grid grid-cols-12 gap-5">
-
-      <!-- Filtres latéraux -->
-      <aside class="col-span-12 space-y-4 lg:col-span-3">
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <div class="flex items-center justify-between">
-            <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Familles</div>
-            <button class="text-xs text-amber-600 hover:underline">Tout voir</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catalogue · M1 · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-50 text-neutral-900">
+    <header class="sticky top-0 z-20 border-b bg-white">
+      <div class="flex h-14 items-center gap-4 px-6">
+        <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
+        <div class="flex items-center gap-2">
+          <div
+            class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white"
+          >
+            B
           </div>
-          <ul class="mt-3 space-y-0.5 text-sm">
-            <li><a class="flex items-center justify-between rounded bg-amber-50 px-2 py-1.5 font-medium text-amber-800"><span>Béton & granulats</span><span class="text-xs">14</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Maçonnerie</span><span class="text-xs text-neutral-400">34</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Couverture</span><span class="text-xs text-neutral-400">22</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Plâtrerie</span><span class="text-xs text-neutral-400">18</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Carrelage</span><span class="text-xs text-neutral-400">27</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Plomberie</span><span class="text-xs text-neutral-400">15</span></a></li>
-            <li><a class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"><span>Électricité</span><span class="text-xs text-neutral-400">12</span></a></li>
-          </ul>
+          <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700"
+            >ERP BTP</a
+          >
+          <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">
+            Compte-R BTP ▾
+          </button>
         </div>
-
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Fourchette de prix</div>
-          <div class="mt-3 flex items-center gap-2 text-sm">
-            <input type="text" value="0" class="w-16 rounded border px-2 py-1 text-right" />
-            <span class="text-neutral-400">€ —</span>
-            <input type="text" value="500" class="w-16 rounded border px-2 py-1 text-right" />
-            <span class="text-neutral-400">€</span>
-          </div>
-          <input type="range" class="mt-3 w-full accent-amber-500" />
-        </div>
-
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">Filtres rapides</div>
-          <div class="mt-3 space-y-1.5 text-sm">
-            <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500" checked /> Actifs uniquement</label>
-            <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500" /> Sans prix</label>
-            <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500" /> Composition multi-articles</label>
-            <label class="flex items-center gap-2"><input type="checkbox" class="accent-amber-500" /> Modifiés &lt; 7 j</label>
+        <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
+          <a class="hover:text-neutral-900">Catalogue</a>
+          <span class="text-neutral-300">/</span>
+          <span class="text-neutral-900">Articles</span>
+        </nav>
+        <div class="flex-1"></div>
+        <div class="flex items-center gap-3">
+          <button
+            class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100"
+          >
+            <span>🔍</span><span>Rechercher…</span
+            ><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+          </button>
+          <button class="relative rounded p-2 hover:bg-neutral-100">
+            🔔<span
+              class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white"
+              >3</span
+            >
+          </button>
+          <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+            <div class="size-6 rounded-full bg-amber-200"></div>
+            <span>Alex</span>
           </div>
         </div>
-      </aside>
+      </div>
+    </header>
 
-      <!-- Liste articles -->
-      <section class="col-span-12 lg:col-span-9">
-        <div class="rounded-xl border bg-white shadow-sm">
-          <div class="flex items-center justify-between border-b px-5 py-3">
-            <div class="flex items-center gap-3">
-              <h2 class="text-base font-semibold">Béton &amp; granulats</h2>
-              <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">14 articles</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <div class="flex rounded-md border bg-neutral-50 p-0.5 text-xs">
-                <button class="rounded bg-white px-2 py-1 shadow-sm">Tableau</button>
-                <button class="rounded px-2 py-1 text-neutral-500 hover:bg-white">Grille</button>
+    <main class="mx-auto max-w-[1400px] px-6 py-6">
+      <!-- Heading + chantier context band -->
+      <div class="mb-4 flex items-end justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">Catalogue articles</h1>
+          <p class="mt-1 text-sm text-neutral-500">
+            142 références · 12 familles · mise à jour il y a 3h
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">
+            Importer CSV
+          </button>
+          <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Exporter</button>
+          <button
+            class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
+          >
+            + Nouvel article
+          </button>
+        </div>
+      </div>
+
+      <!-- Chantier context (fil rouge M1) -->
+      <div
+        class="mb-5 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-sm"
+      >
+        <span class="rounded bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-800"
+          >Contexte chantier</span
+        >
+        <span class="text-neutral-700"
+          >Articles filtrés en priorité pour
+          <a
+            href="01-chantier-first.html"
+            class="font-semibold text-amber-800 underline-offset-2 hover:underline"
+            >École Marguerite</a
+          ></span
+        >
+        <span class="text-neutral-400">·</span>
+        <span class="text-xs text-neutral-500"
+          >basé sur les devis liés et l'historique des bons de commande</span
+        >
+        <button class="ml-auto text-xs text-neutral-500 hover:text-neutral-900">✕ Retirer</button>
+      </div>
+
+      <div class="grid grid-cols-12 gap-5">
+        <!-- Filtres latéraux -->
+        <aside class="col-span-12 space-y-4 lg:col-span-3">
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">
+                Familles
               </div>
-              <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Trier ▾</button>
+              <button class="text-xs text-amber-600 hover:underline">Tout voir</button>
+            </div>
+            <ul class="mt-3 space-y-0.5 text-sm">
+              <li>
+                <a
+                  class="flex items-center justify-between rounded bg-amber-50 px-2 py-1.5 font-medium text-amber-800"
+                  ><span>Béton & granulats</span><span class="text-xs">14</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Maçonnerie</span><span class="text-xs text-neutral-400">34</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Couverture</span><span class="text-xs text-neutral-400">22</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Plâtrerie</span><span class="text-xs text-neutral-400">18</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Carrelage</span><span class="text-xs text-neutral-400">27</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Plomberie</span><span class="text-xs text-neutral-400">15</span></a
+                >
+              </li>
+              <li>
+                <a
+                  class="flex items-center justify-between rounded px-2 py-1.5 text-neutral-700 hover:bg-neutral-50"
+                  ><span>Électricité</span><span class="text-xs text-neutral-400">12</span></a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">
+              Fourchette de prix
+            </div>
+            <div class="mt-3 flex items-center gap-2 text-sm">
+              <input type="text" value="0" class="w-16 rounded border px-2 py-1 text-right" />
+              <span class="text-neutral-400">€ —</span>
+              <input type="text" value="500" class="w-16 rounded border px-2 py-1 text-right" />
+              <span class="text-neutral-400">€</span>
+            </div>
+            <input type="range" class="mt-3 w-full accent-amber-500" />
+          </div>
+
+          <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="text-xs font-medium uppercase tracking-widest text-neutral-500">
+              Filtres rapides
+            </div>
+            <div class="mt-3 space-y-1.5 text-sm">
+              <label class="flex items-center gap-2"
+                ><input type="checkbox" class="accent-amber-500" checked /> Actifs uniquement</label
+              >
+              <label class="flex items-center gap-2"
+                ><input type="checkbox" class="accent-amber-500" /> Sans prix</label
+              >
+              <label class="flex items-center gap-2"
+                ><input type="checkbox" class="accent-amber-500" /> Composition
+                multi-articles</label
+              >
+              <label class="flex items-center gap-2"
+                ><input type="checkbox" class="accent-amber-500" /> Modifiés &lt; 7 j</label
+              >
+            </div>
+          </div>
+        </aside>
+
+        <!-- Liste articles -->
+        <section class="col-span-12 lg:col-span-9">
+          <div class="rounded-xl border bg-white shadow-sm">
+            <div class="flex items-center justify-between border-b px-5 py-3">
+              <div class="flex items-center gap-3">
+                <h2 class="text-base font-semibold">Béton &amp; granulats</h2>
+                <span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600"
+                  >14 articles</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="flex rounded-md border bg-neutral-50 p-0.5 text-xs">
+                  <button class="rounded bg-white px-2 py-1 shadow-sm">Tableau</button>
+                  <button class="rounded px-2 py-1 text-neutral-500 hover:bg-white">Grille</button>
+                </div>
+                <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">
+                  Trier ▾
+                </button>
+              </div>
+            </div>
+
+            <table class="w-full text-sm">
+              <thead
+                class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500"
+              >
+                <tr>
+                  <th class="px-5 py-2.5 font-medium">Référence</th>
+                  <th class="px-5 py-2.5 font-medium">Libellé</th>
+                  <th class="px-5 py-2.5 font-medium">Unité</th>
+                  <th class="px-5 py-2.5 text-right font-medium">Prix HT</th>
+                  <th class="px-5 py-2.5 text-right font-medium">Évol. 30j</th>
+                  <th class="px-5 py-2.5 font-medium">Statut</th>
+                  <th class="w-12"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr class="bg-amber-50/40 hover:bg-amber-50/70">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">BTN-025</td>
+                  <td class="px-5 py-3">
+                    <div class="font-medium">Béton C25/30</div>
+                    <div class="text-xs text-neutral-500">★ favori · utilisé dans 4 devis</div>
+                  </td>
+                  <td class="px-5 py-3 text-neutral-600">m³</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">142,00 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-emerald-600">+2.1 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">BTN-030</td>
+                  <td class="px-5 py-3">
+                    <div class="font-medium">Béton C30/37</div>
+                    <div class="text-xs text-neutral-500">utilisé dans 2 devis</div>
+                  </td>
+                  <td class="px-5 py-3 text-neutral-600">m³</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">158,00 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-emerald-600">+1.8 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">GRA-005</td>
+                  <td class="px-5 py-3"><div class="font-medium">Gravier 5/15</div></td>
+                  <td class="px-5 py-3 text-neutral-600">tonne</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">42,50 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-neutral-500">+0.0 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">SAB-001</td>
+                  <td class="px-5 py-3"><div class="font-medium">Sable rivière</div></td>
+                  <td class="px-5 py-3 text-neutral-600">tonne</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">28,00 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-rose-600">−1.2 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">CIM-005</td>
+                  <td class="px-5 py-3">
+                    <div class="font-medium">Ciment CEM II 32,5</div>
+                    <div class="text-xs text-neutral-500">sac 35 kg</div>
+                  </td>
+                  <td class="px-5 py-3 text-neutral-600">sac</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">12,80 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-emerald-600">+3.4 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">MOR-001</td>
+                  <td class="px-5 py-3">
+                    <div class="font-medium">Mortier prêt à l'emploi</div>
+                    <div class="text-xs text-amber-700">composition · 3 articles</div>
+                  </td>
+                  <td class="px-5 py-3 text-neutral-600">m³</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">186,40 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-neutral-500">—</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                      >composé</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-700">PRP-020</td>
+                  <td class="px-5 py-3"><div class="font-medium">Parpaing creux 20</div></td>
+                  <td class="px-5 py-3 text-neutral-600">unité</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums">1,80 €</td>
+                  <td class="px-5 py-3 text-right text-xs text-neutral-500">+0.0 %</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                      >actif</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+                <tr class="hover:bg-neutral-50">
+                  <td class="px-5 py-3 font-mono text-xs text-neutral-400">ARD-001</td>
+                  <td class="px-5 py-3">
+                    <div class="text-neutral-500">Ardoise naturelle 32×22</div>
+                  </td>
+                  <td class="px-5 py-3 text-neutral-500">unité</td>
+                  <td class="px-5 py-3 text-right font-medium tabular-nums text-neutral-500">
+                    2,40 €
+                  </td>
+                  <td class="px-5 py-3 text-right text-xs text-neutral-500">—</td>
+                  <td class="px-5 py-3">
+                    <span
+                      class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600"
+                      >archivé</span
+                    >
+                  </td>
+                  <td class="px-3 py-3 text-neutral-400">›</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div
+              class="flex items-center justify-between border-t px-5 py-3 text-xs text-neutral-500"
+            >
+              <div>1 à 8 sur 14</div>
+              <div class="flex gap-1">
+                <button class="rounded border px-2 py-1 hover:bg-neutral-50">‹</button>
+                <button class="rounded border bg-neutral-900 px-2 py-1 text-white">1</button>
+                <button class="rounded border px-2 py-1 hover:bg-neutral-50">2</button>
+                <button class="rounded border px-2 py-1 hover:bg-neutral-50">›</button>
+              </div>
             </div>
           </div>
 
-          <table class="w-full text-sm">
-            <thead class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
-              <tr>
-                <th class="px-5 py-2.5 font-medium">Référence</th>
-                <th class="px-5 py-2.5 font-medium">Libellé</th>
-                <th class="px-5 py-2.5 font-medium">Unité</th>
-                <th class="px-5 py-2.5 text-right font-medium">Prix HT</th>
-                <th class="px-5 py-2.5 text-right font-medium">Évol. 30j</th>
-                <th class="px-5 py-2.5 font-medium">Statut</th>
-                <th class="w-12"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <tr class="bg-amber-50/40 hover:bg-amber-50/70">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">BTN-025</td>
-                <td class="px-5 py-3"><div class="font-medium">Béton C25/30</div><div class="text-xs text-neutral-500">★ favori · utilisé dans 4 devis</div></td>
-                <td class="px-5 py-3 text-neutral-600">m³</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">142,00 €</td>
-                <td class="px-5 py-3 text-right text-xs text-emerald-600">+2.1 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">BTN-030</td>
-                <td class="px-5 py-3"><div class="font-medium">Béton C30/37</div><div class="text-xs text-neutral-500">utilisé dans 2 devis</div></td>
-                <td class="px-5 py-3 text-neutral-600">m³</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">158,00 €</td>
-                <td class="px-5 py-3 text-right text-xs text-emerald-600">+1.8 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">GRA-005</td>
-                <td class="px-5 py-3"><div class="font-medium">Gravier 5/15</div></td>
-                <td class="px-5 py-3 text-neutral-600">tonne</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">42,50 €</td>
-                <td class="px-5 py-3 text-right text-xs text-neutral-500">+0.0 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">SAB-001</td>
-                <td class="px-5 py-3"><div class="font-medium">Sable rivière</div></td>
-                <td class="px-5 py-3 text-neutral-600">tonne</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">28,00 €</td>
-                <td class="px-5 py-3 text-right text-xs text-rose-600">−1.2 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">CIM-005</td>
-                <td class="px-5 py-3"><div class="font-medium">Ciment CEM II 32,5</div><div class="text-xs text-neutral-500">sac 35 kg</div></td>
-                <td class="px-5 py-3 text-neutral-600">sac</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">12,80 €</td>
-                <td class="px-5 py-3 text-right text-xs text-emerald-600">+3.4 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">MOR-001</td>
-                <td class="px-5 py-3"><div class="font-medium">Mortier prêt à l'emploi</div><div class="text-xs text-amber-700">composition · 3 articles</div></td>
-                <td class="px-5 py-3 text-neutral-600">m³</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">186,40 €</td>
-                <td class="px-5 py-3 text-right text-xs text-neutral-500">—</td>
-                <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">composé</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-700">PRP-020</td>
-                <td class="px-5 py-3"><div class="font-medium">Parpaing creux 20</div></td>
-                <td class="px-5 py-3 text-neutral-600">unité</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums">1,80 €</td>
-                <td class="px-5 py-3 text-right text-xs text-neutral-500">+0.0 %</td>
-                <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">actif</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-              <tr class="hover:bg-neutral-50">
-                <td class="px-5 py-3 font-mono text-xs text-neutral-400">ARD-001</td>
-                <td class="px-5 py-3"><div class="text-neutral-500">Ardoise naturelle 32×22</div></td>
-                <td class="px-5 py-3 text-neutral-500">unité</td>
-                <td class="px-5 py-3 text-right font-medium tabular-nums text-neutral-500">2,40 €</td>
-                <td class="px-5 py-3 text-right text-xs text-neutral-500">—</td>
-                <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">archivé</span></td>
-                <td class="px-3 py-3 text-neutral-400">›</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="flex items-center justify-between border-t px-5 py-3 text-xs text-neutral-500">
-            <div>1 à 8 sur 14</div>
-            <div class="flex gap-1">
-              <button class="rounded border px-2 py-1 hover:bg-neutral-50">‹</button>
-              <button class="rounded border bg-neutral-900 px-2 py-1 text-white">1</button>
-              <button class="rounded border px-2 py-1 hover:bg-neutral-50">2</button>
-              <button class="rounded border px-2 py-1 hover:bg-neutral-50">›</button>
-            </div>
-          </div>
-        </div>
-
-        <p class="mt-6 text-center text-xs text-neutral-400">
-          M1 — Catalogue avec contexte chantier (bandeau ambre) : priorité aux articles déjà utilisés sur le chantier actif.
-        </p>
-      </section>
-    </div>
-  </main>
-</body>
+          <p class="mt-6 text-center text-xs text-neutral-400">
+            M1 — Catalogue avec contexte chantier (bandeau ambre) : priorité aux articles déjà
+            utilisés sur le chantier actif.
+          </p>
+        </section>
+      </div>
+    </main>
+  </body>
 </html>

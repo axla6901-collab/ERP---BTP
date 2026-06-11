@@ -40,7 +40,11 @@ export async function creerUnite(input: UniteInput): Promise<ActionResult<{ id: 
   const utilisateur = ctx.utilisateur;
   const parsed = uniteSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -81,7 +85,11 @@ export async function mettreAJourUnite(id: string, input: UniteInput): Promise<A
   const utilisateur = ctx.utilisateur;
   const parsed = uniteSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {

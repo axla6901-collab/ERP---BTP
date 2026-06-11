@@ -146,9 +146,9 @@ describe('factureSchema', () => {
   });
 
   it('refuse un retenue garantie > 10 %', () => {
-    expect(() =>
-      factureSchema.parse({ ...factureMinimale, retenueGarantiePct: '15' }),
-    ).toThrow(/Retenue garantie/);
+    expect(() => factureSchema.parse({ ...factureMinimale, retenueGarantiePct: '15' })).toThrow(
+      /Retenue garantie/,
+    );
   });
 
   it('accepte une retenue de 5 %', () => {
@@ -167,9 +167,9 @@ describe('factureSchema', () => {
   });
 
   it('refuse un délai de paiement > 365 jours', () => {
-    expect(() =>
-      factureSchema.parse({ ...factureMinimale, delaiPaiementJours: 400 }),
-    ).toThrow(/Délai paiement/);
+    expect(() => factureSchema.parse({ ...factureMinimale, delaiPaiementJours: 400 })).toThrow(
+      /Délai paiement/,
+    );
   });
 
   it('accepte un chantier et un devis liés (UUIDs optionnels)', () => {
@@ -305,9 +305,7 @@ describe('situationTravauxSchema', () => {
     const r = situationTravauxSchema.parse({
       chantierId: UUID_CHANTIER,
       dateSituation: '2026-05-24',
-      lignes: [
-        { designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' },
-      ],
+      lignes: [{ designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' }],
     });
     expect(r.tauxTva).toBe('20.00');
   });
@@ -317,9 +315,7 @@ describe('situationTravauxSchema', () => {
       chantierId: UUID_CHANTIER,
       devisId: '00000000-0000-4000-8000-000000000099',
       dateSituation: '2026-05-24',
-      lignes: [
-        { designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' },
-      ],
+      lignes: [{ designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' }],
     });
     expect(r.devisId).toBe('00000000-0000-4000-8000-000000000099');
   });
@@ -329,9 +325,7 @@ describe('situationTravauxSchema', () => {
       situationTravauxSchema.parse({
         chantierId: UUID_CHANTIER,
         dateSituation: '24/05/2026',
-        lignes: [
-          { designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' },
-        ],
+        lignes: [{ designation: 'X', montantMarcheHt: '1000', pctAvancementCumule: '50' }],
       }),
     ).toThrow(/Date invalide/);
   });
@@ -342,7 +336,13 @@ describe('situationTravauxSchema', () => {
       dateSituation: '2026-05-24',
       lignes: [
         { designation: 'Lot 1', montantMarcheHt: '10000', pctAvancementCumule: '50' },
-        { designation: 'Lot 2', quantite: 5, prixUnitaireHt: '200', unite: 'u', pctAvancementCumule: '30' },
+        {
+          designation: 'Lot 2',
+          quantite: 5,
+          prixUnitaireHt: '200',
+          unite: 'u',
+          pctAvancementCumule: '30',
+        },
       ],
     });
     expect(r.lignes).toHaveLength(2);
@@ -371,9 +371,7 @@ describe('remise globale', () => {
   const situationBase = {
     chantierId: UUID_CHANTIER,
     dateSituation: '2026-05-24',
-    lignes: [
-      { designation: 'Lot 1', montantMarcheHt: '50000', pctAvancementCumule: '40' },
-    ],
+    lignes: [{ designation: 'Lot 1', montantMarcheHt: '50000', pctAvancementCumule: '40' }],
   };
 
   it('facture : pas de remise par défaut', () => {
@@ -393,9 +391,9 @@ describe('remise globale', () => {
   });
 
   it('facture : rejette un type sans valeur', () => {
-    expect(() =>
-      factureSchema.parse({ ...factureBase, remiseGlobaleType: 'pourcent' }),
-    ).toThrow(/montant de remise/);
+    expect(() => factureSchema.parse({ ...factureBase, remiseGlobaleType: 'pourcent' })).toThrow(
+      /montant de remise/,
+    );
   });
 
   it('facture : rejette un pourcentage > 100', () => {

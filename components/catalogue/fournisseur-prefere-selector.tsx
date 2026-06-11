@@ -72,7 +72,8 @@ export function FournisseurPrefereSelector({
         </SelectContent>
       </Select>
       <p className="text-xs text-muted-foreground">
-        Le calcul de prix de revient utilisera ce fournisseur en priorité, puis la référence générique, puis le moins cher.
+        Le calcul de prix de revient utilisera ce fournisseur en priorité, puis la référence
+        générique, puis le moins cher.
       </p>
     </div>
   );

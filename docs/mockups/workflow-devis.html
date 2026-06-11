@@ -18,11 +18,27 @@
       };
     </script>
     <style>
-      body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; }
-      .variant-card { scroll-margin-top: 1rem; }
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      .variant-card {
+        scroll-margin-top: 1rem;
+      }
       /* V3 — chevrons via clip-path */
       .chevron {
-        clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+        clip-path: polygon(
+          0 0,
+          calc(100% - 14px) 0,
+          100% 50%,
+          calc(100% - 14px) 100%,
+          0 100%,
+          14px 50%
+        );
         padding-left: 28px;
         padding-right: 28px;
       }
@@ -43,15 +59,25 @@
       <header class="mb-8">
         <h1 class="text-2xl font-semibold">Maquettes — Bandeau workflow devis</h1>
         <p class="mt-1 text-sm text-slate-600">
-          Statut courant pour comparaison : <strong>Validé</strong> (étape 3 sur 5).
-          Étapes franchies : Brouillon, En validation. À venir : Envoyé, Gagné.
+          Statut courant pour comparaison : <strong>Validé</strong> (étape 3 sur 5). Étapes
+          franchies : Brouillon, En validation. À venir : Envoyé, Gagné.
         </p>
         <nav class="mt-4 flex flex-wrap gap-2 text-sm">
-          <a href="#v1" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100">V1 — Stripe</a>
-          <a href="#v2" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100">V2 — Pilules</a>
-          <a href="#v3" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100">V3 — Chevrons</a>
-          <a href="#v4" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100">V4 — Vercel bar</a>
-          <a href="#v5" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100">V5 — Tabs underline</a>
+          <a href="#v1" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100"
+            >V1 — Stripe</a
+          >
+          <a href="#v2" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100"
+            >V2 — Pilules</a
+          >
+          <a href="#v3" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100"
+            >V3 — Chevrons</a
+          >
+          <a href="#v4" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100"
+            >V4 — Vercel bar</a
+          >
+          <a href="#v5" class="rounded-full border bg-white px-3 py-1 hover:bg-slate-100"
+            >V5 — Tabs underline</a
+          >
         </nav>
       </header>
 
@@ -59,31 +85,53 @@
       <section id="v1" class="variant-card mb-10">
         <h2 class="mb-2 text-lg font-semibold">V1 — Stepper Stripe / Tailwind UI</h2>
         <p class="mb-3 text-sm text-slate-600">
-          Ronds 32px, traits fins entre eux, labels sous les ronds. Palette neutre :
-          slate-900 pour franchis/courant, slate-200 pour futurs. Très sobre, look SaaS standard.
+          Ronds 32px, traits fins entre eux, labels sous les ronds. Palette neutre : slate-900 pour
+          franchis/courant, slate-200 pour futurs. Très sobre, look SaaS standard.
         </p>
         <div class="rounded-lg border bg-white p-5 shadow-sm">
           <div class="flex items-center gap-6">
             <ol class="flex flex-1 items-start">
               <!-- Brouillon : franchi -->
               <li class="flex flex-col items-center">
-                <div class="flex size-8 items-center justify-center rounded-full bg-slate-900 text-white">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div
+                  class="flex size-8 items-center justify-center rounded-full bg-slate-900 text-white"
+                >
+                  <svg
+                    class="size-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
                 </div>
                 <span class="mt-2 text-xs font-medium">Brouillon</span>
               </li>
               <div class="mx-2 mt-4 h-0.5 flex-1 bg-slate-900"></div>
               <!-- En validation : franchi -->
               <li class="flex flex-col items-center">
-                <div class="flex size-8 items-center justify-center rounded-full bg-slate-900 text-white">
-                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div
+                  class="flex size-8 items-center justify-center rounded-full bg-slate-900 text-white"
+                >
+                  <svg
+                    class="size-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
                 </div>
                 <span class="mt-2 text-xs font-medium">En validation</span>
               </li>
               <div class="mx-2 mt-4 h-0.5 flex-1 bg-slate-900"></div>
               <!-- Validé : courant -->
               <li class="flex flex-col items-center">
-                <div class="flex size-8 items-center justify-center rounded-full border-2 border-slate-900 bg-white text-slate-900 ring-4 ring-slate-200">
+                <div
+                  class="flex size-8 items-center justify-center rounded-full border-2 border-slate-900 bg-white text-slate-900 ring-4 ring-slate-200"
+                >
                   <span class="text-sm font-semibold">3</span>
                 </div>
                 <span class="mt-2 text-xs font-semibold">Validé</span>
@@ -91,7 +139,9 @@
               <div class="mx-2 mt-4 h-0.5 flex-1 bg-slate-200"></div>
               <!-- Envoyé : suivant -->
               <li class="flex flex-col items-center">
-                <button class="flex size-8 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 hover:border-slate-900 hover:text-slate-900">
+                <button
+                  class="flex size-8 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 hover:border-slate-900 hover:text-slate-900"
+                >
                   <span class="text-sm font-medium">4</span>
                 </button>
                 <span class="mt-2 text-xs text-slate-500">Envoyé</span>
@@ -99,15 +149,25 @@
               <div class="mx-2 mt-4 h-0.5 flex-1 bg-slate-200"></div>
               <!-- Gagné : futur -->
               <li class="flex flex-col items-center">
-                <div class="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-400">
+                <div
+                  class="flex size-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-400"
+                >
                   <span class="text-sm font-medium">5</span>
                 </div>
                 <span class="mt-2 text-xs text-slate-400">Gagné</span>
               </li>
             </ol>
             <div class="flex shrink-0 gap-2">
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Refuser</button>
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Annulé</button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Refuser
+              </button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Annulé
+              </button>
             </div>
           </div>
         </div>
@@ -117,38 +177,72 @@
       <section id="v2" class="variant-card mb-10">
         <h2 class="mb-2 text-lg font-semibold">V2 — Pilules Linear / Notion</h2>
         <p class="mb-3 text-sm text-slate-600">
-          Chips pleines avec icône + libellé intégrés. Couleurs douces (pastel).
-          Plus visuel, plus large. Ressemble à des badges de statut.
+          Chips pleines avec icône + libellé intégrés. Couleurs douces (pastel). Plus visuel, plus
+          large. Ressemble à des badges de statut.
         </p>
         <div class="rounded-lg border bg-white p-5 shadow-sm">
           <div class="flex flex-wrap items-center gap-3">
             <div class="flex flex-1 flex-wrap items-center gap-1.5">
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800"
+              >
+                <svg
+                  class="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
                 Brouillon
               </span>
               <span class="text-slate-300">›</span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800"
+              >
+                <svg
+                  class="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
                 En validation
               </span>
               <span class="text-slate-300">›</span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm"
+              >
                 <span class="size-2 rounded-full bg-white"></span>
                 Validé
               </span>
               <span class="text-slate-300">›</span>
-              <button class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:bg-slate-50">
+              <button
+                class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+              >
                 Envoyé
               </button>
               <span class="text-slate-300">›</span>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-400">
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-400"
+              >
                 Gagné
               </span>
             </div>
             <div class="flex shrink-0 gap-2">
-              <button class="rounded-full border border-red-200 bg-white px-3 py-1.5 text-sm text-red-600 hover:bg-red-50">Refuser</button>
-              <button class="rounded-full border border-red-200 bg-white px-3 py-1.5 text-sm text-red-600 hover:bg-red-50">Annulé</button>
+              <button
+                class="rounded-full border border-red-200 bg-white px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+              >
+                Refuser
+              </button>
+              <button
+                class="rounded-full border border-red-200 bg-white px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+              >
+                Annulé
+              </button>
             </div>
           </div>
         </div>
@@ -158,34 +252,68 @@
       <section id="v3" class="variant-card mb-10">
         <h2 class="mb-2 text-lg font-semibold">V3 — Chevrons / process flow</h2>
         <p class="mb-3 text-sm text-slate-600">
-          Onglets pointus enchaînés (clip-path). Look pipeline / wizard, direction visuelle
-          forte. Franchies vert, courante bleu, futures gris.
+          Onglets pointus enchaînés (clip-path). Look pipeline / wizard, direction visuelle forte.
+          Franchies vert, courante bleu, futures gris.
         </p>
         <div class="rounded-lg border bg-white p-5 shadow-sm">
           <div class="flex flex-wrap items-center gap-3">
             <div class="flex flex-1 items-stretch">
-              <div class="chevron-first -mr-2 flex items-center bg-emerald-500 py-2.5 text-sm font-medium text-white">
-                <svg class="mr-1.5 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+              <div
+                class="chevron-first -mr-2 flex items-center bg-emerald-500 py-2.5 text-sm font-medium text-white"
+              >
+                <svg
+                  class="mr-1.5 size-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
                 Brouillon
               </div>
-              <div class="chevron -mr-2 flex items-center bg-emerald-500 py-2.5 text-sm font-medium text-white">
-                <svg class="mr-1.5 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+              <div
+                class="chevron -mr-2 flex items-center bg-emerald-500 py-2.5 text-sm font-medium text-white"
+              >
+                <svg
+                  class="mr-1.5 size-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
                 En validation
               </div>
-              <div class="chevron -mr-2 flex items-center bg-blue-600 py-2.5 text-sm font-semibold text-white shadow">
+              <div
+                class="chevron -mr-2 flex items-center bg-blue-600 py-2.5 text-sm font-semibold text-white shadow"
+              >
                 <span class="mr-1.5 size-2 rounded-full bg-white"></span>
                 Validé
               </div>
-              <button class="chevron -mr-2 flex items-center bg-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-300">
+              <button
+                class="chevron -mr-2 flex items-center bg-slate-200 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-300"
+              >
                 Envoyé
               </button>
-              <div class="chevron-last flex items-center bg-slate-100 py-2.5 text-sm font-medium text-slate-400">
+              <div
+                class="chevron-last flex items-center bg-slate-100 py-2.5 text-sm font-medium text-slate-400"
+              >
                 Gagné
               </div>
             </div>
             <div class="flex shrink-0 gap-2">
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Refuser</button>
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Annulé</button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Refuser
+              </button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Annulé
+              </button>
             </div>
           </div>
         </div>
@@ -195,14 +323,17 @@
       <section id="v4" class="variant-card mb-10">
         <h2 class="mb-2 text-lg font-semibold">V4 — Barre de progression Vercel</h2>
         <p class="mb-3 text-sm text-slate-600">
-          Vraie progress bar continue au-dessus + dots discrets dessous. Met l'accent
-          sur le % d'avancement plutôt que sur la cliquabilité.
+          Vraie progress bar continue au-dessus + dots discrets dessous. Met l'accent sur le %
+          d'avancement plutôt que sur la cliquabilité.
         </p>
         <div class="rounded-lg border bg-white p-5 shadow-sm">
           <div class="space-y-4">
             <div class="flex items-center gap-3">
-              <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-blue-600" style="width: 50%"></div>
+              <div class="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-blue-600"
+                  style="width: 50%"
+                ></div>
               </div>
               <span class="shrink-0 text-xs font-medium text-slate-500">Étape 3 / 5 — 50%</span>
             </div>
@@ -221,7 +352,9 @@
                   <span class="mt-1.5 text-xs font-semibold text-blue-700">Validé</span>
                 </li>
                 <li class="flex flex-col items-center">
-                  <button class="size-2.5 rounded-full border-2 border-slate-300 bg-white hover:border-blue-600"></button>
+                  <button
+                    class="size-2.5 rounded-full border-2 border-slate-300 bg-white hover:border-blue-600"
+                  ></button>
                   <span class="mt-1.5 text-xs text-slate-500">Envoyé</span>
                 </li>
                 <li class="flex flex-col items-center">
@@ -230,8 +363,16 @@
                 </li>
               </ol>
               <div class="flex shrink-0 gap-2">
-                <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Refuser</button>
-                <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Annulé</button>
+                <button
+                  class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+                >
+                  Refuser
+                </button>
+                <button
+                  class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+                >
+                  Annulé
+                </button>
               </div>
             </div>
           </div>
@@ -250,14 +391,30 @@
             <ol class="flex flex-1 items-end">
               <li class="flex flex-1 flex-col items-center">
                 <div class="flex items-center gap-1.5 text-sm">
-                  <svg class="size-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+                  <svg
+                    class="size-3.5 text-emerald-600"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
                   <span class="font-medium text-emerald-700">Brouillon</span>
                 </div>
                 <div class="mt-2 h-0.5 w-full bg-emerald-500"></div>
               </li>
               <li class="flex flex-1 flex-col items-center">
                 <div class="flex items-center gap-1.5 text-sm">
-                  <svg class="size-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+                  <svg
+                    class="size-3.5 text-emerald-600"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                  >
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
                   <span class="font-medium text-emerald-700">En validation</span>
                 </div>
                 <div class="mt-2 h-0.5 w-full bg-emerald-500"></div>
@@ -267,7 +424,9 @@
                 <div class="mt-2 h-0.5 w-full bg-blue-600"></div>
               </li>
               <li class="flex flex-1 flex-col items-center">
-                <button class="text-sm font-medium text-slate-500 hover:text-blue-700">Envoyé</button>
+                <button class="text-sm font-medium text-slate-500 hover:text-blue-700">
+                  Envoyé
+                </button>
                 <div class="mt-2 h-0.5 w-full border-t-2 border-dashed border-slate-300"></div>
               </li>
               <li class="flex flex-1 flex-col items-center">
@@ -276,8 +435,16 @@
               </li>
             </ol>
             <div class="flex shrink-0 gap-2 pb-1">
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Refuser</button>
-              <button class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">Annulé</button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Refuser
+              </button>
+              <button
+                class="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                Annulé
+              </button>
             </div>
           </div>
         </div>
@@ -285,7 +452,10 @@
 
       <footer class="mt-12 border-t pt-6 text-sm text-slate-500">
         <p>Toutes les maquettes représentent le même état : statut = <code>valide</code> (3/5).</p>
-        <p class="mt-1">Les boutons « Refuser » et « Annulé » ne sont rendus que si la transition est autorisée par <code>TRANSITIONS_STATUT_DEVIS</code>.</p>
+        <p class="mt-1">
+          Les boutons « Refuser » et « Annulé » ne sont rendus que si la transition est autorisée
+          par <code>TRANSITIONS_STATUT_DEVIS</code>.
+        </p>
       </footer>
     </div>
   </body>

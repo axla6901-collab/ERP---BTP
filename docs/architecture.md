@@ -59,15 +59,15 @@
 
 Chaque module = un dossier dans `app/(app)/` + un schéma dans `db/schema/` + des validations Zod dans `lib/validation/`.
 
-| Module | Pages | Schéma DB |
-|---|---|---|
-| `catalogue` | `app/(app)/catalogue/` | `db/schema/catalogue.ts` |
-| `commercial` | `app/(app)/commercial/` | `db/schema/commercial.ts` |
-| `chantiers` | `app/(app)/chantiers/` | `db/schema/chantiers.ts` |
-| `rh` | `app/(app)/rh/` | `db/schema/rh.ts` |
-| `achats` | `app/(app)/achats/` | `db/schema/achats.ts` |
+| Module           | Pages                       | Schéma DB                     |
+| ---------------- | --------------------------- | ----------------------------- |
+| `catalogue`      | `app/(app)/catalogue/`      | `db/schema/catalogue.ts`      |
+| `commercial`     | `app/(app)/commercial/`     | `db/schema/commercial.ts`     |
+| `chantiers`      | `app/(app)/chantiers/`      | `db/schema/chantiers.ts`      |
+| `rh`             | `app/(app)/rh/`             | `db/schema/rh.ts`             |
+| `achats`         | `app/(app)/achats/`         | `db/schema/achats.ts`         |
 | `sous-traitance` | `app/(app)/sous-traitance/` | `db/schema/sous_traitance.ts` |
-| `documents` | `app/(app)/documents/` | `db/schema/documents.ts` |
+| `documents`      | `app/(app)/documents/`      | `db/schema/documents.ts`      |
 
 ## Règle de dépendance entre modules
 

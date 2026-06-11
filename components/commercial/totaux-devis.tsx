@@ -6,10 +6,7 @@ import {
   libelleRemiseGlobale,
   type RemiseGlobale,
 } from '@/lib/remise-globale';
-import type {
-  LigneDevisInput,
-  PosteInterneFormInput,
-} from '@/lib/validation/commercial';
+import type { LigneDevisInput, PosteInterneFormInput } from '@/lib/validation/commercial';
 
 function formatMontant(m: string | number): string {
   const n = typeof m === 'number' ? m : Number(m);
@@ -59,13 +56,13 @@ export function TotauxDevis({
         {hasPostesInternes && (
           <>
             <dt className="text-xs text-muted-foreground">Lignes (HT nu)</dt>
-            <dd className="text-right text-xs text-muted-foreground tabular-nums">
+            <dd className="text-right text-xs tabular-nums text-muted-foreground">
               {formatMontant(totauxNus.totalHt)} €
             </dd>
             <dt className="text-xs text-muted-foreground">
               + Postes internes ventilés ({postesInternes.length})
             </dt>
-            <dd className="text-right text-xs text-muted-foreground tabular-nums">
+            <dd className="text-right text-xs tabular-nums text-muted-foreground">
               {formatMontant(totalInterne)} €
             </dd>
           </>
@@ -82,9 +79,7 @@ export function TotauxDevis({
               − {formatMontant(net.remiseGlobaleMontant)} €
             </dd>
             <dt className="font-medium">Total HT net</dt>
-            <dd className="text-right font-medium tabular-nums">
-              {formatMontant(net.totalHt)} €
-            </dd>
+            <dd className="text-right font-medium tabular-nums">{formatMontant(net.totalHt)} €</dd>
           </>
         )}
 
@@ -92,8 +87,17 @@ export function TotauxDevis({
           const d = net.detailsTva[taux];
           if (!d) return null;
           return (
-            <div key={taux} className="col-span-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <dt>TVA {Number(taux).toFixed(2).replace(/\.?0+$/, '')} % sur {formatMontant(d.base)} €</dt>
+            <div
+              key={taux}
+              className="col-span-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground"
+            >
+              <dt>
+                TVA{' '}
+                {Number(taux)
+                  .toFixed(2)
+                  .replace(/\.?0+$/, '')}{' '}
+                % sur {formatMontant(d.base)} €
+              </dt>
               <dd className="text-right tabular-nums">{formatMontant(d.tva)} €</dd>
             </div>
           );
@@ -103,7 +107,9 @@ export function TotauxDevis({
         <dd className="text-right tabular-nums">{formatMontant(net.totalTva)} €</dd>
 
         <dt className="text-base font-semibold">Total TTC</dt>
-        <dd className="text-right text-base font-semibold tabular-nums">{formatMontant(net.totalTtc)} €</dd>
+        <dd className="text-right text-base font-semibold tabular-nums">
+          {formatMontant(net.totalTtc)} €
+        </dd>
       </dl>
     </div>
   );

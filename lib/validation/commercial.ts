@@ -81,7 +81,10 @@ const numericPourcent = (label: string, max = 100) =>
 // Clients
 // ─────────────────────────────────────────────────────────────
 
-const codePostalFR = z.string().trim().regex(/^\d{5}$/, 'Code postal invalide (5 chiffres).');
+const codePostalFR = z
+  .string()
+  .trim()
+  .regex(/^\d{5}$/, 'Code postal invalide (5 chiffres).');
 
 /**
  * Normalise toute valeur "vide" venant du form (chaîne vide, espaces, null, undefined)
@@ -96,17 +99,17 @@ const emptyToNull = (v: unknown): unknown => {
 
 const emailOptional = z.preprocess(
   emptyToNull,
-  z.union([
-    z.null(),
-    z.email('Email invalide.').max(200),
-  ]),
+  z.union([z.null(), z.email('Email invalide.').max(200)]),
 );
 
 const siretSchema = z.preprocess(
   emptyToNull,
   z.union([
     z.null(),
-    z.string().trim().regex(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).'),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).'),
   ]),
 );
 
@@ -115,7 +118,10 @@ const tvaIntraSchema = z.preprocess(
   z
     .union([
       z.null(),
-      z.string().trim().regex(/^FR\d{11}$/i, 'N° TVA invalide (format FR + 11 chiffres).'),
+      z
+        .string()
+        .trim()
+        .regex(/^FR\d{11}$/i, 'N° TVA invalide (format FR + 11 chiffres).'),
     ])
     .transform((v) => (typeof v === 'string' ? v.toUpperCase() : v)),
 );
@@ -248,16 +254,14 @@ const ligneAvecMontant = {
   quantite: numericStrictlyPositive('Quantité'),
   unite: z.string().trim().min(1, 'Unité requise.').max(20),
   prixUnitaireHt: numericPrix('Prix unitaire HT'),
-  tauxTva: z
-    .union([z.string(), z.number()])
-    .transform((v, ctx) => {
-      const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
-      if (Number.isNaN(n) || n < 0 || n > 100) {
-        ctx.addIssue({ code: 'custom', message: 'Taux TVA invalide.' });
-        return z.NEVER;
-      }
-      return n.toFixed(2);
-    }),
+  tauxTva: z.union([z.string(), z.number()]).transform((v, ctx) => {
+    const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
+    if (Number.isNaN(n) || n < 0 || n > 100) {
+      ctx.addIssue({ code: 'custom', message: 'Taux TVA invalide.' });
+      return z.NEVER;
+    }
+    return n.toFixed(2);
+  }),
   remisePourcent: numericPourcent('Remise'),
   notes: trimmedOptionalString(500),
   /** Catalogue articles chiffrant cette ligne. Si non vide, le PU stocké
@@ -295,20 +299,18 @@ export type LigneDevisInput = z.infer<typeof ligneDevisSchema>;
 export const PORTEES_POSTE_INTERNE = ['devis', 'chapitre'] as const;
 export type PorteePosteInterne = (typeof PORTEES_POSTE_INTERNE)[number];
 
-const numericPoidsLigne = z
-  .union([z.string(), z.number()])
-  .transform((v, ctx) => {
-    const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
-    if (!Number.isFinite(n)) {
-      ctx.addIssue({ code: 'custom', message: 'Poids invalide.' });
-      return z.NEVER;
-    }
-    if (n < 0) {
-      ctx.addIssue({ code: 'custom', message: 'Poids négatif interdit.' });
-      return z.NEVER;
-    }
-    return n.toFixed(4);
-  });
+const numericPoidsLigne = z.union([z.string(), z.number()]).transform((v, ctx) => {
+  const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
+  if (!Number.isFinite(n)) {
+    ctx.addIssue({ code: 'custom', message: 'Poids invalide.' });
+    return z.NEVER;
+  }
+  if (n < 0) {
+    ctx.addIssue({ code: 'custom', message: 'Poids négatif interdit.' });
+    return z.NEVER;
+  }
+  return n.toFixed(4);
+});
 
 /**
  * Format du form devis : un poste interne référence les lignes du devis
@@ -321,9 +323,7 @@ const repartitionPosteInterneFormSchema = z.object({
   poids: numericPoidsLigne,
 });
 
-export type RepartitionPosteInterneFormInput = z.infer<
-  typeof repartitionPosteInterneFormSchema
->;
+export type RepartitionPosteInterneFormInput = z.infer<typeof repartitionPosteInterneFormSchema>;
 
 const baseInternePoste = {
   libelle: z.string().trim().min(1, 'Libellé requis.').max(200),
@@ -333,10 +333,9 @@ const baseInternePoste = {
   repartitions: z
     .array(repartitionPosteInterneFormSchema)
     .default([])
-    .refine(
-      (arr) => new Set(arr.map((r) => r.ordreLigne)).size === arr.length,
-      { message: 'Doublon dans les répartitions.' },
-    ),
+    .refine((arr) => new Set(arr.map((r) => r.ordreLigne)).size === arr.length, {
+      message: 'Doublon dans les répartitions.',
+    }),
 };
 
 export const posteInterneFormSchema = z.discriminatedUnion('portee', [

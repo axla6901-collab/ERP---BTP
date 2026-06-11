@@ -99,7 +99,8 @@ export function BomTreeTable({ noeuds, prixParArticle }: Props) {
       </Table>
       <p className="border-t bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
         Cliquez sur le chevron d&apos;un sous-ouvrage composé pour afficher ses propres composants.
-        Le total peut différer du prix de revient officiel si des grilles fournisseurs ou prix négociés sont actifs.
+        Le total peut différer du prix de revient officiel si des grilles fournisseurs ou prix
+        négociés sont actifs.
       </p>
     </div>
   );

@@ -317,10 +317,7 @@ export function GanttMultiChantier({
 
         {/* Frise scrollable */}
         <div ref={timelineRef} className="relative min-w-0 flex-1 overflow-auto">
-          <div
-            className="sticky top-0 z-10 border-b bg-card"
-            style={{ width: W, height: HEAD_H }}
-          >
+          <div className="sticky top-0 z-10 border-b bg-card" style={{ width: W, height: HEAD_H }}>
             <GanttHeader range={range} zoom={zoom} totalWidth={W} />
           </div>
           <div className="relative" style={{ width: W, height: layout.height }}>
@@ -333,11 +330,18 @@ export function GanttMultiChantier({
                   <div
                     key={`sep-${d}`}
                     className="absolute bg-border/60"
-                    style={{ left: (d - range.start) * px, width: 1, top: 0, height: layout.height }}
+                    style={{
+                      left: (d - range.start) * px,
+                      width: 1,
+                      top: 0,
+                      height: layout.height,
+                    }}
                   />,
                 );
                 const dt = fromN(d);
-                d = Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + 1, 0) / 86_400_000) + 1;
+                d =
+                  Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + 1, 0) / 86_400_000) +
+                  1;
               }
               for (const r of layout.rows) {
                 if (r.type === 'projet') {
@@ -365,7 +369,12 @@ export function GanttMultiChantier({
                     <div
                       key="today"
                       className="absolute border-l-2 border-primary"
-                      style={{ left: (td - range.start) * px + px / 2, top: 0, height: layout.height, width: 0 }}
+                      style={{
+                        left: (td - range.start) * px + px / 2,
+                        top: 0,
+                        height: layout.height,
+                        width: 0,
+                      }}
                     />,
                   );
                 }
@@ -459,10 +468,22 @@ export function GanttMultiChantier({
                   </span>
                   <div
                     className="pointer-events-none absolute"
-                    style={{ left: 4, right: 4, bottom: 2, height: 3, borderRadius: 9999, background: 'rgba(255,255,255,0.35)' }}
+                    style={{
+                      left: 4,
+                      right: 4,
+                      bottom: 2,
+                      height: 3,
+                      borderRadius: 9999,
+                      background: 'rgba(255,255,255,0.35)',
+                    }}
                   >
                     <div
-                      style={{ height: '100%', borderRadius: 9999, width: `${pct}%`, background: 'rgba(255,255,255,0.95)' }}
+                      style={{
+                        height: '100%',
+                        borderRadius: 9999,
+                        width: `${pct}%`,
+                        background: 'rgba(255,255,255,0.95)',
+                      }}
                     />
                   </div>
                 </div>

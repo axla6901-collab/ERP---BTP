@@ -17,14 +17,14 @@ Le projet est en **phase M0** : les fondations sont écrites mais **aucun code a
 
 Remplacer les 3 briques Supabase par des composants open-source **génériques** ou des bibliothèques **embarquées dans l'application** :
 
-| Brique | Avant (ADR-001) | Après (ADR-006) |
-|---|---|---|
-| Base de données | Supabase Postgres managé | **PostgreSQL 16** (image officielle Docker `postgres:16-alpine`) |
-| Authentification | Supabase Auth (GoTrue) | **Better Auth** (bibliothèque NPM embarquée dans Next.js) |
-| Storage objet | Supabase Storage | **MinIO** (S3-compatible, Docker) |
-| SMTP dev | Supabase Inbucket | **Mailpit** (Docker) |
-| UI admin DB | Supabase Studio | **Drizzle Studio** (`pnpm db:studio`, déjà inclus) |
-| Orchestration locale | Supabase CLI | **`docker-compose.yml`** versionné dans le repo |
+| Brique               | Avant (ADR-001)          | Après (ADR-006)                                                  |
+| -------------------- | ------------------------ | ---------------------------------------------------------------- |
+| Base de données      | Supabase Postgres managé | **PostgreSQL 16** (image officielle Docker `postgres:16-alpine`) |
+| Authentification     | Supabase Auth (GoTrue)   | **Better Auth** (bibliothèque NPM embarquée dans Next.js)        |
+| Storage objet        | Supabase Storage         | **MinIO** (S3-compatible, Docker)                                |
+| SMTP dev             | Supabase Inbucket        | **Mailpit** (Docker)                                             |
+| UI admin DB          | Supabase Studio          | **Drizzle Studio** (`pnpm db:studio`, déjà inclus)               |
+| Orchestration locale | Supabase CLI             | **`docker-compose.yml`** versionné dans le repo                  |
 
 ### Choix Better Auth (et pas Auth.js / Lucia / Keycloak)
 
@@ -99,6 +99,7 @@ Un ADR-007 dédié au déploiement production sera créé en M6/M7.
 ## Révision
 
 À revisiter si :
+
 - Better Auth annonce sa fin ou une migration majeure incompatible
 - L'équipe s'étoffe et un serveur d'identité externe (Keycloak) devient justifiable
 - Un besoin Realtime majeur émerge

@@ -22,10 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  chantierTacheSchema,
-  type ChantierTacheInput,
-} from '@/lib/validation/chantier-taches';
+import { chantierTacheSchema, type ChantierTacheInput } from '@/lib/validation/chantier-taches';
 
 type ResponsableOption = { id: string; email: string };
 
@@ -117,7 +114,9 @@ export function TacheForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue>{(v) => responsableLibelle((v as string) || null)}</SelectValue>
+                        <SelectValue>
+                          {(v) => responsableLibelle((v as string) || null)}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

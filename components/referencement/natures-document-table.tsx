@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { NatureDocument } from '@/db/schema/referentiel-tiers';
-import { LIBELLES_MODE_CONTROLE, type ModeControleDocument } from '@/lib/validation/referencement-tiers';
+import {
+  LIBELLES_MODE_CONTROLE,
+  type ModeControleDocument,
+} from '@/lib/validation/referencement-tiers';
 
 type Props = {
   items: NatureDocument[];
@@ -14,7 +17,8 @@ type Props = {
 };
 
 function delaiLabel(n: NatureDocument): string {
-  if (n.modeControle === 'duree_jours') return n.delaiValiditeJours != null ? `${n.delaiValiditeJours} j` : '—';
+  if (n.modeControle === 'duree_jours')
+    return n.delaiValiditeJours != null ? `${n.delaiValiditeJours} j` : '—';
   if (n.modeControle === 'date_fin_assurance')
     return n.delaiValiditeJours != null ? `+${n.delaiValiditeJours} j` : 'Date de fin';
   return '—';

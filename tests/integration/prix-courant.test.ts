@@ -149,7 +149,7 @@ afterAll(async () => {
 });
 
 describe('prix_courant_article — ordre de priorité (migration 0067)', () => {
-  it('le prix de référence l\'emporte sur un prix fournisseur (non-préféré)', async () => {
+  it("le prix de référence l'emporte sur un prix fournisseur (non-préféré)", async () => {
     if (!canRun || !sql) {
       console.warn('Skip : pas de DB');
       return;
@@ -172,7 +172,7 @@ describe('prix_courant_article — ordre de priorité (migration 0067)', () => {
     expect(rows[0]!.source).toBe('reference');
   });
 
-  it('le prix de référence l\'emporte même sur un fournisseur marqué préféré', async () => {
+  it("le prix de référence l'emporte même sur un fournisseur marqué préféré", async () => {
     if (!canRun || !sql) return;
     await sql`UPDATE articles SET fournisseur_prefere_id = ${fournisseurId} WHERE id = ${artSupplier}`;
     try {

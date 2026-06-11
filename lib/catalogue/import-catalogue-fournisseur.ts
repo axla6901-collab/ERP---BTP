@@ -1,6 +1,5 @@
 'use server';
 
-import * as XLSX from 'xlsx';
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -16,10 +15,8 @@ import {
   grillesTarifaires,
   unites,
 } from '@/db/schema/catalogue';
-import {
-  nettoyerNombre,
-  normaliserCle,
-} from '@/lib/facturation/import-situation-helpers';
+import { nettoyerNombre, normaliserCle } from '@/lib/facturation/import-situation-helpers';
+import { lireClasseur, ClasseurFormatError, type Classeur } from '@/lib/import/classeur';
 
 import type { ActionResult } from './types';
 
@@ -133,27 +130,10 @@ export type CatalogueImportResult = {
 
 const ALIAS_CATALOGUE = {
   code: ['code', 'codearticle', 'ref', 'reference', 'refinterne', 'sku'],
-  libelle: [
-    'libelle',
-    'designation',
-    'denomination',
-    'nom',
-    'article',
-    'intitule',
-    'produit',
-  ],
+  libelle: ['libelle', 'designation', 'denomination', 'nom', 'article', 'intitule', 'produit'],
   famille: ['famille', 'categorie', 'category', 'rubrique', 'groupe', 'gamme'],
   unite: ['unite', 'u', 'unit', 'um'],
-  prix: [
-    'prixunitaireht',
-    'prixht',
-    'puht',
-    'pu',
-    'prix',
-    'tarif',
-    'prixunitaire',
-    'unitprice',
-  ],
+  prix: ['prixunitaireht', 'prixht', 'puht', 'pu', 'prix', 'tarif', 'prixunitaire', 'unitprice'],
   referenceFournisseur: [
     'referencefournisseur',
     'reffournisseur',
@@ -182,18 +162,9 @@ function trouverColonneCatalogue(
 // Helpers parsing
 // ─────────────────────────────────────────────────────────────
 
-function lireFeuille(sheet: XLSX.WorkSheet): unknown[][] {
-  return XLSX.utils.sheet_to_json<unknown[]>(sheet, {
-    header: 1,
-    defval: null,
-    raw: true,
-  });
-}
-
 function nbLignesNonVides(data: unknown[][]): number {
   return data.filter(
-    (r) =>
-      r && r.some((v) => v !== null && v !== undefined && String(v).trim() !== ''),
+    (r) => r && r.some((v) => v !== null && v !== undefined && String(v).trim() !== ''),
   ).length;
 }
 
@@ -230,15 +201,15 @@ export async function analyserClasseurCatalogue(
 ): Promise<ActionResult<CatalogueAnalyse>> {
   await requirePermission(PERM_IMPORT);
 
-  let workbook: XLSX.WorkBook;
+  let classeur: Classeur;
   try {
-    const bytes = Buffer.from(fichierBase64, 'base64');
-    workbook = XLSX.read(bytes, { type: 'buffer' });
-  } catch {
+    classeur = await lireClasseur(fichierBase64, nomFichier);
+  } catch (e) {
+    if (e instanceof ClasseurFormatError) return { ok: false, error: e.message };
     return { ok: false, error: `Fichier illisible : ${nomFichier}` };
   }
 
-  if (workbook.SheetNames.length === 0) {
+  if (classeur.sheetNames.length === 0) {
     return { ok: false, error: 'Le fichier ne contient aucune feuille.' };
   }
 
@@ -246,19 +217,13 @@ export async function analyserClasseurCatalogue(
   let meilleureSuggestion: MappingCatalogue | null = null;
   let meilleurNbLignes = 0;
 
-  for (const nom of workbook.SheetNames) {
-    const sheet = workbook.Sheets[nom]!;
-    const data = lireFeuille(sheet);
+  for (const nom of classeur.sheetNames) {
+    const data = classeur.feuille(nom);
     const nbLignes = nbLignesNonVides(data);
     const apercuRaw = data.slice(0, NB_LIGNES_APERCU);
-    const nbColonnes = apercuRaw.reduce(
-      (m, r) => Math.max(m, r?.length ?? 0),
-      0,
-    );
+    const nbColonnes = apercuRaw.reduce((m, r) => Math.max(m, r?.length ?? 0), 0);
     const apercu = apercuRaw.map((row) =>
-      Array.from({ length: nbColonnes }, (_, i) =>
-        normaliserCellule(row?.[i] ?? null),
-      ),
+      Array.from({ length: nbColonnes }, (_, i) => normaliserCellule(row?.[i] ?? null)),
     );
     feuilles.push({ nom, nbLignes, apercu, nbColonnes });
 
@@ -357,41 +322,31 @@ type LigneBrute = {
   description: string | null;
 };
 
-function parserLignes(
-  data: unknown[][],
-  mapping: MappingCatalogue,
-): LigneBrute[] {
+function parserLignes(data: unknown[][], mapping: MappingCatalogue): LigneBrute[] {
   const out: LigneBrute[] = [];
   for (let i = mapping.headerRow + 1; i < data.length; i++) {
     const row = data[i];
     if (!row || row.length === 0) continue;
     const codeBrut = row[mapping.idxCode];
     const libelleBrut = row[mapping.idxLibelle];
-    const codeVide =
-      codeBrut === null || codeBrut === undefined || String(codeBrut).trim() === '';
+    const codeVide = codeBrut === null || codeBrut === undefined || String(codeBrut).trim() === '';
     const libelleVide =
-      libelleBrut === null ||
-      libelleBrut === undefined ||
-      String(libelleBrut).trim() === '';
+      libelleBrut === null || libelleBrut === undefined || String(libelleBrut).trim() === '';
     if (codeVide && libelleVide) continue;
 
     out.push({
       ordre: out.length,
       code: normaliserCode(codeBrut),
       libelle: texteOuNull(libelleBrut, 200),
-      famille:
-        mapping.idxFamille !== null ? texteOuNull(row[mapping.idxFamille], 100) : null,
+      famille: mapping.idxFamille !== null ? texteOuNull(row[mapping.idxFamille], 100) : null,
       unite: mapping.idxUnite !== null ? texteOuNull(row[mapping.idxUnite], 10) : null,
-      prix:
-        mapping.idxPrix !== null ? nettoyerNombre(row[mapping.idxPrix]) : null,
+      prix: mapping.idxPrix !== null ? nettoyerNombre(row[mapping.idxPrix]) : null,
       referenceFournisseur:
         mapping.idxReferenceFournisseur !== null
           ? texteOuNull(row[mapping.idxReferenceFournisseur], 100)
           : null,
       description:
-        mapping.idxDescription !== null
-          ? texteOuNull(row[mapping.idxDescription], 2000)
-          : null,
+        mapping.idxDescription !== null ? texteOuNull(row[mapping.idxDescription], 2000) : null,
     });
   }
   return out;
@@ -405,19 +360,18 @@ export async function previewImportCatalogue(
   await requirePermission(PERM_IMPORT);
   const { entreprise } = await requireTenantContextWithMfa();
 
-  let workbook: XLSX.WorkBook;
+  let classeur: Classeur;
   try {
-    const bytes = Buffer.from(fichierBase64, 'base64');
-    workbook = XLSX.read(bytes, { type: 'buffer' });
-  } catch {
+    classeur = await lireClasseur(fichierBase64, nomFichier);
+  } catch (e) {
+    if (e instanceof ClasseurFormatError) return { ok: false, error: e.message };
     return { ok: false, error: `Fichier illisible : ${nomFichier}` };
   }
 
-  const sheet = workbook.Sheets[mapping.feuille];
-  if (!sheet) {
+  if (!classeur.sheetNames.includes(mapping.feuille)) {
     return { ok: false, error: `Feuille « ${mapping.feuille} » introuvable.` };
   }
-  const data = lireFeuille(sheet);
+  const data = classeur.feuille(mapping.feuille);
   const nbColonnes = data.reduce((m, r) => Math.max(m, r?.length ?? 0), 0);
   const erreurMapping = validerMapping(mapping, nbColonnes, data.length);
   if (erreurMapping) return { ok: false, error: erreurMapping };
@@ -431,55 +385,33 @@ export async function previewImportCatalogue(
     new Set(lignesBrutes.map((l) => l.code).filter((c): c is string => c !== null)),
   );
   const codesFamilles = Array.from(
-    new Set(
-      lignesBrutes
-        .map((l) => l.famille?.toUpperCase().trim() ?? '')
-        .filter((c) => c !== ''),
-    ),
+    new Set(lignesBrutes.map((l) => l.famille?.toUpperCase().trim() ?? '').filter((c) => c !== '')),
   );
   const symbolesUnites = Array.from(
-    new Set(
-      lignesBrutes
-        .map((l) => l.unite?.trim() ?? '')
-        .filter((u) => u !== ''),
-    ),
+    new Set(lignesBrutes.map((l) => l.unite?.trim() ?? '').filter((u) => u !== '')),
   );
 
-  const { articlesExistants, famillesExistantes, unitesExistantes } =
-    await withTenant(entreprise.id, async (tx) => {
+  const { articlesExistants, famillesExistantes, unitesExistantes } = await withTenant(
+    entreprise.id,
+    async (tx) => {
       const [articlesRows, famillesRows, unitesRows] = await Promise.all([
         codesArticles.length > 0
           ? tx
               .select({ code: articles.code })
               .from(articles)
-              .where(
-                and(
-                  inArray(articles.code, codesArticles),
-                  isNull(articles.deletedAt),
-                ),
-              )
+              .where(and(inArray(articles.code, codesArticles), isNull(articles.deletedAt)))
           : Promise.resolve([] as Array<{ code: string }>),
         codesFamilles.length > 0
           ? tx
               .select({ code: familles.code })
               .from(familles)
-              .where(
-                and(
-                  inArray(familles.code, codesFamilles),
-                  isNull(familles.deletedAt),
-                ),
-              )
+              .where(and(inArray(familles.code, codesFamilles), isNull(familles.deletedAt)))
           : Promise.resolve([] as Array<{ code: string }>),
         symbolesUnites.length > 0
           ? tx
               .select({ symbole: unites.symbole })
               .from(unites)
-              .where(
-                and(
-                  inArray(unites.symbole, symbolesUnites),
-                  isNull(unites.deletedAt),
-                ),
-              )
+              .where(and(inArray(unites.symbole, symbolesUnites), isNull(unites.deletedAt)))
           : Promise.resolve([] as Array<{ symbole: string }>),
       ]);
       return {
@@ -487,7 +419,8 @@ export async function previewImportCatalogue(
         famillesExistantes: new Set(famillesRows.map((r) => r.code.toUpperCase())),
         unitesExistantes: new Set(unitesRows.map((r) => r.symbole)),
       };
-    });
+    },
+  );
 
   const codesDejaVus = new Set<string>();
   const lignes: LigneCataloguePreview[] = [];
@@ -578,10 +511,7 @@ export async function executerImportCatalogue(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(infosGrille.validFrom)) {
     return { ok: false, error: 'Date de début de validité invalide (YYYY-MM-DD).' };
   }
-  if (
-    infosGrille.validTo !== null &&
-    !/^\d{4}-\d{2}-\d{2}$/.test(infosGrille.validTo)
-  ) {
+  if (infosGrille.validTo !== null && !/^\d{4}-\d{2}-\d{2}$/.test(infosGrille.validTo)) {
     return { ok: false, error: 'Date de fin de validité invalide.' };
   }
   if (infosGrille.validTo && infosGrille.validTo < infosGrille.validFrom) {
@@ -609,9 +539,7 @@ export async function executerImportCatalogue(
       // ── 1. Familles : récupère existantes + crée les manquantes ──
       const codesFamilles = Array.from(
         new Set(
-          lignesValides
-            .map((l) => l.famille?.toUpperCase().trim() ?? '')
-            .filter((c) => c !== ''),
+          lignesValides.map((l) => l.famille?.toUpperCase().trim() ?? '').filter((c) => c !== ''),
         ),
       );
       const familleIdByCode = new Map<string, string>();
@@ -619,9 +547,7 @@ export async function executerImportCatalogue(
         const existantes = await tx
           .select({ id: familles.id, code: familles.code })
           .from(familles)
-          .where(
-            and(inArray(familles.code, codesFamilles), isNull(familles.deletedAt)),
-          );
+          .where(and(inArray(familles.code, codesFamilles), isNull(familles.deletedAt)));
         for (const f of existantes) familleIdByCode.set(f.code.toUpperCase(), f.id);
       }
       let nbFamillesCreees = 0;
@@ -674,20 +600,14 @@ export async function executerImportCatalogue(
 
       // ── 2. Unités ──────────────────────────────────────────
       const symbolesUnites = Array.from(
-        new Set(
-          lignesValides
-            .map((l) => l.unite?.trim() ?? '')
-            .filter((u) => u !== ''),
-        ),
+        new Set(lignesValides.map((l) => l.unite?.trim() ?? '').filter((u) => u !== '')),
       );
       const uniteIdBySymbole = new Map<string, string>();
       if (symbolesUnites.length > 0) {
         const existantes = await tx
           .select({ id: unites.id, symbole: unites.symbole })
           .from(unites)
-          .where(
-            and(inArray(unites.symbole, symbolesUnites), isNull(unites.deletedAt)),
-          );
+          .where(and(inArray(unites.symbole, symbolesUnites), isNull(unites.deletedAt)));
         for (const u of existantes) uniteIdBySymbole.set(u.symbole, u.id);
       }
       let nbUnitesCreees = 0;
@@ -722,9 +642,7 @@ export async function executerImportCatalogue(
         const existants = await tx
           .select({ id: articles.id, code: articles.code })
           .from(articles)
-          .where(
-            and(inArray(articles.code, codesArticles), isNull(articles.deletedAt)),
-          );
+          .where(and(inArray(articles.code, codesArticles), isNull(articles.deletedAt)));
         for (const a of existants) articleIdByCode.set(a.code, a.id);
       }
 
@@ -740,9 +658,7 @@ export async function executerImportCatalogue(
             ? familleIdByCode.get(l.famille.toUpperCase().trim())!
             : familleDiversId!;
         const uniteId =
-          l.unite && l.unite.trim() !== ''
-            ? uniteIdBySymbole.get(l.unite.trim()) ?? null
-            : null;
+          l.unite && l.unite.trim() !== '' ? (uniteIdBySymbole.get(l.unite.trim()) ?? null) : null;
 
         const [inserted] = await tx
           .insert(articles)
@@ -776,9 +692,7 @@ export async function executerImportCatalogue(
           validFrom: infosGrille.validFrom,
           validTo: infosGrille.validTo,
           actif: true,
-          notes: `Importé depuis « ${nomFichier} » le ${new Date()
-            .toISOString()
-            .slice(0, 10)}`,
+          notes: `Importé depuis « ${nomFichier} » le ${new Date().toISOString().slice(0, 10)}`,
           createdBy: ctx.utilisateur.id,
           updatedBy: ctx.utilisateur.id,
         })
@@ -846,7 +760,7 @@ export async function executerImportCatalogue(
       return {
         ok: false,
         error:
-          'Conflit de données pendant l\'insertion (article ou code dupliqué). Reprenez l\'import.',
+          "Conflit de données pendant l'insertion (article ou code dupliqué). Reprenez l'import.",
       };
     }
     throw err;

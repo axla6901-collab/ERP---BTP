@@ -68,7 +68,7 @@ export function DetailPanel({ table, schema, onClose, onSelect }: Props) {
           </button>
 
           <div className="border-b px-4 py-4 pr-12">
-            <h2 className="font-mono text-[17px] font-semibold text-[#C0392B] break-all">
+            <h2 className="break-all font-mono text-[17px] font-semibold text-[#C0392B]">
               {table.name}
             </h2>
             <div className="mt-1 text-xs text-muted-foreground">
@@ -101,7 +101,7 @@ export function DetailPanel({ table, schema, onClose, onSelect }: Props) {
                   >
                     <div className="flex items-start gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="font-mono text-[12px] font-semibold break-all">
+                        <div className="break-all font-mono text-[12px] font-semibold">
                           {c.name}
                         </div>
                         <div className="font-mono text-[11px] text-muted-foreground">
@@ -148,10 +148,7 @@ export function DetailPanel({ table, schema, onClose, onSelect }: Props) {
                 </h3>
                 <ul className="space-y-0.5 text-xs">
                   {fkSortantes.map((c) => (
-                    <li
-                      key={c.name}
-                      className="border-b border-gray-100 py-1.5 font-mono"
-                    >
+                    <li key={c.name} className="border-b border-gray-100 py-1.5 font-mono">
                       <span className="mr-2 inline-block min-w-[34px] text-center font-bold text-[#C0392B]">
                         N:1
                       </span>

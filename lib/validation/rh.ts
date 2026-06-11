@@ -13,17 +13,11 @@ const emptyToNull = (v: unknown): unknown => {
 };
 
 const trimmedOptionalString = (max: number) =>
-  z.preprocess(
-    emptyToNull,
-    z.union([z.null(), z.string().trim().max(max)]),
-  );
+  z.preprocess(emptyToNull, z.union([z.null(), z.string().trim().max(max)]));
 
 const optionalDate = z.preprocess(
   emptyToNull,
-  z.union([
-    z.null(),
-    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).'),
-  ]),
+  z.union([z.null(), z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).')]),
 );
 
 const optionalEmail = z.preprocess(
@@ -35,20 +29,18 @@ const optionalMontant = z.preprocess(
   emptyToNull,
   z.union([
     z.null(),
-    z
-      .union([z.string(), z.number()])
-      .transform((v, ctx) => {
-        const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
-        if (Number.isNaN(n) || !Number.isFinite(n)) {
-          ctx.addIssue({ code: 'custom', message: 'Montant invalide.' });
-          return z.NEVER;
-        }
-        if (n < 0) {
-          ctx.addIssue({ code: 'custom', message: 'Montant négatif interdit.' });
-          return z.NEVER;
-        }
-        return n.toFixed(2);
-      }),
+    z.union([z.string(), z.number()]).transform((v, ctx) => {
+      const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
+      if (Number.isNaN(n) || !Number.isFinite(n)) {
+        ctx.addIssue({ code: 'custom', message: 'Montant invalide.' });
+        return z.NEVER;
+      }
+      if (n < 0) {
+        ctx.addIssue({ code: 'custom', message: 'Montant négatif interdit.' });
+        return z.NEVER;
+      }
+      return n.toFixed(2);
+    }),
   ]),
 );
 
@@ -116,12 +108,7 @@ export const LIBELLES_CLASSIFICATION: Record<Classification, string> = {
   apprenti: 'Apprenti',
 };
 
-export const APTITUDES = [
-  'apte',
-  'apte_amenagement',
-  'inapte_temporaire',
-  'inapte',
-] as const;
+export const APTITUDES = ['apte', 'apte_amenagement', 'inapte_temporaire', 'inapte'] as const;
 export type Aptitude = (typeof APTITUDES)[number];
 export const LIBELLES_APTITUDE: Record<Aptitude, string> = {
   apte: 'Apte',
@@ -134,7 +121,10 @@ const optionalCodePostalFR = z.preprocess(
   emptyToNull,
   z.union([
     z.null(),
-    z.string().trim().regex(/^\d{5}$/, 'Code postal invalide (5 chiffres).'),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{5}$/, 'Code postal invalide (5 chiffres).'),
   ]),
 );
 
@@ -142,7 +132,10 @@ const optionalSecu = z.preprocess(
   emptyToNull,
   z.union([
     z.null(),
-    z.string().trim().regex(/^\d{13,15}$/, 'N° sécurité sociale invalide (13-15 chiffres).'),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{13,15}$/, 'N° sécurité sociale invalide (13-15 chiffres).'),
   ]),
 );
 
@@ -154,11 +147,7 @@ const optionalIban = z.preprocess(
       .string()
       .trim()
       .transform((v) => v.replace(/\s+/g, '').toUpperCase())
-      .pipe(
-        z
-          .string()
-          .regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/, 'IBAN invalide.'),
-      ),
+      .pipe(z.string().regex(/^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/, 'IBAN invalide.')),
   ]),
 );
 
@@ -213,10 +202,7 @@ export const employeSchema = z
     telephoneMobile: trimmedOptionalString(30),
     telephoneFixe: trimmedOptionalString(30),
     actif: z.boolean().default(true),
-    utilisateurId: z.preprocess(
-      emptyToNull,
-      z.union([z.null(), z.string().min(1)]),
-    ),
+    utilisateurId: z.preprocess(emptyToNull, z.union([z.null(), z.string().min(1)])),
     notes: trimmedOptionalString(2000),
 
     // Identité civile
@@ -243,17 +229,14 @@ export const employeSchema = z
       emptyToNull,
       z.union([z.null(), z.enum(SITUATIONS_FAMILIALES)]),
     ),
-    nombreEnfants: optionalEntier(0, 20, 'Nombre d\'enfants').default(0),
+    nombreEnfants: optionalEntier(0, 20, "Nombre d'enfants").default(0),
 
     // Contrat avancé
     matricule: trimmedOptionalString(50),
     dateEmbauche: optionalDate,
     dateFinContrat: optionalDate,
     coefficientHierarchique: trimmedOptionalString(50),
-    classification: z.preprocess(
-      emptyToNull,
-      z.union([z.null(), z.enum(CLASSIFICATIONS)]),
-    ),
+    classification: z.preprocess(emptyToNull, z.union([z.null(), z.enum(CLASSIFICATIONS)])),
     salaireMensuelBrut: optionalMontant,
     conventionCollective: trimmedOptionalString(100),
 
@@ -275,14 +258,14 @@ export const employeSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['societeInterim'],
-        message: 'Société d\'intérim requise pour un contrat INT.',
+        message: "Société d'intérim requise pour un contrat INT.",
       });
     }
     if (val.dateEntree && val.dateSortie && val.dateSortie < val.dateEntree) {
       ctx.addIssue({
         code: 'custom',
         path: ['dateSortie'],
-        message: 'Date de sortie antérieure à la date d\'entrée.',
+        message: "Date de sortie antérieure à la date d'entrée.",
       });
     }
     if (
@@ -294,7 +277,7 @@ export const employeSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['dateFinContrat'],
-        message: 'Fin de contrat antérieure à l\'embauche.',
+        message: "Fin de contrat antérieure à l'embauche.",
       });
     }
   });
@@ -370,15 +353,11 @@ export const habilitationSchema = z
     notes: trimmedOptionalString(500),
   })
   .superRefine((val, ctx) => {
-    if (
-      val.dateObtention &&
-      val.dateValidite &&
-      val.dateValidite < val.dateObtention
-    ) {
+    if (val.dateObtention && val.dateValidite && val.dateValidite < val.dateObtention) {
       ctx.addIssue({
         code: 'custom',
         path: ['dateValidite'],
-        message: 'Date de validité antérieure à l\'obtention.',
+        message: "Date de validité antérieure à l'obtention.",
       });
     }
   });
@@ -424,15 +403,11 @@ export const permisSchema = z
     notes: trimmedOptionalString(500),
   })
   .superRefine((val, ctx) => {
-    if (
-      val.dateObtention &&
-      val.dateValidite &&
-      val.dateValidite < val.dateObtention
-    ) {
+    if (val.dateObtention && val.dateValidite && val.dateValidite < val.dateObtention) {
       ctx.addIssue({
         code: 'custom',
         path: ['dateValidite'],
-        message: 'Date de validité antérieure à l\'obtention.',
+        message: "Date de validité antérieure à l'obtention.",
       });
     }
   });
@@ -628,17 +603,29 @@ const refinePointageCoherence = (
 ) => {
   if (val.type === 'absence') {
     if (val.chantierId) {
-      ctx.addIssue({ code: 'custom', path: ['chantierId'], message: 'Pas de chantier pour une absence.' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['chantierId'],
+        message: 'Pas de chantier pour une absence.',
+      });
     }
     if (!val.motifAbsence) {
-      ctx.addIssue({ code: 'custom', path: ['motifAbsence'], message: 'Motif d\'absence requis.' });
+      ctx.addIssue({ code: 'custom', path: ['motifAbsence'], message: "Motif d'absence requis." });
     }
   } else {
     if (!val.chantierId) {
-      ctx.addIssue({ code: 'custom', path: ['chantierId'], message: 'Chantier requis (sauf pour absence).' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['chantierId'],
+        message: 'Chantier requis (sauf pour absence).',
+      });
     }
     if (val.motifAbsence) {
-      ctx.addIssue({ code: 'custom', path: ['motifAbsence'], message: 'Motif uniquement pour les absences.' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['motifAbsence'],
+        message: 'Motif uniquement pour les absences.',
+      });
     }
   }
 };
@@ -675,22 +662,13 @@ export const ligneMatriceSchema = z
     employeId: z.uuid(),
     chantierId: z.preprocess(emptyToNull, z.union([z.null(), z.uuid()])),
     type: z.enum(TYPES_POINTAGE).default('heures'),
-    motifAbsence: z.preprocess(
-      emptyToNull,
-      z.union([z.null(), z.enum(MOTIFS_ABSENCE)]),
-    ),
-    zoneDeplacement: z.preprocess(
-      emptyToNull,
-      z.union([z.null(), z.enum(ZONES_DEPLACEMENT)]),
-    ),
+    motifAbsence: z.preprocess(emptyToNull, z.union([z.null(), z.enum(MOTIFS_ABSENCE)])),
+    zoneDeplacement: z.preprocess(emptyToNull, z.union([z.null(), z.enum(ZONES_DEPLACEMENT)])),
     panier: z.boolean().default(false),
     grandPanier: z.boolean().default(false),
     nuitPanierSoir: z.boolean().default(false),
     // map du jour vers la quantité (ex: { '1': 8, '2': 8, '3': 4 })
-    jours: z.record(
-      z.string().regex(/^\d{1,2}$/),
-      z.union([z.null(), z.number(), z.string()]),
-    ),
+    jours: z.record(z.string().regex(/^\d{1,2}$/), z.union([z.null(), z.number(), z.string()])),
   })
   .superRefine((val, ctx) => {
     if (val.type === 'absence') {

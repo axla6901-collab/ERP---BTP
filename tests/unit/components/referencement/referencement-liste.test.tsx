@@ -7,7 +7,10 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
 }));
 
-const relancerTiersEnMasse = vi.fn(async () => ({ ok: true as const, data: { envoyees: 1, ignores: 0 } }));
+const relancerTiersEnMasse = vi.fn(async () => ({
+  ok: true as const,
+  data: { envoyees: 1, ignores: 0 },
+}));
 const relancerTier = vi.fn(async () => ({ ok: true as const, data: { niveau: 'r1' as const } }));
 vi.mock('@/lib/referencement/relances', () => ({
   relancerTiersEnMasse: (...args: unknown[]) => relancerTiersEnMasse(...(args as [])),
@@ -28,7 +31,14 @@ const A_RELANCER: TierConformiteRow = {
   nbProblemes: 1,
   nbDocumentsRequis: 3,
   lignes: [
-    { natureDocumentId: 'n1', code: 'KBIS', libelle: 'K-bis', estBloquant: true, statut: 'manquant', dateFinValidite: null },
+    {
+      natureDocumentId: 'n1',
+      code: 'KBIS',
+      libelle: 'K-bis',
+      estBloquant: true,
+      statut: 'manquant',
+      dateFinValidite: null,
+    },
   ],
   derniereRelanceLe: null,
 };

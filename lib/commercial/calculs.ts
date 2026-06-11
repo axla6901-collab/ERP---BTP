@@ -17,9 +17,7 @@ import {
  * source de vérité). Ne tient pas compte des remises/TVA — c'est le PU
  * brut avant application des taux.
  */
-export function calculerPuDepuisComposants(
-  composants: ComposantLigneInput[],
-): string | null {
+export function calculerPuDepuisComposants(composants: ComposantLigneInput[]): string | null {
   if (composants.length === 0) return null;
   let total = 0;
   for (const c of composants) {
@@ -100,11 +98,8 @@ export function calculerContributionsLigne(
     if (!Number.isFinite(qpu) || !Number.isFinite(pu)) continue;
 
     const remiseOverride =
-      c.type === 'libre' && c.remisePourcent !== null
-        ? Number(c.remisePourcent)
-        : null;
-    const tauxOverride =
-      c.type === 'libre' && c.tauxTva !== null ? String(c.tauxTva) : null;
+      c.type === 'libre' && c.remisePourcent !== null ? Number(c.remisePourcent) : null;
+    const tauxOverride = c.type === 'libre' && c.tauxTva !== null ? String(c.tauxTva) : null;
 
     const effRemise = remiseOverride !== null ? remiseOverride : lineRemise;
     const effTauxTva = tauxOverride !== null ? tauxOverride : lineTauxTva;

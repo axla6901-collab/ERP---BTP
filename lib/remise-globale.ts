@@ -44,10 +44,7 @@ export type TotauxAvecRemise = TotauxHt & {
  * absente, nulle ou négative. Un montant fixe est plafonné au total HT (on ne
  * descend jamais sous 0) ; un pourcentage est borné à 100 %.
  */
-export function calculerMontantRemiseGlobale(
-  totalHtBrut: number,
-  remise: RemiseGlobale,
-): number {
+export function calculerMontantRemiseGlobale(totalHtBrut: number, remise: RemiseGlobale): number {
   if (!remise.type || remise.valeur == null || remise.valeur === '') return 0;
   if (!Number.isFinite(totalHtBrut) || totalHtBrut <= 0) return 0;
   const v = Number(remise.valeur);
@@ -71,10 +68,7 @@ export function calculerMontantRemiseGlobale(
  * que `totalHt === Σ base_net` et que `totalHtAvantRemise − remiseGlobaleMontant
  * === totalHt` à l'affichage.
  */
-export function appliquerRemiseGlobale(
-  totaux: TotauxHt,
-  remise: RemiseGlobale,
-): TotauxAvecRemise {
+export function appliquerRemiseGlobale(totaux: TotauxHt, remise: RemiseGlobale): TotauxAvecRemise {
   const brut = Number(totaux.totalHt);
   const montant = calculerMontantRemiseGlobale(brut, remise);
 
@@ -113,7 +107,9 @@ export function appliquerRemiseGlobale(
 /** Libellé court de la remise pour l'affichage (« 5 % » ou « forfait »). */
 export function libelleRemiseGlobale(remise: RemiseGlobale): string {
   if (remise.type === 'pourcent' && remise.valeur != null) {
-    return `${Number(remise.valeur).toFixed(2).replace(/\.?0+$/, '')} %`;
+    return `${Number(remise.valeur)
+      .toFixed(2)
+      .replace(/\.?0+$/, '')} %`;
   }
   return 'forfait';
 }

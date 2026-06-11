@@ -49,13 +49,13 @@ Adopter une **PWA (Progressive Web App) avec outbox pattern** pour le pointage, 
 
 ### Composants techniques
 
-| Composant | Rôle |
-|---|---|
-| **Workbox** (Google) | Génération du Service Worker, stratégies de cache |
-| **Cache strategies** | `NetworkFirst` pour HTML, `CacheFirst` pour assets |
-| **IndexedDB via `idb`** | Stockage local typesafe (librairie wrapper TypeScript) |
-| **Background Sync API** | Retry automatique quand le réseau revient |
-| **Fallback polling** | Sur iOS Safari (Background Sync mal supporté), polling 30s quand l'app est au focus |
+| Composant               | Rôle                                                                                |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| **Workbox** (Google)    | Génération du Service Worker, stratégies de cache                                   |
+| **Cache strategies**    | `NetworkFirst` pour HTML, `CacheFirst` pour assets                                  |
+| **IndexedDB via `idb`** | Stockage local typesafe (librairie wrapper TypeScript)                              |
+| **Background Sync API** | Retry automatique quand le réseau revient                                           |
+| **Fallback polling**    | Sur iOS Safari (Background Sync mal supporté), polling 30s quand l'app est au focus |
 
 ### Outbox pattern détaillé
 
@@ -77,9 +77,7 @@ Côté serveur :
 export async function createPointage(input: PointageInput) {
   const data = pointageSchema.parse(input);
 
-  await db.insert(pointages)
-    .values(data)
-    .onConflictDoNothing({ target: pointages.clientUuid });
+  await db.insert(pointages).values(data).onConflictDoNothing({ target: pointages.clientUuid });
 
   return { ok: true };
 }
@@ -156,6 +154,7 @@ export async function createPointage(input: PointageInput) {
 ## Révision
 
 À revisiter si :
+
 - Volume de pointages dépasse 10 000/jour (envisager CDN edge + broker).
 - Besoin de modifier un pointage historique offline (non prévu M0-M10).
 - iOS Background Sync devient fiable (simplifier en supprimant le polling de fallback).

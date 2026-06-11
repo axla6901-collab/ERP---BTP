@@ -24,6 +24,7 @@
 ```
 
 **Types** :
+
 - `feat` : nouvelle fonctionnalité
 - `fix` : correction de bug
 - `docs` : documentation uniquement
@@ -35,6 +36,7 @@
 - `security` : correction de sécurité
 
 **Exemples** :
+
 - `feat(catalogue): ajoute la composition d'ouvrage`
 - `fix(devis): corrige le calcul HT pour les lignes article`
 - `docs(adr): ajoute l'ADR-006 sur les backups`
@@ -49,6 +51,7 @@
 3. Le commettre dans la PR de la décision
 
 Exemples de décisions qui méritent un ADR :
+
 - Changer de librairie majeure (ORM, framework UI)
 - Ajouter un service externe (envoi d'email, paiement)
 - Modifier la stratégie de sécurité (auth, RBAC)

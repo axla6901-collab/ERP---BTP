@@ -248,9 +248,8 @@ export function EntrepriseIdentiteForm({ defaultValues, onSubmit }: Props) {
           storageKey="entreprise:facturx"
         >
           <p className="mb-4 text-sm text-muted-foreground">
-            Coordonnées bancaires et mentions légales reprises sur les factures
-            électroniques. L&apos;IBAN et le SIRET/TVA ci-dessus sont requis pour
-            générer un Factur-X conforme.
+            Coordonnées bancaires et mentions légales reprises sur les factures électroniques.
+            L&apos;IBAN et le SIRET/TVA ci-dessus sont requis pour générer un Factur-X conforme.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField

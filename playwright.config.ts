@@ -37,6 +37,4 @@ const baseConfig: PlaywrightTestConfig = {
   },
 };
 
-export default defineConfig(
-  process.env.CI ? { ...baseConfig, workers: 1 } : baseConfig,
-);
+export default defineConfig(process.env.CI ? { ...baseConfig, workers: 1 } : baseConfig);

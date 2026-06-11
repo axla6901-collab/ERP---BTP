@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe('encryptField / decryptField', () => {
-  it('round-trip : chiffre puis déchiffre à l\'identique', () => {
+  it("round-trip : chiffre puis déchiffre à l'identique", () => {
     const clear = '2806990412345';
     const env = encryptField(clear);
     expect(Buffer.isBuffer(env)).toBe(true);
@@ -51,12 +51,12 @@ describe('encryptField / decryptField', () => {
     expect(decryptField(a)).toBe(decryptField(b));
   });
 
-  it('préserve l\'UTF-8 (accents, symboles)', () => {
+  it("préserve l'UTF-8 (accents, symboles)", () => {
     const v = 'Société Générale — €1 234,56';
     expect(decryptField(encryptField(v))).toBe(v);
   });
 
-  it('lève si l\'enveloppe est tronquée', () => {
+  it("lève si l'enveloppe est tronquée", () => {
     expect(() => decryptField(Buffer.from([1, 1, 2, 3]))).toThrow(/tronquée/);
   });
 
@@ -67,7 +67,7 @@ describe('encryptField / decryptField', () => {
     expect(() => decryptField(env)).toThrow();
   });
 
-  it('lève sur une version d\'enveloppe inconnue', () => {
+  it("lève sur une version d'enveloppe inconnue", () => {
     const env = encryptField('x');
     env[0] = 2; // version inconnue
     expect(() => decryptField(env)).toThrow(/version inconnue/);
@@ -107,12 +107,12 @@ describe('isEncryptionConfigured', () => {
     expect(isEncryptionConfigured()).toBe(false);
   });
 
-  it('false quand une clé n\'a pas la bonne taille', () => {
+  it("false quand une clé n'a pas la bonne taille", () => {
     setKeys(`1:${randomBytes(16).toString('base64')}`, '1');
     expect(isEncryptionConfigured()).toBe(false);
   });
 
-  it('false quand l\'id actif ne correspond à aucune clé', () => {
+  it("false quand l'id actif ne correspond à aucune clé", () => {
     setKeys(`1:${KEY_1}`, '9');
     expect(isEncryptionConfigured()).toBe(false);
   });

@@ -53,11 +53,10 @@ export function TiersReferencementToggle({ initialActif, onToggle }: Props) {
           Module Référencement &amp; Agrément des tiers
         </Label>
         <p className="text-xs text-muted-foreground">
-          Active l&apos;onglet « Tiers ▸ Référencement » : suivi de la conformité
-          documentaire des sous-traitants et fournisseurs (K-bis, attestation de
-          vigilance URSSAF, assurances, etc.), statut d&apos;agrément et relances.
-          À la première activation, le référentiel des documents requis est
-          pré-rempli.
+          Active l&apos;onglet « Tiers ▸ Référencement » : suivi de la conformité documentaire des
+          sous-traitants et fournisseurs (K-bis, attestation de vigilance URSSAF, assurances, etc.),
+          statut d&apos;agrément et relances. À la première activation, le référentiel des documents
+          requis est pré-rempli.
         </p>
       </div>
     </div>

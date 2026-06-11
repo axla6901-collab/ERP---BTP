@@ -63,7 +63,10 @@ describe('verifierConformiteSousTraitant — via Référencement', () => {
         ],
       },
     });
-    const v = await verifierConformiteSousTraitant(st, { referencementActif: true, aujourdhui: TODAY });
+    const v = await verifierConformiteSousTraitant(st, {
+      referencementActif: true,
+      aujourdhui: TODAY,
+    });
     expect(v.ok).toBe(false);
     expect(v.source).toBe('referencement');
     expect(v.raison).toMatch(/Attestation URSSAF/);
@@ -78,7 +81,10 @@ describe('verifierConformiteSousTraitant — via Référencement', () => {
         lignes: [{ libelle: 'Attestation URSSAF', estBloquant: true, statut: 'a_jour' }],
       },
     });
-    const v = await verifierConformiteSousTraitant(st, { referencementActif: true, aujourdhui: TODAY });
+    const v = await verifierConformiteSousTraitant(st, {
+      referencementActif: true,
+      aujourdhui: TODAY,
+    });
     expect(v).toEqual({ ok: true, raison: null, source: 'referencement' });
   });
 

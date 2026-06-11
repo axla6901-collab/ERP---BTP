@@ -44,10 +44,7 @@ describe('calculerQuoteParts', () => {
   });
 
   it('répartit au prorata du montant de marché (somme = 100,00)', () => {
-    const qp = calculerQuoteParts([
-      part('A', '60000'),
-      part('B', '40000'),
-    ]);
+    const qp = calculerQuoteParts([part('A', '60000'), part('B', '40000')]);
     expect(qp.find((q) => q.participantId === 'A')?.pourcent).toBe('60.00');
     expect(qp.find((q) => q.participantId === 'B')?.pourcent).toBe('40.00');
     expect(sommePourcent(qp)).toBeCloseTo(100, 5);
@@ -79,10 +76,7 @@ describe('calculerQuoteParts', () => {
   });
 
   it('manuel à 100 % ⇒ les autres à 0 %', () => {
-    const qp = calculerQuoteParts([
-      part('A', '0', { manuel: '100' }),
-      part('B', '50000'),
-    ]);
+    const qp = calculerQuoteParts([part('A', '0', { manuel: '100' }), part('B', '50000')]);
     const byId = new Map(qp.map((q) => [q.participantId, q]));
     expect(byId.get('A')?.pourcent).toBe('100.00');
     expect(byId.get('B')?.pourcent).toBe('0.00');

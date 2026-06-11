@@ -29,11 +29,7 @@ function formatQuantite(q: string): string {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
 }
 
-export default async function CompositionPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CompositionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const peutEcrire = peutEcrireCatalogue(utilisateur.role);
@@ -48,8 +44,8 @@ export default async function CompositionPage({
         <Alert className="max-w-2xl">
           <AlertTitle>Cet article n&apos;est pas composé</AlertTitle>
           <AlertDescription>
-            Seuls les articles de type « composé » peuvent avoir une nomenclature. Modifie le type de
-            l&apos;article si tu veux le rendre composé.{' '}
+            Seuls les articles de type « composé » peuvent avoir une nomenclature. Modifie le type
+            de l&apos;article si tu veux le rendre composé.{' '}
             <Link href={`/catalogue/articles/${id}`} className="underline underline-offset-4">
               Retour à l&apos;article
             </Link>
@@ -120,7 +116,8 @@ export default async function CompositionPage({
             {!prixRevient.ok && prixRevient.missingCount > 0 && (
               <Alert variant="destructive">
                 <AlertTitle>
-                  {prixRevient.missingCount} composant{prixRevient.missingCount > 1 ? 's' : ''} sans prix
+                  {prixRevient.missingCount} composant{prixRevient.missingCount > 1 ? 's' : ''} sans
+                  prix
                 </AlertTitle>
                 <AlertDescription>
                   Le total n&apos;est pas représentatif. Saisis un prix pour ces articles :
@@ -151,10 +148,13 @@ export default async function CompositionPage({
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              {courante ? `Modifier la composition (version courante : v${courante.version})` : 'Définir la composition'}
+              {courante
+                ? `Modifier la composition (version courante : v${courante.version})`
+                : 'Définir la composition'}
             </CardTitle>
             <CardDescription>
-              Ajoute les composants (matériaux, prestations, sous-ouvrages) avec leur quantité par unité de l&apos;ouvrage.
+              Ajoute les composants (matériaux, prestations, sous-ouvrages) avec leur quantité par
+              unité de l&apos;ouvrage.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -181,14 +181,17 @@ export default async function CompositionPage({
         courante && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Composition courante (v{courante.version})</CardTitle>
+              <CardTitle className="text-base">
+                Composition courante (v{courante.version})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="text-sm">
                 {courante.lignes.map((l) => (
                   <li key={l.id} className="border-b py-1 last:border-0">
                     {formatQuantite(l.quantite)} {l.uniteEmploiSymbole} de{' '}
-                    <span className="font-mono text-xs">{l.composantCode}</span> — {l.composantLibelle}
+                    <span className="font-mono text-xs">{l.composantCode}</span> —{' '}
+                    {l.composantLibelle}
                     {Number(l.coefficientPerte) > 0 && (
                       <span className="ml-2 text-xs text-muted-foreground">
                         (perte {(Number(l.coefficientPerte) * 100).toFixed(1)} %)
@@ -205,7 +208,9 @@ export default async function CompositionPage({
       {historique.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Historique des versions ({historique.length})</CardTitle>
+            <CardTitle className="text-base">
+              Historique des versions ({historique.length})
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {historique.map((v) => (

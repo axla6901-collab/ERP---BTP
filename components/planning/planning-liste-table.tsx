@@ -41,10 +41,7 @@ export function PlanningListeTable({
           {chantiers.map((c) => (
             <TableRow key={c.id} className="group cursor-pointer hover:bg-muted/40">
               <TableCell className="font-mono text-xs">
-                <Link
-                  href={`/${entrepriseSlug}/chantiers/${c.id}/planning`}
-                  className="block py-1"
-                >
+                <Link href={`/${entrepriseSlug}/chantiers/${c.id}/planning`} className="block py-1">
                   {c.numero}
                 </Link>
               </TableCell>
@@ -57,9 +54,7 @@ export function PlanningListeTable({
                 </Link>
               </TableCell>
               <TableCell>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${COULEURS_STATUT[c.statut]}`}
-                >
+                <span className={`rounded-full px-2 py-0.5 text-xs ${COULEURS_STATUT[c.statut]}`}>
                   {LIBELLES_STATUT[c.statut]}
                 </span>
               </TableCell>

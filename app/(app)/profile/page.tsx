@@ -46,7 +46,9 @@ export default async function ProfilePage() {
         <CardContent className="space-y-2 text-sm">
           <p>
             Statut&nbsp;:{' '}
-            <span className={utilisateur.twoFactorEnabled ? 'font-medium' : 'text-muted-foreground'}>
+            <span
+              className={utilisateur.twoFactorEnabled ? 'font-medium' : 'text-muted-foreground'}
+            >
               {utilisateur.twoFactorEnabled ? 'activée' : 'non activée'}
             </span>
           </p>

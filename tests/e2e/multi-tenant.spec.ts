@@ -50,7 +50,7 @@ test.describe('Multi-tenant', () => {
     await expect(page).toHaveURL(/\/default\/catalogue\/articles/, { timeout: 5_000 });
   });
 
-  test('la sidebar affiche l\'entreprise active', async ({ page }) => {
+  test("la sidebar affiche l'entreprise active", async ({ page }) => {
     await login(page);
 
     // Le nom de l'entreprise default doit être visible (badge ou dropdown)
@@ -59,7 +59,7 @@ test.describe('Multi-tenant', () => {
     });
   });
 
-  test('accès à un slug d\'entreprise inexistant → 404', async ({ page }) => {
+  test("accès à un slug d'entreprise inexistant → 404", async ({ page }) => {
     await login(page);
 
     // Tentative d'accès à une entreprise dont l'user n'est PAS membre

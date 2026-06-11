@@ -1,9 +1,6 @@
 import { asc, eq, isNull, isNotNull } from 'drizzle-orm';
 
-import {
-  UtilisateurActions,
-  type RoleOption,
-} from '@/components/admin/utilisateur-actions';
+import { UtilisateurActions, type RoleOption } from '@/components/admin/utilisateur-actions';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -83,9 +80,8 @@ export default async function UtilisateursPage() {
         subtitle={`${actifs.length} actif(s)`}
         actions={
           <span className="text-xs text-muted-foreground">
-            Création de compte via la console super-admin (création d’entreprise) ;
-            promotion admin via{' '}
-            <code className="font-mono text-xs">pnpm bootstrap:admin &lt;email&gt;</code>
+            Création de compte via la console super-admin (création d’entreprise) ; promotion admin
+            via <code className="font-mono text-xs">pnpm bootstrap:admin &lt;email&gt;</code>
           </span>
         }
       />

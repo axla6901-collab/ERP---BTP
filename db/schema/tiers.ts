@@ -110,10 +110,7 @@ export const sousTraitants = pgTable(
       'chk_sous_traitants_taux_retenue',
       sql`taux_retenue_garantie >= 0 AND taux_retenue_garantie <= 10`,
     ),
-    check(
-      'chk_sous_traitants_parent_self',
-      sql`parent_st_id IS NULL OR parent_st_id <> id`,
-    ),
+    check('chk_sous_traitants_parent_self', sql`parent_st_id IS NULL OR parent_st_id <> id`),
   ],
 );
 
@@ -222,10 +219,7 @@ export const documentsTiers = pgTable(
       'chk_documents_tiers_proprietaire_unique',
       sql`(sous_traitant_id IS NOT NULL)::int + (fournisseur_id IS NOT NULL)::int = 1`,
     ),
-    check(
-      'chk_documents_tiers_taille',
-      sql`taille_bytes IS NULL OR taille_bytes > 0`,
-    ),
+    check('chk_documents_tiers_taille', sql`taille_bytes IS NULL OR taille_bytes > 0`),
   ],
 );
 

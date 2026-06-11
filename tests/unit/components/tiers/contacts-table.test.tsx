@@ -136,8 +136,6 @@ describe('ContactsTable', () => {
     const onChangerStatut = vi.fn().mockResolvedValue({ ok: true });
     render(<ContactsTable items={[FOURNISSEUR]} onChangerStatut={onChangerStatut} />);
     fireEvent.click(screen.getByRole('button', { name: 'Désactiver' }));
-    await waitFor(() =>
-      expect(onChangerStatut).toHaveBeenCalledWith('fournisseur', 'fc1', false),
-    );
+    await waitFor(() => expect(onChangerStatut).toHaveBeenCalledWith('fournisseur', 'fc1', false));
   });
 });

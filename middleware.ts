@@ -64,9 +64,7 @@ export function middleware(request: NextRequest) {
   if (estRouteTenantLegacy(pathname) && !estRouteHorsTenant(pathname)) {
     const activeSlug = request.cookies.get(ACTIVE_ENTREPRISE_COOKIE)?.value;
     if (activeSlug) {
-      return NextResponse.redirect(
-        new URL(`/${activeSlug}${pathname}${search}`, request.url),
-      );
+      return NextResponse.redirect(new URL(`/${activeSlug}${pathname}${search}`, request.url));
     }
     const fallback = new URL('/select-entreprise', request.url);
     fallback.searchParams.set('redirect_to', `${pathname}${search}`);
@@ -86,6 +84,6 @@ export const config = {
   // servis SANS session (référencés depuis /login, requis pour installer la
   // PWA et amorcer le service worker) — sinon ils sont redirigés vers /login.
   matcher: [
-    '/((?!api/auth|api/entreprise/switch|_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|icons|login|signup|verify-email|magic-link-sent|two-factor).*)',
+    '/((?!api/auth|api/entreprise/switch|_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|icons|login|signup|forgot-password|reset-password|verify-email|magic-link-sent|two-factor).*)',
   ],
 };

@@ -45,7 +45,7 @@ describe('DevisTable — bouton Dupliquer', () => {
   });
   afterEach(() => cleanup());
 
-  it('absent quand dupliquerAction n\'est pas fourni', () => {
+  it("absent quand dupliquerAction n'est pas fourni", () => {
     render(<DevisTable items={[ITEM]} peutEcrire={true} />);
     expect(
       screen.queryByRole('button', { name: /Dupliquer DEV-2026-00001/ }),
@@ -53,29 +53,15 @@ describe('DevisTable — bouton Dupliquer', () => {
   });
 
   it('absent en lecture seule même si dupliquerAction est fourni', () => {
-    render(
-      <DevisTable
-        items={[ITEM]}
-        peutEcrire={false}
-        dupliquerAction={vi.fn()}
-      />,
-    );
+    render(<DevisTable items={[ITEM]} peutEcrire={false} dupliquerAction={vi.fn()} />);
     expect(
       screen.queryByRole('button', { name: /Dupliquer DEV-2026-00001/ }),
     ).not.toBeInTheDocument();
   });
 
   it('présent quand peutEcrire + dupliquerAction fournis', () => {
-    render(
-      <DevisTable
-        items={[ITEM]}
-        peutEcrire={true}
-        dupliquerAction={vi.fn()}
-      />,
-    );
-    expect(
-      screen.getByRole('button', { name: /Dupliquer DEV-2026-00001/ }),
-    ).toBeInTheDocument();
+    render(<DevisTable items={[ITEM]} peutEcrire={true} dupliquerAction={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /Dupliquer DEV-2026-00001/ })).toBeInTheDocument();
   });
 
   it('clic ouvre le dialog DupliquerDevisDialog', () => {
@@ -88,9 +74,7 @@ describe('DevisTable — bouton Dupliquer', () => {
       />,
     );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole('button', { name: /Dupliquer DEV-2026-00001/ }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: /Dupliquer DEV-2026-00001/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Dupliquer le devis')).toBeInTheDocument();
   });

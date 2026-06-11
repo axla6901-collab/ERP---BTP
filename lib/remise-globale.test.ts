@@ -93,14 +93,11 @@ describe('appliquerRemiseGlobale', () => {
     expect(r.totalHt).toBe('900.00');
     expect(r.totalTva).toBe('139.50');
     // Cohérence : brut − remise = net
-    expect(
-      (Number(r.totalHtAvantRemise) - Number(r.remiseGlobaleMontant)).toFixed(2),
-    ).toBe(r.totalHt);
-    // Cohérence : Σ bases = totalHt
-    const sommeBases = Object.values(r.detailsTva).reduce(
-      (acc, d) => acc + Number(d.base),
-      0,
+    expect((Number(r.totalHtAvantRemise) - Number(r.remiseGlobaleMontant)).toFixed(2)).toBe(
+      r.totalHt,
     );
+    // Cohérence : Σ bases = totalHt
+    const sommeBases = Object.values(r.detailsTva).reduce((acc, d) => acc + Number(d.base), 0);
     expect(sommeBases.toFixed(2)).toBe(r.totalHt);
   });
 

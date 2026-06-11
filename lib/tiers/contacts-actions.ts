@@ -177,9 +177,7 @@ export async function changerStatutContact(
         const [before] = await tx
           .select()
           .from(fournisseurContacts)
-          .where(
-            and(eq(fournisseurContacts.id, contactId), isNull(fournisseurContacts.deletedAt)),
-          );
+          .where(and(eq(fournisseurContacts.id, contactId), isNull(fournisseurContacts.deletedAt)));
         if (!before) throw new Error('NOT_FOUND');
         const principal = principalCible ?? before.principal;
         if (before.actif === actif && before.principal === principal) return;

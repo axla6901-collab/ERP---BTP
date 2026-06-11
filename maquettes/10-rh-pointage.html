@@ -1,353 +1,585 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pointages · M1 · ERP BTP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }</style>
-</head>
-<body class="min-h-screen bg-neutral-50 text-neutral-900">
-
-  <header class="sticky top-0 z-20 border-b bg-white">
-    <div class="flex h-14 items-center gap-4 px-6">
-      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
-      <div class="flex items-center gap-2">
-        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
-        <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700">ERP BTP</a>
-        <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">Compte-R BTP ▾</button>
-      </div>
-      <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
-        <a class="hover:text-neutral-900">RH</a>
-        <span class="text-neutral-300">/</span>
-        <a class="hover:text-neutral-900">Pointages</a>
-        <span class="text-neutral-300">/</span>
-        <span class="text-neutral-900">Saisie matrice — semaine 21</span>
-      </nav>
-      <div class="flex-1"></div>
-      <div class="flex items-center gap-3">
-        <button class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100">
-          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
-        </button>
-        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
-        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
-          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pointages · M1 · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-50 text-neutral-900">
+    <header class="sticky top-0 z-20 border-b bg-white">
+      <div class="flex h-14 items-center gap-4 px-6">
+        <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
+        <div class="flex items-center gap-2">
+          <div
+            class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white"
+          >
+            B
+          </div>
+          <a href="01-chantier-first.html" class="text-sm font-semibold hover:text-amber-700"
+            >ERP BTP</a
+          >
+          <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">
+            Compte-R BTP ▾
+          </button>
+        </div>
+        <nav class="ml-3 flex items-center gap-1.5 text-xs text-neutral-500">
+          <a class="hover:text-neutral-900">RH</a>
+          <span class="text-neutral-300">/</span>
+          <a class="hover:text-neutral-900">Pointages</a>
+          <span class="text-neutral-300">/</span>
+          <span class="text-neutral-900">Saisie matrice — semaine 21</span>
+        </nav>
+        <div class="flex-1"></div>
+        <div class="flex items-center gap-3">
+          <button
+            class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100"
+          >
+            <span>🔍</span><span>Rechercher…</span
+            ><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+          </button>
+          <button class="relative rounded p-2 hover:bg-neutral-100">
+            🔔<span
+              class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white"
+              >3</span
+            >
+          </button>
+          <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+            <div class="size-6 rounded-full bg-amber-200"></div>
+            <span>Alex</span>
+          </div>
         </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="mx-auto max-w-[1400px] px-6 py-6">
-
-    <div class="mb-5 flex items-end justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Saisie matrice — Semaine 21</h1>
-        <p class="mt-1 text-sm text-neutral-500">25 → 31 mai 2026 · 6 employés · 5 chantiers</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">‹ Sem. 20</button>
-        <button class="rounded border bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800">Sem. 21 (en cours)</button>
-        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Sem. 22 ›</button>
-        <div class="mx-2 h-6 w-px bg-neutral-200"></div>
-        <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">Importer CSV</button>
-        <button class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">Valider la semaine</button>
-      </div>
-    </div>
-
-    <!-- Récap KPI -->
-    <div class="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div class="rounded-xl border bg-white p-4 shadow-sm">
-        <div class="text-xs text-neutral-500">Heures totales</div>
-        <div class="mt-1 text-2xl font-semibold tabular-nums">218 h</div>
-        <div class="mt-1 text-xs text-neutral-500">sur 240 h théoriques</div>
-      </div>
-      <div class="rounded-xl border bg-white p-4 shadow-sm">
-        <div class="text-xs text-neutral-500">Coût main d'œuvre</div>
-        <div class="mt-1 text-2xl font-semibold tabular-nums">10 464 €</div>
-        <div class="mt-1 text-xs text-neutral-500">48 €/h moy. chargé</div>
-      </div>
-      <div class="rounded-xl border bg-white p-4 shadow-sm">
-        <div class="text-xs text-neutral-500">Heures sup.</div>
-        <div class="mt-1 text-2xl font-semibold tabular-nums text-amber-700">12 h</div>
-        <div class="mt-1 text-xs text-amber-700">2 employés concernés</div>
-      </div>
-      <div class="rounded-xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
-        <div class="text-xs text-rose-700">⚠ À justifier</div>
-        <div class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">1</div>
-        <div class="mt-1 text-xs text-rose-600">J. Bernard · jeudi</div>
-      </div>
-    </div>
-
-    <!-- Matrice -->
-    <section class="rounded-xl border bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b px-5 py-3">
+    <main class="mx-auto max-w-[1400px] px-6 py-6">
+      <div class="mb-5 flex items-end justify-between">
         <div>
-          <h2 class="text-base font-semibold">Matrice heures × chantier</h2>
-          <p class="text-xs text-neutral-500">Ligne = employé · Colonne = jour · Cellule = heures par chantier</p>
+          <h1 class="text-2xl font-semibold tracking-tight">Saisie matrice — Semaine 21</h1>
+          <p class="mt-1 text-sm text-neutral-500">25 → 31 mai 2026 · 6 employés · 5 chantiers</p>
         </div>
-        <div class="flex gap-2 text-xs">
-          <button class="rounded border px-2 py-1 hover:bg-neutral-50">Tout déplier</button>
-          <button class="rounded border px-2 py-1 hover:bg-neutral-50">Imprimer</button>
+        <div class="flex items-center gap-2">
+          <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">
+            ‹ Sem. 20
+          </button>
+          <button
+            class="rounded border bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800"
+          >
+            Sem. 21 (en cours)
+          </button>
+          <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">
+            Sem. 22 ›
+          </button>
+          <div class="mx-2 h-6 w-px bg-neutral-200"></div>
+          <button class="rounded border px-2.5 py-1.5 text-xs hover:bg-neutral-50">
+            Importer CSV
+          </button>
+          <button
+            class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
+          >
+            Valider la semaine
+          </button>
         </div>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
-            <tr>
-              <th class="px-4 py-2.5 font-medium">Employé</th>
-              <th class="px-3 py-2.5 text-center font-medium">Lun 25</th>
-              <th class="px-3 py-2.5 text-center font-medium">Mar 26</th>
-              <th class="px-3 py-2.5 text-center font-medium">Mer 27</th>
-              <th class="px-3 py-2.5 text-center font-medium">Jeu 28</th>
-              <th class="px-3 py-2.5 text-center font-medium">Ven 29</th>
-              <th class="px-3 py-2.5 text-center font-medium">Sam 30</th>
-              <th class="px-4 py-2.5 text-right font-medium">Total</th>
-              <th class="px-4 py-2.5 font-medium">Statut</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y">
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-amber-100 text-center text-xs leading-7 text-amber-800">PD</div>
-                  <div>
-                    <div class="font-medium">Pierre Dupont</div>
-                    <div class="text-xs text-neutral-500">Maçon · CDI</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">38 h</td>
-              <td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">✓ ok</span></td>
-            </tr>
-
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-sky-100 text-center text-xs leading-7 text-sky-800">ML</div>
-                  <div>
-                    <div class="font-medium">Marc Leroy</div>
-                    <div class="text-xs text-neutral-500">Couvreur · CDI</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">9 h</div>
-                <div class="mt-0.5 text-[10px] text-amber-700">+1h sup.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">40 h <span class="text-xs text-amber-700">(+1)</span></td>
-              <td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">✓ ok</span></td>
-            </tr>
-
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-violet-100 text-center text-xs leading-7 text-violet-800">JB</div>
-                  <div>
-                    <div class="font-medium">Julien Bernard</div>
-                    <div class="text-xs text-neutral-500">Maçon · CDI</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded border border-dashed border-rose-400 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700">? h</div>
-                <div class="mt-0.5 text-[10px] text-rose-600">à saisir</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">32 h</td>
-              <td class="px-4 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">⚠ incomplet</span></td>
-            </tr>
-
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-emerald-100 text-center text-xs leading-7 text-emerald-800">SF</div>
-                  <div>
-                    <div class="font-medium">Sami Fontaine</div>
-                    <div class="text-xs text-neutral-500">Apprenti · CDD</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600">CFA</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">formation</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600">CFA</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">formation</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">21 h <span class="text-xs text-neutral-500">+14 CFA</span></td>
-              <td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">✓ ok</span></td>
-            </tr>
-
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-sky-100 text-center text-xs leading-7 text-sky-800">CR</div>
-                  <div>
-                    <div class="font-medium">Camille Roy</div>
-                    <div class="text-xs text-neutral-500">Plâtrier · CDI</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800">9 h</div>
-                <div class="mt-0.5 text-[10px] text-amber-700">+1h sup.</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">40 h <span class="text-xs text-amber-700">(+1)</span></td>
-              <td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">✓ ok</span></td>
-            </tr>
-
-            <tr class="hover:bg-neutral-50/40">
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div class="size-7 rounded-full bg-neutral-200 text-center text-xs leading-7 text-neutral-700">AM</div>
-                  <div>
-                    <div class="font-medium">Adrien Moreau</div>
-                    <div class="text-xs text-neutral-500">Plombier · CDI</div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">8 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600">CP</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">congé payé</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600">CP</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">congé payé</div>
-              </td>
-              <td class="px-3 py-3 text-center">
-                <div class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800">7 h</div>
-                <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
-              </td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
-              <td class="px-4 py-3 text-right font-semibold tabular-nums">23 h <span class="text-xs text-neutral-500">+14 CP</span></td>
-              <td class="px-4 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">✓ ok</span></td>
-            </tr>
-          </tbody>
-          <tfoot class="border-t-2 border-neutral-200 bg-neutral-50/60 text-sm">
-            <tr>
-              <td class="px-4 py-3 font-medium uppercase text-xs tracking-widest text-neutral-500">Total jour</td>
-              <td class="px-3 py-3 text-center font-semibold tabular-nums">39 h</td>
-              <td class="px-3 py-3 text-center font-semibold tabular-nums">40 h</td>
-              <td class="px-3 py-3 text-center font-semibold tabular-nums">31 h</td>
-              <td class="px-3 py-3 text-center font-semibold tabular-nums">25 h</td>
-              <td class="px-3 py-3 text-center font-semibold tabular-nums">36 h</td>
-              <td class="px-3 py-3 text-center text-xs text-neutral-400">—</td>
-              <td class="px-4 py-3 text-right font-bold tabular-nums text-amber-700">194 h</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div class="flex items-center justify-between border-t bg-neutral-50/30 px-5 py-3 text-xs text-neutral-600">
-        <div>Légende :
-          <span class="ml-2 inline-block size-3 rounded bg-amber-100"></span> École Marg. / Villa
-          <span class="ml-3 inline-block size-3 rounded bg-emerald-100"></span> Marg./Mairie
-          <span class="ml-3 inline-block size-3 rounded bg-rose-100"></span> Logements R3
-          <span class="ml-3 inline-block size-3 rounded bg-sky-100"></span> Cabinet médical
-          <span class="ml-3 inline-block size-3 rounded bg-neutral-200"></span> CP / formation
+      <!-- Récap KPI -->
+      <div class="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs text-neutral-500">Heures totales</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums">218 h</div>
+          <div class="mt-1 text-xs text-neutral-500">sur 240 h théoriques</div>
         </div>
-        <div>Dernière sauvegarde auto · il y a 12 s</div>
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs text-neutral-500">Coût main d'œuvre</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums">10 464 €</div>
+          <div class="mt-1 text-xs text-neutral-500">48 €/h moy. chargé</div>
+        </div>
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+          <div class="text-xs text-neutral-500">Heures sup.</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums text-amber-700">12 h</div>
+          <div class="mt-1 text-xs text-amber-700">2 employés concernés</div>
+        </div>
+        <div class="rounded-xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
+          <div class="text-xs text-rose-700">⚠ À justifier</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">1</div>
+          <div class="mt-1 text-xs text-rose-600">J. Bernard · jeudi</div>
+        </div>
       </div>
-    </section>
 
-    <p class="mt-8 text-center text-xs text-neutral-400">
-      M1 — Saisie matrice façon tableur. Une cellule = heures + chantier. Les couleurs encodent le chantier. Validation hebdomadaire.
-    </p>
-  </main>
-</body>
+      <!-- Matrice -->
+      <section class="rounded-xl border bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b px-5 py-3">
+          <div>
+            <h2 class="text-base font-semibold">Matrice heures × chantier</h2>
+            <p class="text-xs text-neutral-500">
+              Ligne = employé · Colonne = jour · Cellule = heures par chantier
+            </p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <button class="rounded border px-2 py-1 hover:bg-neutral-50">Tout déplier</button>
+            <button class="rounded border px-2 py-1 hover:bg-neutral-50">Imprimer</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead
+              class="border-b bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500"
+            >
+              <tr>
+                <th class="px-4 py-2.5 font-medium">Employé</th>
+                <th class="px-3 py-2.5 text-center font-medium">Lun 25</th>
+                <th class="px-3 py-2.5 text-center font-medium">Mar 26</th>
+                <th class="px-3 py-2.5 text-center font-medium">Mer 27</th>
+                <th class="px-3 py-2.5 text-center font-medium">Jeu 28</th>
+                <th class="px-3 py-2.5 text-center font-medium">Ven 29</th>
+                <th class="px-3 py-2.5 text-center font-medium">Sam 30</th>
+                <th class="px-4 py-2.5 text-right font-medium">Total</th>
+                <th class="px-4 py-2.5 font-medium">Statut</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-amber-100 text-center text-xs leading-7 text-amber-800"
+                    >
+                      PD
+                    </div>
+                    <div>
+                      <div class="font-medium">Pierre Dupont</div>
+                      <div class="text-xs text-neutral-500">Maçon · CDI</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">38 h</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    >✓ ok</span
+                  >
+                </td>
+              </tr>
+
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-sky-100 text-center text-xs leading-7 text-sky-800"
+                    >
+                      ML
+                    </div>
+                    <div>
+                      <div class="font-medium">Marc Leroy</div>
+                      <div class="text-xs text-neutral-500">Couvreur · CDI</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    9 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-amber-700">+1h sup.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">École Marg.</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">
+                  40 h <span class="text-xs text-amber-700">(+1)</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    >✓ ok</span
+                  >
+                </td>
+              </tr>
+
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-violet-100 text-center text-xs leading-7 text-violet-800"
+                    >
+                      JB
+                    </div>
+                    <div>
+                      <div class="font-medium">Julien Bernard</div>
+                      <div class="text-xs text-neutral-500">Maçon · CDI</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded border border-dashed border-rose-400 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700"
+                  >
+                    ? h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-rose-600">à saisir</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-rose-100 px-2 py-1 text-xs font-medium text-rose-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Logements R3</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">32 h</td>
+                <td class="px-4 py-3">
+                  <span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800"
+                    >⚠ incomplet</span
+                  >
+                </td>
+              </tr>
+
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-emerald-100 text-center text-xs leading-7 text-emerald-800"
+                    >
+                      SF
+                    </div>
+                    <div>
+                      <div class="font-medium">Sami Fontaine</div>
+                      <div class="text-xs text-neutral-500">Apprenti · CDD</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600"
+                  >
+                    CFA
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">formation</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600"
+                  >
+                    CFA
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">formation</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Villa Dubois</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">
+                  21 h <span class="text-xs text-neutral-500">+14 CFA</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    >✓ ok</span
+                  >
+                </td>
+              </tr>
+
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-sky-100 text-center text-xs leading-7 text-sky-800"
+                    >
+                      CR
+                    </div>
+                    <div>
+                      <div class="font-medium">Camille Roy</div>
+                      <div class="text-xs text-neutral-500">Plâtrier · CDI</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800"
+                  >
+                    9 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-amber-700">+1h sup.</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-sky-100 px-2 py-1 text-xs font-medium text-sky-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Cabinet méd.</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">
+                  40 h <span class="text-xs text-amber-700">(+1)</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    >✓ ok</span
+                  >
+                </td>
+              </tr>
+
+              <tr class="hover:bg-neutral-50/40">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="size-7 rounded-full bg-neutral-200 text-center text-xs leading-7 text-neutral-700"
+                    >
+                      AM
+                    </div>
+                    <div>
+                      <div class="font-medium">Adrien Moreau</div>
+                      <div class="text-xs text-neutral-500">Plombier · CDI</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    8 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600"
+                  >
+                    CP
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">congé payé</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-neutral-200 px-2 py-1 text-xs font-medium text-neutral-600"
+                  >
+                    CP
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">congé payé</div>
+                </td>
+                <td class="px-3 py-3 text-center">
+                  <div
+                    class="mx-auto inline-block rounded bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-800"
+                  >
+                    7 h
+                  </div>
+                  <div class="mt-0.5 text-[10px] text-neutral-500">Réhab. Mairie</div>
+                </td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-300">—</td>
+                <td class="px-4 py-3 text-right font-semibold tabular-nums">
+                  23 h <span class="text-xs text-neutral-500">+14 CP</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800"
+                    >✓ ok</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+            <tfoot class="border-t-2 border-neutral-200 bg-neutral-50/60 text-sm">
+              <tr>
+                <td
+                  class="px-4 py-3 text-xs font-medium uppercase tracking-widest text-neutral-500"
+                >
+                  Total jour
+                </td>
+                <td class="px-3 py-3 text-center font-semibold tabular-nums">39 h</td>
+                <td class="px-3 py-3 text-center font-semibold tabular-nums">40 h</td>
+                <td class="px-3 py-3 text-center font-semibold tabular-nums">31 h</td>
+                <td class="px-3 py-3 text-center font-semibold tabular-nums">25 h</td>
+                <td class="px-3 py-3 text-center font-semibold tabular-nums">36 h</td>
+                <td class="px-3 py-3 text-center text-xs text-neutral-400">—</td>
+                <td class="px-4 py-3 text-right font-bold tabular-nums text-amber-700">194 h</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div
+          class="flex items-center justify-between border-t bg-neutral-50/30 px-5 py-3 text-xs text-neutral-600"
+        >
+          <div>
+            Légende : <span class="ml-2 inline-block size-3 rounded bg-amber-100"></span> École
+            Marg. / Villa
+            <span class="ml-3 inline-block size-3 rounded bg-emerald-100"></span> Marg./Mairie
+            <span class="ml-3 inline-block size-3 rounded bg-rose-100"></span> Logements R3
+            <span class="ml-3 inline-block size-3 rounded bg-sky-100"></span> Cabinet médical
+            <span class="ml-3 inline-block size-3 rounded bg-neutral-200"></span> CP / formation
+          </div>
+          <div>Dernière sauvegarde auto · il y a 12 s</div>
+        </div>
+      </section>
+
+      <p class="mt-8 text-center text-xs text-neutral-400">
+        M1 — Saisie matrice façon tableur. Une cellule = heures + chantier. Les couleurs encodent le
+        chantier. Validation hebdomadaire.
+      </p>
+    </main>
+  </body>
 </html>

@@ -1,228 +1,319 @@
 <!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>M1 — Chantier-first · ERP BTP</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    .gantt-bar { transition: transform .15s ease; }
-    .gantt-bar:hover { transform: translateY(-1px); }
-    .gantt-bar.active { box-shadow: 0 0 0 2px white, 0 0 0 4px rgb(245 158 11); }
-  </style>
-</head>
-<body class="min-h-screen bg-neutral-50 text-neutral-900">
-
-  <!-- Top bar -->
-  <header class="sticky top-0 z-20 border-b bg-white">
-    <div class="flex h-14 items-center gap-4 px-6">
-      <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
-      <div class="flex items-center gap-2">
-        <div class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</div>
-        <div class="text-sm font-semibold">ERP BTP</div>
-        <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">Compte-R BTP ▾</button>
-      </div>
-      <div class="flex-1"></div>
-      <div class="flex items-center gap-3">
-        <button class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100">
-          <span>🔍</span><span>Rechercher…</span><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
-        </button>
-        <button class="relative rounded p-2 hover:bg-neutral-100">🔔<span class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white">3</span></button>
-        <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
-          <div class="size-6 rounded-full bg-amber-200"></div><span>Alex</span>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="mx-auto max-w-[1400px] px-6 py-6">
-
-    <!-- Timeline chantiers -->
-    <section class="rounded-xl border bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b px-5 py-3">
-        <div>
-          <h1 class="text-base font-semibold">Mes chantiers actifs</h1>
-          <p class="text-xs text-neutral-500">7 chantiers · 3 mois affichés</p>
-        </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M1 — Chantier-first · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      .gantt-bar {
+        transition: transform 0.15s ease;
+      }
+      .gantt-bar:hover {
+        transform: translateY(-1px);
+      }
+      .gantt-bar.active {
+        box-shadow:
+          0 0 0 2px white,
+          0 0 0 4px rgb(245 158 11);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-50 text-neutral-900">
+    <!-- Top bar -->
+    <header class="sticky top-0 z-20 border-b bg-white">
+      <div class="flex h-14 items-center gap-4 px-6">
+        <a href="index.html" class="text-xs text-neutral-500 hover:text-neutral-900">← retour</a>
         <div class="flex items-center gap-2">
-          <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Filtre ▾</button>
-          <button class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600">+ Nouveau chantier</button>
-        </div>
-      </div>
-      <div class="overflow-x-auto px-5 py-4">
-        <div class="min-w-[1100px]">
-          <!-- Months header -->
-          <div class="grid grid-cols-[100px_repeat(12,1fr)] text-[11px] text-neutral-500">
-            <div></div>
-            <div class="col-span-4 border-l pl-2">Mai 2026</div>
-            <div class="col-span-4 border-l pl-2">Juin 2026</div>
-            <div class="col-span-4 border-l pl-2">Juillet 2026</div>
+          <div
+            class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white"
+          >
+            B
           </div>
-
-          <!-- Rows -->
-          <div class="mt-2 space-y-2">
-            <!-- row 1 -->
-            <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
-              <div class="truncate text-xs font-medium">Villa Dubois</div>
-              <div class="col-span-3"></div>
-              <div class="gantt-bar col-span-3 rounded-md bg-amber-200 px-2 py-1.5 text-[11px] text-amber-900">Villa Dubois · 68%</div>
-            </div>
-            <!-- row 2 (active) -->
-            <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
-              <div class="truncate text-xs font-semibold text-amber-700">École Marguerite</div>
-              <div class="col-span-1"></div>
-              <div class="gantt-bar active col-span-6 rounded-md bg-amber-500 px-2 py-1.5 text-[11px] font-medium text-white">École Marguerite · 92%</div>
-            </div>
-            <!-- row 3 -->
-            <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
-              <div class="truncate text-xs font-medium">Logements R+3</div>
-              <div class="col-span-4"></div>
-              <div class="gantt-bar col-span-5 rounded-md bg-rose-200 px-2 py-1.5 text-[11px] text-rose-900">Logements R+3 · 34% ⚠</div>
-            </div>
-            <!-- row 4 -->
-            <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
-              <div class="truncate text-xs font-medium">Réhab. Mairie</div>
-              <div class="col-span-7"></div>
-              <div class="gantt-bar col-span-3 rounded-md bg-emerald-200 px-2 py-1.5 text-[11px] text-emerald-900">Réhab. Mairie · 12%</div>
-            </div>
-            <!-- row 5 -->
-            <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
-              <div class="truncate text-xs font-medium">Cabinet médical</div>
-              <div class="col-span-5"></div>
-              <div class="gantt-bar col-span-3 rounded-md bg-sky-200 px-2 py-1.5 text-[11px] text-sky-900">Cabinet · 45%</div>
-            </div>
-          </div>
+          <div class="text-sm font-semibold">ERP BTP</div>
+          <button class="rounded border px-2 py-0.5 text-xs text-neutral-600 hover:bg-neutral-50">
+            Compte-R BTP ▾
+          </button>
         </div>
-      </div>
-    </section>
-
-    <!-- Chantier sélectionné -->
-    <section class="mt-6 rounded-xl border bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b px-5 py-3">
+        <div class="flex-1"></div>
         <div class="flex items-center gap-3">
-          <div class="size-2 rounded-full bg-amber-500"></div>
-          <h2 class="text-lg font-semibold">École Marguerite</h2>
-          <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">en cours</span>
-          <span class="text-xs text-neutral-500">Réf. CH-2026-014 · Maître d'ouvrage : Commune de Saint-Étienne</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Imprimer</button>
-          <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Partager</button>
-          <button class="rounded bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800">Action ▾</button>
+          <button
+            class="flex items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-500 hover:bg-neutral-100"
+          >
+            <span>🔍</span><span>Rechercher…</span
+            ><kbd class="ml-2 rounded border bg-white px-1 text-[10px]">⌘K</kbd>
+          </button>
+          <button class="relative rounded p-2 hover:bg-neutral-100">
+            🔔<span
+              class="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-rose-500 text-[9px] text-white"
+              >3</span
+            >
+          </button>
+          <div class="flex items-center gap-2 rounded-full border bg-white px-2 py-1 pr-3 text-sm">
+            <div class="size-6 rounded-full bg-amber-200"></div>
+            <span>Alex</span>
+          </div>
         </div>
       </div>
+    </header>
 
-      <!-- Tabs contextuelles -->
-      <nav class="flex gap-1 border-b px-3">
-        <a class="border-b-2 border-amber-500 px-3 py-2.5 text-sm font-medium text-amber-700">Aperçu</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Devis</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Pointages</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Factures</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Achats</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Sous-traitants</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Documents</a>
-        <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Photos</a>
-      </nav>
-
-      <div class="grid grid-cols-1 gap-6 p-6 lg:grid-cols-3">
-        <!-- KPI block -->
-        <div class="space-y-4 lg:col-span-2">
-          <div class="grid gap-4 sm:grid-cols-4">
-            <div class="rounded-lg border bg-neutral-50 p-4">
-              <div class="text-xs text-neutral-500">Avancement</div>
-              <div class="mt-1 text-2xl font-semibold">92%</div>
-              <div class="mt-2 h-1.5 rounded bg-neutral-200"><div class="h-full w-[92%] rounded bg-amber-500"></div></div>
-            </div>
-            <div class="rounded-lg border bg-neutral-50 p-4">
-              <div class="text-xs text-neutral-500">Marge actuelle</div>
-              <div class="mt-1 text-2xl font-semibold text-emerald-700">+28 100 €</div>
-              <div class="mt-1 text-xs text-emerald-600">+2.1 % vs prévision</div>
-            </div>
-            <div class="rounded-lg border bg-neutral-50 p-4">
-              <div class="text-xs text-neutral-500">Reste à faire</div>
-              <div class="mt-1 text-2xl font-semibold">8 j</div>
-              <div class="mt-1 text-xs text-neutral-500">livraison 03/06</div>
-            </div>
-            <div class="rounded-lg border bg-neutral-50 p-4">
-              <div class="text-xs text-neutral-500">Pointage cette sem.</div>
-              <div class="mt-1 text-2xl font-semibold">178 h</div>
-              <div class="mt-1 text-xs text-neutral-500">sur 200 h prévues</div>
-            </div>
+    <main class="mx-auto max-w-[1400px] px-6 py-6">
+      <!-- Timeline chantiers -->
+      <section class="rounded-xl border bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b px-5 py-3">
+          <div>
+            <h1 class="text-base font-semibold">Mes chantiers actifs</h1>
+            <p class="text-xs text-neutral-500">7 chantiers · 3 mois affichés</p>
           </div>
-
-          <!-- Activité timeline -->
-          <div class="rounded-lg border">
-            <div class="border-b px-4 py-2.5 text-sm font-medium">Activité de la semaine</div>
-            <ul class="divide-y text-sm">
-              <li class="flex items-start gap-3 px-4 py-3">
-                <div class="mt-0.5 size-2 shrink-0 rounded-full bg-emerald-500"></div>
-                <div class="flex-1">
-                  <div><span class="font-medium">P. Dupont</span> a pointé <span class="font-medium">7 h</span></div>
-                  <div class="text-xs text-neutral-500">14:32 — aujourd'hui</div>
-                </div>
-              </li>
-              <li class="flex items-start gap-3 px-4 py-3">
-                <div class="mt-0.5 size-2 shrink-0 rounded-full bg-sky-500"></div>
-                <div class="flex-1">
-                  <div><span class="font-medium">M. Leroy</span> a réceptionné le bon de livraison <span class="font-medium">BTN-025</span></div>
-                  <div class="text-xs text-neutral-500">14:11 — aujourd'hui</div>
-                </div>
-              </li>
-              <li class="flex items-start gap-3 px-4 py-3">
-                <div class="mt-0.5 size-2 shrink-0 rounded-full bg-amber-500"></div>
-                <div class="flex-1">
-                  <div>Devis <span class="font-medium">DV-2026-042</span> envoyé à la mairie</div>
-                  <div class="text-xs text-neutral-500">hier · 18:02</div>
-                </div>
-              </li>
-              <li class="flex items-start gap-3 px-4 py-3">
-                <div class="mt-0.5 size-2 shrink-0 rounded-full bg-violet-500"></div>
-                <div class="flex-1">
-                  <div>Sous-traitance <span class="font-medium">Plomberie Martin</span> validée</div>
-                  <div class="text-xs text-neutral-500">23/05 · 10:14</div>
-                </div>
-              </li>
-            </ul>
+          <div class="flex items-center gap-2">
+            <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Filtre ▾</button>
+            <button
+              class="rounded bg-amber-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
+            >
+              + Nouveau chantier
+            </button>
           </div>
         </div>
+        <div class="overflow-x-auto px-5 py-4">
+          <div class="min-w-[1100px]">
+            <!-- Months header -->
+            <div class="grid grid-cols-[100px_repeat(12,1fr)] text-[11px] text-neutral-500">
+              <div></div>
+              <div class="col-span-4 border-l pl-2">Mai 2026</div>
+              <div class="col-span-4 border-l pl-2">Juin 2026</div>
+              <div class="col-span-4 border-l pl-2">Juillet 2026</div>
+            </div>
 
-        <!-- Side : carte + équipe -->
-        <div class="space-y-4">
-          <div class="overflow-hidden rounded-lg border">
-            <div class="border-b px-4 py-2.5 text-sm font-medium">Localisation</div>
-            <div class="relative h-40 bg-gradient-to-br from-emerald-100 via-emerald-50 to-sky-100">
-              <div class="absolute inset-0 grid place-items-center">
-                <div class="rounded-full bg-amber-500 px-2 py-1 text-xs font-medium text-white shadow-lg">📍 École Marguerite</div>
+            <!-- Rows -->
+            <div class="mt-2 space-y-2">
+              <!-- row 1 -->
+              <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
+                <div class="truncate text-xs font-medium">Villa Dubois</div>
+                <div class="col-span-3"></div>
+                <div
+                  class="gantt-bar col-span-3 rounded-md bg-amber-200 px-2 py-1.5 text-[11px] text-amber-900"
+                >
+                  Villa Dubois · 68%
+                </div>
+              </div>
+              <!-- row 2 (active) -->
+              <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
+                <div class="truncate text-xs font-semibold text-amber-700">École Marguerite</div>
+                <div class="col-span-1"></div>
+                <div
+                  class="gantt-bar active col-span-6 rounded-md bg-amber-500 px-2 py-1.5 text-[11px] font-medium text-white"
+                >
+                  École Marguerite · 92%
+                </div>
+              </div>
+              <!-- row 3 -->
+              <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
+                <div class="truncate text-xs font-medium">Logements R+3</div>
+                <div class="col-span-4"></div>
+                <div
+                  class="gantt-bar col-span-5 rounded-md bg-rose-200 px-2 py-1.5 text-[11px] text-rose-900"
+                >
+                  Logements R+3 · 34% ⚠
+                </div>
+              </div>
+              <!-- row 4 -->
+              <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
+                <div class="truncate text-xs font-medium">Réhab. Mairie</div>
+                <div class="col-span-7"></div>
+                <div
+                  class="gantt-bar col-span-3 rounded-md bg-emerald-200 px-2 py-1.5 text-[11px] text-emerald-900"
+                >
+                  Réhab. Mairie · 12%
+                </div>
+              </div>
+              <!-- row 5 -->
+              <div class="grid grid-cols-[100px_repeat(12,1fr)] items-center gap-x-1">
+                <div class="truncate text-xs font-medium">Cabinet médical</div>
+                <div class="col-span-5"></div>
+                <div
+                  class="gantt-bar col-span-3 rounded-md bg-sky-200 px-2 py-1.5 text-[11px] text-sky-900"
+                >
+                  Cabinet · 45%
+                </div>
               </div>
             </div>
-            <div class="px-4 py-3 text-xs text-neutral-600">12 rue des Tilleuls, 42000 Saint-Étienne</div>
-          </div>
-
-          <div class="rounded-lg border">
-            <div class="border-b px-4 py-2.5 text-sm font-medium">Équipe sur chantier</div>
-            <ul class="divide-y text-sm">
-              <li class="flex items-center justify-between px-4 py-2.5">
-                <div class="flex items-center gap-2"><div class="size-7 rounded-full bg-amber-200"></div>P. Dupont</div>
-                <span class="text-xs text-emerald-600">● présent</span>
-              </li>
-              <li class="flex items-center justify-between px-4 py-2.5">
-                <div class="flex items-center gap-2"><div class="size-7 rounded-full bg-sky-200"></div>M. Leroy</div>
-                <span class="text-xs text-emerald-600">● présent</span>
-              </li>
-              <li class="flex items-center justify-between px-4 py-2.5">
-                <div class="flex items-center gap-2"><div class="size-7 rounded-full bg-violet-200"></div>J. Bernard</div>
-                <span class="text-xs text-neutral-500">○ congé</span>
-              </li>
-            </ul>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <p class="mt-6 text-center text-xs text-neutral-400">
-      Idée centrale : la racine de la navigation, c'est le chantier — pas le module. Le catalogue, les tiers et l'admin restent accessibles via ⌘K.
-    </p>
-  </main>
-</body>
+      <!-- Chantier sélectionné -->
+      <section class="mt-6 rounded-xl border bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b px-5 py-3">
+          <div class="flex items-center gap-3">
+            <div class="size-2 rounded-full bg-amber-500"></div>
+            <h2 class="text-lg font-semibold">École Marguerite</h2>
+            <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+              >en cours</span
+            >
+            <span class="text-xs text-neutral-500"
+              >Réf. CH-2026-014 · Maître d'ouvrage : Commune de Saint-Étienne</span
+            >
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Imprimer</button>
+            <button class="rounded border px-2 py-1 text-xs hover:bg-neutral-50">Partager</button>
+            <button
+              class="rounded bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800"
+            >
+              Action ▾
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs contextuelles -->
+        <nav class="flex gap-1 border-b px-3">
+          <a class="border-b-2 border-amber-500 px-3 py-2.5 text-sm font-medium text-amber-700"
+            >Aperçu</a
+          >
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Devis</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Pointages</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Factures</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Achats</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Sous-traitants</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Documents</a>
+          <a class="px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-900">Photos</a>
+        </nav>
+
+        <div class="grid grid-cols-1 gap-6 p-6 lg:grid-cols-3">
+          <!-- KPI block -->
+          <div class="space-y-4 lg:col-span-2">
+            <div class="grid gap-4 sm:grid-cols-4">
+              <div class="rounded-lg border bg-neutral-50 p-4">
+                <div class="text-xs text-neutral-500">Avancement</div>
+                <div class="mt-1 text-2xl font-semibold">92%</div>
+                <div class="mt-2 h-1.5 rounded bg-neutral-200">
+                  <div class="h-full w-[92%] rounded bg-amber-500"></div>
+                </div>
+              </div>
+              <div class="rounded-lg border bg-neutral-50 p-4">
+                <div class="text-xs text-neutral-500">Marge actuelle</div>
+                <div class="mt-1 text-2xl font-semibold text-emerald-700">+28 100 €</div>
+                <div class="mt-1 text-xs text-emerald-600">+2.1 % vs prévision</div>
+              </div>
+              <div class="rounded-lg border bg-neutral-50 p-4">
+                <div class="text-xs text-neutral-500">Reste à faire</div>
+                <div class="mt-1 text-2xl font-semibold">8 j</div>
+                <div class="mt-1 text-xs text-neutral-500">livraison 03/06</div>
+              </div>
+              <div class="rounded-lg border bg-neutral-50 p-4">
+                <div class="text-xs text-neutral-500">Pointage cette sem.</div>
+                <div class="mt-1 text-2xl font-semibold">178 h</div>
+                <div class="mt-1 text-xs text-neutral-500">sur 200 h prévues</div>
+              </div>
+            </div>
+
+            <!-- Activité timeline -->
+            <div class="rounded-lg border">
+              <div class="border-b px-4 py-2.5 text-sm font-medium">Activité de la semaine</div>
+              <ul class="divide-y text-sm">
+                <li class="flex items-start gap-3 px-4 py-3">
+                  <div class="mt-0.5 size-2 shrink-0 rounded-full bg-emerald-500"></div>
+                  <div class="flex-1">
+                    <div>
+                      <span class="font-medium">P. Dupont</span> a pointé
+                      <span class="font-medium">7 h</span>
+                    </div>
+                    <div class="text-xs text-neutral-500">14:32 — aujourd'hui</div>
+                  </div>
+                </li>
+                <li class="flex items-start gap-3 px-4 py-3">
+                  <div class="mt-0.5 size-2 shrink-0 rounded-full bg-sky-500"></div>
+                  <div class="flex-1">
+                    <div>
+                      <span class="font-medium">M. Leroy</span> a réceptionné le bon de livraison
+                      <span class="font-medium">BTN-025</span>
+                    </div>
+                    <div class="text-xs text-neutral-500">14:11 — aujourd'hui</div>
+                  </div>
+                </li>
+                <li class="flex items-start gap-3 px-4 py-3">
+                  <div class="mt-0.5 size-2 shrink-0 rounded-full bg-amber-500"></div>
+                  <div class="flex-1">
+                    <div>Devis <span class="font-medium">DV-2026-042</span> envoyé à la mairie</div>
+                    <div class="text-xs text-neutral-500">hier · 18:02</div>
+                  </div>
+                </li>
+                <li class="flex items-start gap-3 px-4 py-3">
+                  <div class="mt-0.5 size-2 shrink-0 rounded-full bg-violet-500"></div>
+                  <div class="flex-1">
+                    <div>
+                      Sous-traitance <span class="font-medium">Plomberie Martin</span> validée
+                    </div>
+                    <div class="text-xs text-neutral-500">23/05 · 10:14</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Side : carte + équipe -->
+          <div class="space-y-4">
+            <div class="overflow-hidden rounded-lg border">
+              <div class="border-b px-4 py-2.5 text-sm font-medium">Localisation</div>
+              <div
+                class="relative h-40 bg-gradient-to-br from-emerald-100 via-emerald-50 to-sky-100"
+              >
+                <div class="absolute inset-0 grid place-items-center">
+                  <div
+                    class="rounded-full bg-amber-500 px-2 py-1 text-xs font-medium text-white shadow-lg"
+                  >
+                    📍 École Marguerite
+                  </div>
+                </div>
+              </div>
+              <div class="px-4 py-3 text-xs text-neutral-600">
+                12 rue des Tilleuls, 42000 Saint-Étienne
+              </div>
+            </div>
+
+            <div class="rounded-lg border">
+              <div class="border-b px-4 py-2.5 text-sm font-medium">Équipe sur chantier</div>
+              <ul class="divide-y text-sm">
+                <li class="flex items-center justify-between px-4 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <div class="size-7 rounded-full bg-amber-200"></div>
+                    P. Dupont
+                  </div>
+                  <span class="text-xs text-emerald-600">● présent</span>
+                </li>
+                <li class="flex items-center justify-between px-4 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <div class="size-7 rounded-full bg-sky-200"></div>
+                    M. Leroy
+                  </div>
+                  <span class="text-xs text-emerald-600">● présent</span>
+                </li>
+                <li class="flex items-center justify-between px-4 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <div class="size-7 rounded-full bg-violet-200"></div>
+                    J. Bernard
+                  </div>
+                  <span class="text-xs text-neutral-500">○ congé</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <p class="mt-6 text-center text-xs text-neutral-400">
+        Idée centrale : la racine de la navigation, c'est le chantier — pas le module. Le catalogue,
+        les tiers et l'admin restent accessibles via ⌘K.
+      </p>
+    </main>
+  </body>
 </html>

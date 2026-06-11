@@ -6,10 +6,7 @@ import { useForm } from 'react-hook-form';
 
 import { creerEntreprise } from '@/lib/admin/entreprises-super';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
-import {
-  entrepriseCreateSchema,
-  type EntrepriseCreateInput,
-} from '@/lib/validation/super-admin';
+import { entrepriseCreateSchema, type EntrepriseCreateInput } from '@/lib/validation/super-admin';
 
 export function NouvelleEntrepriseForm() {
   const router = useRouter();
@@ -127,16 +124,10 @@ export function NouvelleEntrepriseForm() {
             />
           </Field>
           <Field label="Ville" error={errors.ville?.message}>
-            <input
-              {...register('ville')}
-              className="w-full rounded-md border px-3 py-2 text-sm"
-            />
+            <input {...register('ville')} className="w-full rounded-md border px-3 py-2 text-sm" />
           </Field>
           <Field label="Pays" error={errors.pays?.message}>
-            <input
-              {...register('pays')}
-              className="w-full rounded-md border px-3 py-2 text-sm"
-            />
+            <input {...register('pays')} className="w-full rounded-md border px-3 py-2 text-sm" />
           </Field>
         </div>
       </fieldset>
@@ -151,7 +142,8 @@ export function NouvelleEntrepriseForm() {
             className="w-full rounded-md border px-3 py-2 text-sm"
           />
           <p className="text-xs text-muted-foreground">
-            Si ce compte n&apos;existe pas, il sera créé. Un magic-link de connexion lui sera envoyé.
+            Si ce compte n&apos;existe pas, il sera créé. Un magic-link de connexion lui sera
+            envoyé.
           </p>
         </Field>
       </fieldset>
@@ -162,7 +154,7 @@ export function NouvelleEntrepriseForm() {
           disabled={isSubmitting}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
-          {isSubmitting ? 'Création…' : 'Créer l\'entreprise'}
+          {isSubmitting ? 'Création…' : "Créer l'entreprise"}
         </button>
       </div>
     </form>

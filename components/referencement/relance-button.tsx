@@ -16,7 +16,12 @@ type Props = {
 };
 
 /** Bouton de relance individuelle d'un tier (enregistre la trace, sans envoi auto). */
-export function RelanceButton({ tierId, size = 'sm', variant = 'outline', label = 'Relancer' }: Props) {
+export function RelanceButton({
+  tierId,
+  size = 'sm',
+  variant = 'outline',
+  label = 'Relancer',
+}: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 

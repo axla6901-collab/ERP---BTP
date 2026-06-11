@@ -166,10 +166,7 @@ export const facturesSt = pgTable(
     index('idx_factures_st_contrat').on(t.contratStId),
     index('idx_factures_st_statut').on(t.statut),
     index('idx_factures_st_date').on(t.dateFacture.desc()),
-    check(
-      'chk_factures_st_retenue',
-      sql`retenue_garantie_pct >= 0 AND retenue_garantie_pct <= 10`,
-    ),
+    check('chk_factures_st_retenue', sql`retenue_garantie_pct >= 0 AND retenue_garantie_pct <= 10`),
     check('chk_factures_st_cumul', sql`cumul_paye_ttc >= 0`),
     check('chk_factures_st_dates', sql`date_echeance IS NULL OR date_echeance >= date_facture`),
     check(

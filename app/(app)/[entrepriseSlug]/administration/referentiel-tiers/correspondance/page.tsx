@@ -11,7 +11,10 @@ export default async function CorrespondancePage() {
   const utilisateur = await requireAuthWithMfa();
   const peutEcrire = peutAdministrerReferentielTiers(utilisateur.role);
 
-  const [corpsEtatAll, naturesAll] = await Promise.all([listerCorpsEtat(), listerNaturesDocument()]);
+  const [corpsEtatAll, naturesAll] = await Promise.all([
+    listerCorpsEtat(),
+    listerNaturesDocument(),
+  ]);
   const corpsEtatList = corpsEtatAll
     .filter((c) => c.actif)
     .map((c) => ({ id: c.id, code: c.code, libelle: c.libelle }));

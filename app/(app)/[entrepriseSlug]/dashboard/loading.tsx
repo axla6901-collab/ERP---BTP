@@ -1,7 +1,7 @@
 /** Squelette du dashboard chantier-first (timeline + fiche chantier). */
 export default function DashboardLoading() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="animate-pulse space-y-6">
       {/* Timeline */}
       <section className="rounded-xl border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b px-5 py-3">

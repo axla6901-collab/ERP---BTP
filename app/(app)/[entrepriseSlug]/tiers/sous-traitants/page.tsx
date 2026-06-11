@@ -18,10 +18,7 @@ export default async function SousTraitantsPage() {
         title="Sous-traitants"
         actions={
           peutEcrire ? (
-            <Link
-              href="/tiers/sous-traitants/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/tiers/sous-traitants/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouveau sous-traitant
             </Link>
           ) : null

@@ -10,11 +10,7 @@ import { peutAdministrerReferentielTiers } from '@/lib/referencement/permissions
 
 const BASE = '/administration/referentiel-tiers/societes';
 
-export default async function SocieteDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function SocieteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const data = await lireSociete(id);
@@ -39,7 +35,12 @@ export default async function SocieteDetailPage({
       />
 
       <div className="max-w-2xl">
-        <FormSection number={2} title="Règles applicables" storageKey="societe:regles" collapsible={false}>
+        <FormSection
+          number={2}
+          title="Règles applicables"
+          storageKey="societe:regles"
+          collapsible={false}
+        >
           <SocieteReglesManager societeId={id} regles={data.regles} peutEcrire={peutEcrire} />
         </FormSection>
       </div>

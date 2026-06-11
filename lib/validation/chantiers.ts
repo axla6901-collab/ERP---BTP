@@ -46,13 +46,7 @@ const optionalCodePostalFR = z
   .nullable()
   .transform((v) => (v && v.length > 0 ? v : null));
 
-export const STATUTS_CHANTIER = [
-  'prospect',
-  'en_cours',
-  'suspendu',
-  'termine',
-  'annule',
-] as const;
+export const STATUTS_CHANTIER = ['prospect', 'en_cours', 'suspendu', 'termine', 'annule'] as const;
 export type StatutChantier = (typeof STATUTS_CHANTIER)[number];
 
 export const LIBELLES_STATUT_CHANTIER: Record<StatutChantier, string> = {

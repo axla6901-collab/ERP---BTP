@@ -25,7 +25,10 @@ type Props = {
   action: (input: {
     prixUnitaireHt: string;
     uniteId: string;
-  }) => Promise<{ ok: true; data: { id: string } } | { ok: false; error: string; fieldErrors?: Record<string, string[]> }>;
+  }) => Promise<
+    | { ok: true; data: { id: string } }
+    | { ok: false; error: string; fieldErrors?: Record<string, string[]> }
+  >;
 };
 
 export function PrixReferenceQuickForm({
@@ -96,7 +99,10 @@ export function PrixReferenceQuickForm({
           />
         </div>
         <div className="grid gap-1">
-          <label htmlFor="prix-reference-unite" className="text-xs font-medium text-muted-foreground">
+          <label
+            htmlFor="prix-reference-unite"
+            className="text-xs font-medium text-muted-foreground"
+          >
             Unité
           </label>
           <Select value={uniteId} onValueChange={(v) => setUniteId(v ?? '')}>

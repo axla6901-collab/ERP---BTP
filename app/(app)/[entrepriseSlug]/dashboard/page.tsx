@@ -32,8 +32,7 @@ export default async function DashboardPage({
   // À défaut de sélection valide : 1er « en cours », sinon 1er actif.
   let apercu = apercuDemande;
   if (!apercu) {
-    const fallbackId =
-      timeline.find((c) => c.statut === 'en_cours')?.id ?? timeline[0]?.id ?? null;
+    const fallbackId = timeline.find((c) => c.statut === 'en_cours')?.id ?? timeline[0]?.id ?? null;
     apercu = fallbackId ? await lireApercuChantier(fallbackId) : null;
   }
 

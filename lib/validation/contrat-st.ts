@@ -88,12 +88,9 @@ export const contratStSchema = z
     statut: z.enum(STATUT_CONTRAT_ST_VALUES).default('brouillon'),
     notes: trimmedOptionalString(2000),
   })
-  .refine(
-    (c) =>
-      !c.dateDebutPrevue ||
-      !c.dateFinPrevue ||
-      c.dateFinPrevue >= c.dateDebutPrevue,
-    { message: 'La date de fin prévue doit suivre la date de début.', path: ['dateFinPrevue'] },
-  );
+  .refine((c) => !c.dateDebutPrevue || !c.dateFinPrevue || c.dateFinPrevue >= c.dateDebutPrevue, {
+    message: 'La date de fin prévue doit suivre la date de début.',
+    path: ['dateFinPrevue'],
+  });
 
 export type ContratStInput = z.infer<typeof contratStSchema>;

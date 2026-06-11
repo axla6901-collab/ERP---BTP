@@ -156,16 +156,9 @@ export async function listerTiersAvecConformite(): Promise<TierConformiteRow[]> 
 
   return withTenant(ctx.entreprise.id, async (tx) => {
     const [rowsTiers, liens, natures, matriceRows, documents, relances] = await Promise.all([
-      tx
-        .select()
-        .from(tiers)
-        .where(isNull(tiers.deletedAt))
-        .orderBy(tiers.nom),
+      tx.select().from(tiers).where(isNull(tiers.deletedAt)).orderBy(tiers.nom),
       tx.select().from(tierCorpsEtat),
-      tx
-        .select()
-        .from(naturesDocument)
-        .where(isNull(naturesDocument.deletedAt)),
+      tx.select().from(naturesDocument).where(isNull(naturesDocument.deletedAt)),
       tx.select().from(corpsEtatDocumentsRequis),
       tx
         .select({
@@ -387,14 +380,23 @@ async function remplacerLiens(
   await tx.delete(tierCorpsEtat).where(eq(tierCorpsEtat.tierId, tierId));
   await tx.delete(tierSocietesAutorisees).where(eq(tierSocietesAutorisees.tierId, tierId));
   if (corpsEtatIds.length > 0) {
-    await tx.insert(tierCorpsEtat).values(
-      corpsEtatIds.map((corpsEtatId) => ({ tierId, corpsEtatId, entrepriseId, createdBy: userId })),
-    );
+    await tx
+      .insert(tierCorpsEtat)
+      .values(
+        corpsEtatIds.map((corpsEtatId) => ({
+          tierId,
+          corpsEtatId,
+          entrepriseId,
+          createdBy: userId,
+        })),
+      );
   }
   if (societeIds.length > 0) {
-    await tx.insert(tierSocietesAutorisees).values(
-      societeIds.map((societeId) => ({ tierId, societeId, entrepriseId, createdBy: userId })),
-    );
+    await tx
+      .insert(tierSocietesAutorisees)
+      .values(
+        societeIds.map((societeId) => ({ tierId, societeId, entrepriseId, createdBy: userId })),
+      );
   }
 }
 

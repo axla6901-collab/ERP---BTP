@@ -1,7 +1,4 @@
-import {
-  STATUT_SOUS_TRAITANT_LABELS,
-  type StatutSousTraitant,
-} from '@/lib/validation/tiers';
+import { STATUT_SOUS_TRAITANT_LABELS, type StatutSousTraitant } from '@/lib/validation/tiers';
 import { cn } from '@/lib/utils';
 
 /**

@@ -65,8 +65,7 @@ export function getDbAdmin(): ReturnType<typeof drizzle> {
   // Pool admin partagée via globalThis (cf. pool principale plus haut) pour
   // éviter l'accumulation HMR.
   const adminQueryClient =
-    globalThis.__erpBtpDbAdminClient ??
-    postgres(url, { prepare: false, max: 3, idle_timeout: 30 });
+    globalThis.__erpBtpDbAdminClient ?? postgres(url, { prepare: false, max: 3, idle_timeout: 30 });
   if (process.env.NODE_ENV !== 'production') {
     globalThis.__erpBtpDbAdminClient = adminQueryClient;
   }

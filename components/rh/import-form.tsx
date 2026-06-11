@@ -7,10 +7,7 @@ import { toast } from 'sonner';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  detectFormatImport,
-  type ImportStats,
-} from '@/lib/rh/import-export-types';
+import { detectFormatImport, type ImportStats } from '@/lib/rh/import-export-types';
 
 type ServerActionResult<T> =
   | { ok: true; data: T }
@@ -35,7 +32,7 @@ export function ImportForm({ onJson, onExcel }: Props) {
     setFileName(file.name);
     const format = detectFormatImport(file.name);
     if (!format) {
-      setErreur('Format non supporté. Utilise un fichier .json, .xlsx, .xls ou .csv.');
+      setErreur('Format non supporté. Utilise un fichier .json, .xlsx ou .csv.');
       return;
     }
     startTransition(async () => {
@@ -72,7 +69,7 @@ export function ImportForm({ onJson, onExcel }: Props) {
   }
 
   return (
-    <div className="grid gap-4 max-w-2xl">
+    <div className="grid max-w-2xl gap-4">
       <div
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
@@ -89,12 +86,12 @@ export function ImportForm({ onJson, onExcel }: Props) {
           <span className="text-foreground underline">clique pour parcourir</span>
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Formats acceptés : .json (export Pointage), .xlsx, .xls, .csv
+          Formats acceptés : .json (export Pointage), .xlsx, .csv
         </p>
         <input
           ref={inputRef}
           type="file"
-          accept=".json,.xlsx,.xls,.csv"
+          accept=".json,.xlsx,.csv"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
@@ -127,11 +124,10 @@ export function ImportForm({ onJson, onExcel }: Props) {
                 <span className="font-semibold">{stats.inserted}</span> pointages insérés
               </li>
               <li>
-                {stats.newEmployes} nouvel(s) employé(s), {stats.newChantiers} nouveau(x) chantier(s)
+                {stats.newEmployes} nouvel(s) employé(s), {stats.newChantiers} nouveau(x)
+                chantier(s)
               </li>
-              <li>
-                {stats.skipped} ligne(s) ignorée(s) (sans collab/quantité/chantier)
-              </li>
+              <li>{stats.skipped} ligne(s) ignorée(s) (sans collab/quantité/chantier)</li>
               {stats.invalidEmp > 0 && (
                 <li className="text-amber-700">
                   ⚠ {stats.invalidEmp} ligne(s) sans employé mappable
@@ -143,11 +139,7 @@ export function ImportForm({ onJson, onExcel }: Props) {
       )}
 
       <div className="flex gap-2">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/rh/pointages')}
-          disabled={isPending}
-        >
+        <Button variant="outline" onClick={() => router.push('/rh/pointages')} disabled={isPending}>
           Voir les pointages
         </Button>
       </div>

@@ -98,7 +98,10 @@ export function isoWeek(d: Date): number {
   const day = (t.getUTCDay() + 6) % 7;
   t.setUTCDate(t.getUTCDate() - day + 3);
   const first = new Date(Date.UTC(t.getUTCFullYear(), 0, 4));
-  return 1 + Math.round(((t.getTime() - first.getTime()) / DAY_MS - 3 + ((first.getUTCDay() + 6) % 7)) / 7);
+  return (
+    1 +
+    Math.round(((t.getTime() - first.getTime()) / DAY_MS - 3 + ((first.getUTCDay() + 6) % 7)) / 7)
+  );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -375,7 +378,7 @@ export function calculerKpis(
     heuresPlan += heures || equipePlan;
     heuresFait += equipeFait;
 
-    const poids = (heures || equipePlan || 1);
+    const poids = heures || equipePlan || 1;
     poidsTotal += poids;
 
     avancement += poids * (t.avancementPourcent ?? 0);

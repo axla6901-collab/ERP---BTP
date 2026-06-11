@@ -344,7 +344,12 @@ export function AppSidebar({
                   )}
                 </div>
                 {hasChildren && isOpen && (
-                  <ul className={cn('mt-1 space-y-0.5 border-l border-orange-200 pl-4 ml-5', collapsed && 'lg:hidden')}>
+                  <ul
+                    className={cn(
+                      'ml-5 mt-1 space-y-0.5 border-l border-orange-200 pl-4',
+                      collapsed && 'lg:hidden',
+                    )}
+                  >
                     {visibleChildren.map((child) => {
                       const fullChildHref = tenantHref(child.href);
                       const childActive =
@@ -359,7 +364,7 @@ export function AppSidebar({
                             className={cn(
                               'block rounded-md px-3 py-1.5 text-sm transition-colors',
                               childActive
-                                ? 'bg-orange-500 text-white font-medium shadow-sm'
+                                ? 'bg-orange-500 font-medium text-white shadow-sm'
                                 : 'text-orange-900/70 hover:bg-orange-200/70 hover:text-orange-900',
                             )}
                           >

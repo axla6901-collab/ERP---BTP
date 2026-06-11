@@ -15,6 +15,7 @@ Cette itération porte la table `employes` à ~50 colonnes et ajoute 3 tables fi
 ### Élargissement table `employes`
 
 Champs ajoutés, regroupés thématiquement :
+
 - **Identité civile** : date_naissance, lieu_naissance, nationalité, numero_secu (CHECK 13-15 chiffres), sexe
 - **Adresse perso** : ligne1/ligne2, code_postal (CHECK 5 digits FR), ville, pays
 - **Contact urgence** : nom + téléphone + relation
@@ -29,15 +30,18 @@ Renommage : `telephone` → `telephone_mobile`, ajout de `telephone_fixe` sépar
 ### Tables séparées
 
 **`employe_habilitations`** — chaque habilitation a sa propre date d'obtention/validité.
+
 - Enum `type_habilitation` couvre les principales habilitations BTP : CACES R482 (engins de chantier A→G), R489 (chariots élévateurs 1A/1B/3/5/6), AIPR (concepteur/encadrant/opérateur), électrique (B0/BE/B1V/B2V/BR/BC/HF), SST, et `autre` pour les cas spécifiques.
 - Index sur `date_validite` pour générer les alertes d'échéance (M9 ou plus tôt).
 - ON DELETE CASCADE sur `employe_id` : si on supprime hard un employé (hors-scope M5), les habilitations partent.
 
 **`employe_permis`** — un permis par catégorie.
+
 - Enum `categorie_permis` : B, BE, C, C1, C1E, CE, D, D1, D1E, DE.
 - UNIQUE partiel `(employe_id, categorie) WHERE deleted_at IS NULL` : impossible d'avoir 2 fois le même permis.
 
 **`employe_documents`** — métadonnées + clé MinIO.
+
 - Stockage du fichier dans MinIO via presigned upload URL (cf. `lib/storage/s3.ts`).
 - DB ne stocke que `minio_key`, `mime_type`, `taille_bytes` (max 25 Mo via Server Action).
 - Enum `type_document_employe` : cv, photo, contrat, attestations, carte_identite, passeport, titre_sejour, justificatif_domicile, rib, carte_vitale, carte_btp, diplome, certificat_medical, autre.
@@ -60,6 +64,7 @@ Tous les rôles `ROLES_RH_WRITE = ['admin', 'rh', 'comptable']` (inchangé). Le 
 ### UI
 
 **Form employé** — refonte en **8 sections accordéon** (HTML `<details>` natif, pas de lib) :
+
 1. Identité professionnelle (nom, prénom, matricule, qualif, classif, coef, contrat, dates, paie, zone)
 2. Identité civile (naissance, sécu, sexe, nationalité)
 3. Coordonnées (adresse + contacts + urgence)
@@ -70,6 +75,7 @@ Tous les rôles `ROLES_RH_WRITE = ['admin', 'rh', 'comptable']` (inchangé). Le 
 8. Notes
 
 **Composants dédiés** sur la page détail :
+
 - `<HabilitationsList>` — liste + form inline d'ajout, suppression, badge statut validité (Valide / J-30 / Expirée)
 - `<PermisList>` — idem
 - `<DocumentsList>` — upload (input file + metadata), download via presigned URL, suppression soft
@@ -77,6 +83,7 @@ Tous les rôles `ROLES_RH_WRITE = ['admin', 'rh', 'comptable']` (inchangé). Le 
 ## Conséquences
 
 ### Positives
+
 - **Dossier RH complet** : couvre tous les besoins d'une PME BTP française standard
 - **Conformité légale** : carte BTP, visite médicale, habilitations sont des obligations réelles → désormais traçables
 - **Alertes d'échéances possibles** : `date_validite` sur habilitations/permis/documents → M9 ajoutera un job d'alertes 30/15/7 jours avant
@@ -84,6 +91,7 @@ Tous les rôles `ROLES_RH_WRITE = ['admin', 'rh', 'comptable']` (inchangé). Le 
 - **Audit log RGPD-friendly** : chaque modification de données personnelles tracée
 
 ### Négatives / Risques
+
 - **Taille de la table employes** : ~50 colonnes. Acceptable techniquement, mais le form devient long → mitigé par les sections accordéon.
 - **N° sécu en clair** : pas de chiffrement at-rest spécifique en M5.4. À renforcer si requirements RGPD/audit poussés (M9). Pour l'instant, restriction aux rôles RH suffisante.
 - **IBAN au format texte** : pas de validation cryptographique de la clé de contrôle (algorithme MOD-97). Acceptable pour la saisie initiale, à durcir en M6 si paiement automatisé.
@@ -101,6 +109,7 @@ Tous les rôles `ROLES_RH_WRITE = ['admin', 'rh', 'comptable']` (inchangé). Le 
 ## Révision
 
 À revisiter quand :
+
 - Plus de 50 employés actifs régulièrement → dashboard d'alertes d'échéances (visite médicale, CACES, etc.) en M9
 - L'application sert plusieurs entités → chiffrement at-rest des champs sensibles (numero_secu, iban)
 - Multi-RH → permissions plus fines (lecture seule sur paie pour le conducteur de travaux)

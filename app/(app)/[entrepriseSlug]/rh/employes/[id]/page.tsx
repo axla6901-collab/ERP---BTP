@@ -35,11 +35,7 @@ import type {
   ZoneDeplacement,
 } from '@/lib/validation/rh';
 
-export default async function EmployeDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EmployeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const employe = await lireEmploye(id);

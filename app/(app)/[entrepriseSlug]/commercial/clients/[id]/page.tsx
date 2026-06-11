@@ -23,9 +23,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const peutEcrire = peutEcrireCommercial(utilisateur.role);
   if (!peutEcrire) {
     return (
-      <div className="space-y-2 max-w-2xl">
+      <div className="max-w-2xl space-y-2">
         <h2 className="text-xl font-medium">
-          {client.type === 'professionnel' ? client.raisonSociale : `${client.prenom ?? ''} ${client.nom ?? ''}`.trim()}
+          {client.type === 'professionnel'
+            ? client.raisonSociale
+            : `${client.prenom ?? ''} ${client.nom ?? ''}`.trim()}
         </h2>
         <p className="text-sm text-muted-foreground">
           {client.adresseLigne1}, {client.codePostal} {client.ville}
@@ -88,7 +90,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         className="max-w-3xl"
       />
 
-      <div className="border-t pt-6 max-w-2xl">
+      <div className="max-w-2xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer ce client"

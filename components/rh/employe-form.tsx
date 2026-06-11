@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -995,7 +995,12 @@ export function EmployeForm({ defaultValues, onSubmit, successRedirect }: Props)
         </FormSection>
 
         <div className="sticky bottom-0 -mx-4 flex justify-end gap-2 border-t bg-background/95 p-4 backdrop-blur">
-          <Button variant="ghost" type="button" onClick={() => guardedRouter.back()} disabled={isSubmitting}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => guardedRouter.back()}
+            disabled={isSubmitting}
+          >
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>

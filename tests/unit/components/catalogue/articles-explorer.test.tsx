@@ -52,8 +52,22 @@ function art(over: Partial<ArticleAvecPrix>): ArticleAvecPrix {
 }
 
 const ITEMS = [
-  art({ id: 'a', code: 'AAA', libelle: 'Alpha', actif: true, familleId: 'f1', familleLibelle: 'Famille Un' }),
-  art({ id: 'b', code: 'BBB', libelle: 'Beta', actif: false, familleId: 'f1', familleLibelle: 'Famille Un' }),
+  art({
+    id: 'a',
+    code: 'AAA',
+    libelle: 'Alpha',
+    actif: true,
+    familleId: 'f1',
+    familleLibelle: 'Famille Un',
+  }),
+  art({
+    id: 'b',
+    code: 'BBB',
+    libelle: 'Beta',
+    actif: false,
+    familleId: 'f1',
+    familleLibelle: 'Famille Un',
+  }),
   art({
     id: 'c',
     code: 'CCC',
@@ -67,12 +81,7 @@ const ITEMS = [
 
 function renderExplorer() {
   return render(
-    <ArticlesExplorer
-      items={ITEMS}
-      chantierActif={null}
-      chantiers={[]}
-      articleIdsChantier={[]}
-    />,
+    <ArticlesExplorer items={ITEMS} chantierActif={null} chantiers={[]} articleIdsChantier={[]} />,
   );
 }
 

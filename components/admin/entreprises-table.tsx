@@ -117,10 +117,7 @@ export function EntreprisesTable({ items, logoUrls, rightActions }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (e) => (
-        <Link
-          href={`/admin/entreprises/${e.id}`}
-          className="text-sm underline underline-offset-4"
-        >
+        <Link href={`/admin/entreprises/${e.id}`} className="text-sm underline underline-offset-4">
           Ouvrir
         </Link>
       ),

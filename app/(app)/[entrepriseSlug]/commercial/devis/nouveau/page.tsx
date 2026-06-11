@@ -7,7 +7,12 @@ import { creerDevis } from '@/lib/commercial/devis';
 import { analyserClasseurDpgf, importerAvecMappingDpgf } from '@/lib/commercial/import-dpgf';
 import { ROLES_COMMERCIAL_WRITE } from '@/lib/commercial/permissions';
 
-function libelleClient(c: { type: string; raisonSociale: string | null; nom: string | null; prenom: string | null }): string {
+function libelleClient(c: {
+  type: string;
+  raisonSociale: string | null;
+  nom: string | null;
+  prenom: string | null;
+}): string {
   if (c.type === 'professionnel') return c.raisonSociale ?? '?';
   return [c.prenom, c.nom].filter(Boolean).join(' ') || '?';
 }

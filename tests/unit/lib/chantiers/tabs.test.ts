@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  CHANTIER_TABS,
-  chantierTabsVisibles,
-  resolveChantierTab,
-} from '@/lib/chantiers/tabs';
+import { CHANTIER_TABS, chantierTabsVisibles, resolveChantierTab } from '@/lib/chantiers/tabs';
 
 describe('chantierTabsVisibles', () => {
   it('exclut l’onglet « Compte prorata » quand le module est inactif', () => {

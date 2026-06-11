@@ -15,14 +15,14 @@
 
 ## Inventaire des secrets
 
-| Secret | Emplacement | Impact en cas de fuite |
-|---|---|---|
-| `BETTER_AUTH_SECRET` | `.env.local` | Toutes les sessions actives peuvent être forgées |
-| `app_rw` / `app_migrator` (mots de passe DB) | `.env.local` + Postgres | Accès lecture/écriture aux données métier |
-| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` (MinIO) | `.env.local` + `docker-compose.yml` | Accès lecture/écriture aux documents |
-| Superuser DB `erpbtp` | `docker-compose.yml` | Accès total à la DB |
-| `SECRET_KEY` GlitchTip | `docker-compose.glitchtip.yml` | Falsification des tokens GlitchTip |
-| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | `.env.local` | Spam de l'instance GlitchTip (DSN public conçu pour être visible) |
+| Secret                                              | Emplacement                         | Impact en cas de fuite                                            |
+| --------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`                                | `.env.local`                        | Toutes les sessions actives peuvent être forgées                  |
+| `app_rw` / `app_migrator` (mots de passe DB)        | `.env.local` + Postgres             | Accès lecture/écriture aux données métier                         |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` (MinIO) | `.env.local` + `docker-compose.yml` | Accès lecture/écriture aux documents                              |
+| Superuser DB `erpbtp`                               | `docker-compose.yml`                | Accès total à la DB                                               |
+| `SECRET_KEY` GlitchTip                              | `docker-compose.glitchtip.yml`      | Falsification des tokens GlitchTip                                |
+| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN`             | `.env.local`                        | Spam de l'instance GlitchTip (DSN public conçu pour être visible) |
 
 ## Procédures
 

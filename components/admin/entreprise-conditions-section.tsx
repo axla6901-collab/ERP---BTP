@@ -21,10 +21,7 @@ import dynamic from 'next/dynamic';
 
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type {
-  ConditionNouvelleVersionInput,
-  ConditionType,
-} from '@/lib/validation/entreprise';
+import type { ConditionNouvelleVersionInput, ConditionType } from '@/lib/validation/entreprise';
 
 // Tiptap (~100 kB) chargé à la demande : sorti du bundle initial de la fiche
 // entreprise (route /administration/entreprise : 427 kB → ~300 kB First Load JS).
@@ -95,7 +92,7 @@ export function EntrepriseConditionsSection({
   return (
     <Card>
       <CardHeader className="space-y-4">
-        <div className="flex gap-1 rounded-md bg-muted p-1 w-fit">
+        <div className="flex w-fit gap-1 rounded-md bg-muted p-1">
           {(['cgv', 'cga'] as const).map((t) => (
             <button
               key={t}
@@ -271,7 +268,12 @@ function ConditionsPanel({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={() => setMode('list')} disabled={isPending}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setMode('list')}
+            disabled={isPending}
+          >
             Annuler
           </Button>
           <Button type="button" onClick={handlePublier} disabled={isPending}>
@@ -303,11 +305,7 @@ function ConditionsPanel({
         </div>
         <PreviewContent html={previewHtml} />
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => ouvrirEdition(previewVersion)}
-          >
+          <Button type="button" variant="secondary" onClick={() => ouvrirEdition(previewVersion)}>
             Repartir de cette version pour en créer une nouvelle
           </Button>
         </div>
@@ -326,11 +324,7 @@ function ConditionsPanel({
                 versions.length > 1 ? 's' : ''
               }.`}
         </div>
-        <Button
-          type="button"
-          onClick={() => ouvrirEdition(versions[0])}
-          disabled={isPending}
-        >
+        <Button type="button" onClick={() => ouvrirEdition(versions[0])} disabled={isPending}>
           <PlusIcon className="mr-2 size-4" />
           {versions.length === 0 ? 'Rédiger la première version' : 'Nouvelle version'}
         </Button>

@@ -4,10 +4,7 @@ import Link from 'next/link';
 
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { SituationAvecChantier } from '@/lib/facturation/situations';
-import {
-  LIBELLES_STATUT_SITUATION,
-  type StatutSituation,
-} from '@/lib/validation/facturation';
+import { LIBELLES_STATUT_SITUATION, type StatutSituation } from '@/lib/validation/facturation';
 
 function formatMontant(m: string): string {
   const n = Number(m);
@@ -47,7 +44,8 @@ export function SituationsTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Chantier',
       cell: (s) => (
         <>
-          <span className="text-xs text-muted-foreground">{s.chantierNumero}</span> {s.chantierLibelle}
+          <span className="text-xs text-muted-foreground">{s.chantierNumero}</span>{' '}
+          {s.chantierLibelle}
         </>
       ),
       sortAccessor: (s) => s.chantierLibelle,
@@ -65,7 +63,10 @@ export function SituationsTable({ items, rightActions, peutEcrire }: Props) {
       align: 'right',
       cell: (s) => (
         <span className="tabular-nums">
-          {Number(s.pctAvancementCumule).toFixed(2).replace(/\.?0+$/, '')} %
+          {Number(s.pctAvancementCumule)
+            .toFixed(2)
+            .replace(/\.?0+$/, '')}{' '}
+          %
         </span>
       ),
       sortAccessor: (s) => Number(s.pctAvancementCumule),
@@ -74,7 +75,7 @@ export function SituationsTable({ items, rightActions, peutEcrire }: Props) {
       id: 'cumule',
       header: 'Cumulé HT (€)',
       align: 'right',
-      cell: (s) => <span className="tabular-nums text-xs">{formatMontant(s.montantCumuleHt)}</span>,
+      cell: (s) => <span className="text-xs tabular-nums">{formatMontant(s.montantCumuleHt)}</span>,
       sortAccessor: (s) => Number(s.montantCumuleHt),
     },
     {
@@ -82,7 +83,7 @@ export function SituationsTable({ items, rightActions, peutEcrire }: Props) {
       header: 'À facturer HT (€)',
       align: 'right',
       cell: (s) => (
-        <span className="tabular-nums font-medium">{formatMontant(s.montantAFacturerHt)}</span>
+        <span className="font-medium tabular-nums">{formatMontant(s.montantAFacturerHt)}</span>
       ),
       sortAccessor: (s) => Number(s.montantAFacturerHt),
     },

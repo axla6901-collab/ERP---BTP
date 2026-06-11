@@ -99,7 +99,7 @@ export async function setPlanningActive(
   }
   const ctx = await requireTenantContextWithMfa();
   if (!peutAdministrer(ctx.utilisateur.role)) {
-    return { ok: false, error: "Accès refusé : rôle administrateur requis." };
+    return { ok: false, error: 'Accès refusé : rôle administrateur requis.' };
   }
 
   await withTenant(ctx.entreprise.id, async (tx) => {
@@ -273,7 +273,8 @@ export async function enregistrerTachePlanning(
     if (cycle) {
       return {
         ok: false,
-        error: 'Enchaînement circulaire : ce prédécesseur dépend déjà (directement ou indirectement) de cette tâche.',
+        error:
+          'Enchaînement circulaire : ce prédécesseur dépend déjà (directement ou indirectement) de cette tâche.',
       };
     }
   }
@@ -286,9 +287,9 @@ export async function enregistrerTachePlanning(
     if (!before) return 'Tâche introuvable.';
 
     const dateDebut = data.estJalon
-      ? data.dateDebutPrevue ?? data.dateFinPrevue ?? null
-      : data.dateDebutPrevue ?? null;
-    const dateFin = data.estJalon ? dateDebut : data.dateFinPrevue ?? null;
+      ? (data.dateDebutPrevue ?? data.dateFinPrevue ?? null)
+      : (data.dateDebutPrevue ?? null);
+    const dateFin = data.estJalon ? dateDebut : (data.dateFinPrevue ?? null);
 
     const patch = {
       libelle: data.libelle,
@@ -384,18 +385,13 @@ export async function creerTachePlanning(
     const [maxRow] = await tx
       .select({ maxOrdre: sqlMax(chantierTaches.ordre) })
       .from(chantierTaches)
-      .where(
-        and(
-          eq(chantierTaches.chantierId, data.chantierId),
-          isNull(chantierTaches.deletedAt),
-        ),
-      );
+      .where(and(eq(chantierTaches.chantierId, data.chantierId), isNull(chantierTaches.deletedAt)));
     const nextOrdre = (maxRow?.maxOrdre ?? -1) + 1;
 
     const dateDebut = data.estJalon
-      ? data.dateDebutPrevue ?? data.dateFinPrevue ?? null
-      : data.dateDebutPrevue ?? null;
-    const dateFin = data.estJalon ? dateDebut : data.dateFinPrevue ?? null;
+      ? (data.dateDebutPrevue ?? data.dateFinPrevue ?? null)
+      : (data.dateDebutPrevue ?? null);
+    const dateFin = data.estJalon ? dateDebut : (data.dateFinPrevue ?? null);
 
     const [created] = await tx
       .insert(chantierTaches)
@@ -554,10 +550,7 @@ export async function restaurerTachePlanning(id: string): Promise<ActionResult<v
   }
 
   await withTenant(ctx.entreprise.id, async (tx) => {
-    const [before] = await tx
-      .select()
-      .from(chantierTaches)
-      .where(eq(chantierTaches.id, id));
+    const [before] = await tx.select().from(chantierTaches).where(eq(chantierTaches.id, id));
     if (!before || before.deletedAt === null) return; // déjà active
     await tx
       .update(chantierTaches)
@@ -636,9 +629,7 @@ export async function dupliquerNiveauPlanning(
     const niveauxExistants = await tx
       .select({ niveau: chantierTaches.niveau })
       .from(chantierTaches)
-      .where(
-        and(eq(chantierTaches.chantierId, data.chantierId), isNull(chantierTaches.deletedAt)),
-      );
+      .where(and(eq(chantierTaches.chantierId, data.chantierId), isNull(chantierTaches.deletedAt)));
     const utilises = new Set(
       niveauxExistants.map((n) => n.niveau).filter((n): n is string => n !== null),
     );
@@ -657,9 +648,7 @@ export async function dupliquerNiveauPlanning(
     const [maxRow] = await tx
       .select({ maxOrdre: sqlMax(chantierTaches.ordre) })
       .from(chantierTaches)
-      .where(
-        and(eq(chantierTaches.chantierId, data.chantierId), isNull(chantierTaches.deletedAt)),
-      );
+      .where(and(eq(chantierTaches.chantierId, data.chantierId), isNull(chantierTaches.deletedAt)));
     let ordreBase = (maxRow?.maxOrdre ?? -1) + 1;
 
     // 4. Insertion des clones SANS predecesseur (1er passage), puis remap (2e passage).
@@ -689,9 +678,7 @@ export async function dupliquerNiveauPlanning(
           dateDebutPrevue: src.dateDebutPrevue
             ? ajoutJoursISO(src.dateDebutPrevue, deltaJours)
             : null,
-          dateFinPrevue: src.dateFinPrevue
-            ? ajoutJoursISO(src.dateFinPrevue, deltaJours)
-            : null,
+          dateFinPrevue: src.dateFinPrevue ? ajoutJoursISO(src.dateFinPrevue, deltaJours) : null,
           heuresPlanifiees: src.heuresPlanifiees,
           estJalon: src.estJalon,
           predecesseurId: null,

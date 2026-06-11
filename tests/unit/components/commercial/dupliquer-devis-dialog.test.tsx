@@ -33,10 +33,12 @@ describe('DupliquerDevisDialog', () => {
     cleanup();
   });
 
-  function renderAvec(opts: {
-    open?: boolean;
-    peutVersionner?: boolean;
-  } = {}) {
+  function renderAvec(
+    opts: {
+      open?: boolean;
+      peutVersionner?: boolean;
+    } = {},
+  ) {
     return render(
       <DupliquerDevisDialog
         open={opts.open ?? true}
@@ -77,7 +79,7 @@ describe('DupliquerDevisDialog', () => {
       expect(radioAutre).toBeChecked();
     });
 
-    it('avec peutVersionner=false : message d\'erreur de droit visible', () => {
+    it("avec peutVersionner=false : message d'erreur de droit visible", () => {
       renderAvec({ peutVersionner: false });
       expect(screen.getByText(/Droit manquant/)).toBeInTheDocument();
     });

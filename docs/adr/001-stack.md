@@ -28,34 +28,36 @@ Proposition initiale envisagée : **NestJS + Prisma + React/Vite + Keycloak auto
 
 ### Stack retenue
 
-| Couche | Technologie | Version cible |
-|---|---|---|
-| Langage | **TypeScript strict** | 5.6+ |
-| Framework full-stack | **Next.js 15** (App Router) | 15.x |
-| Base de données | **PostgreSQL** via **Supabase** (EU-West) | 16+ |
-| ORM / Migrations | **Drizzle ORM** | 0.36+ |
-| Auth | **Supabase Auth** (MFA TOTP, magic link, OAuth) | cloud ou self-host |
-| Storage fichiers | **Supabase Storage** (S3 compatible) | intégré |
-| UI | **shadcn/ui + Tailwind CSS** | shadcn 2.x, TW 3.4 |
-| Formulaires / Validation | **React Hook Form + Zod** | RHF 7.x, Zod 3.23+ |
-| État client & data fetching | **TanStack Query** + **Server Actions** Next.js | |
-| Tests unitaires | **Vitest** | 2.x |
-| Tests E2E | **Playwright** | 1.47+ |
-| Observabilité | **Sentry** (erreurs) | |
-| CI/CD | **GitHub Actions** | |
-| Hébergement prod | **Scaleway Serverless Containers** (région Paris) | |
-| Mobile / Offline | **PWA** (Service Worker, IndexedDB, Workbox, outbox pattern) | |
-| Gestionnaire paquets | **pnpm** | 9.x |
+| Couche                      | Technologie                                                  | Version cible      |
+| --------------------------- | ------------------------------------------------------------ | ------------------ |
+| Langage                     | **TypeScript strict**                                        | 5.6+               |
+| Framework full-stack        | **Next.js 15** (App Router)                                  | 15.x               |
+| Base de données             | **PostgreSQL** via **Supabase** (EU-West)                    | 16+                |
+| ORM / Migrations            | **Drizzle ORM**                                              | 0.36+              |
+| Auth                        | **Supabase Auth** (MFA TOTP, magic link, OAuth)              | cloud ou self-host |
+| Storage fichiers            | **Supabase Storage** (S3 compatible)                         | intégré            |
+| UI                          | **shadcn/ui + Tailwind CSS**                                 | shadcn 2.x, TW 3.4 |
+| Formulaires / Validation    | **React Hook Form + Zod**                                    | RHF 7.x, Zod 3.23+ |
+| État client & data fetching | **TanStack Query** + **Server Actions** Next.js              |                    |
+| Tests unitaires             | **Vitest**                                                   | 2.x                |
+| Tests E2E                   | **Playwright**                                               | 1.47+              |
+| Observabilité               | **Sentry** (erreurs)                                         |                    |
+| CI/CD                       | **GitHub Actions**                                           |                    |
+| Hébergement prod            | **Scaleway Serverless Containers** (région Paris)            |                    |
+| Mobile / Offline            | **PWA** (Service Worker, IndexedDB, Workbox, outbox pattern) |                    |
+| Gestionnaire paquets        | **pnpm**                                                     | 9.x                |
 
 ### Justifications des choix
 
 **Next.js full-stack plutôt que NestJS + React séparés** :
+
 - Un seul projet, un seul langage, un seul déploiement, un seul lint, un seul format.
 - Server Actions simplifient les mutations sans définir un contrat REST explicite dans 90 % des cas.
 - À maintenir par 1 personne : stack la plus concentrée du marché TypeScript.
 - Documentation et tutoriels pléthoriques.
 
 **Supabase plutôt que Keycloak + Postgres auto-hébergés** :
+
 - Auth managée (MFA TOTP, magic link, OAuth, password reset) : ~500 lignes de code économisées et audit de sécurité déjà fait par Supabase.
 - RLS Postgres natif bien outillé (policies versionnables en SQL).
 - Storage S3 intégré avec signed URLs.
@@ -63,22 +65,26 @@ Proposition initiale envisagée : **NestJS + Prisma + React/Vite + Keycloak auto
 - **Fallback auto-hébergement** possible (Supabase est open-source) si exigence de souveraineté forte plus tard.
 
 **Drizzle plutôt que Prisma** :
+
 - Migrations SQL **natives**, lisibles, versionnables en git sans artefacts binaires.
 - Meilleur contrôle sur les migrations zero-downtime (2-phases) nécessaires à la durabilité 5+ ans.
 - Typage très fort depuis le schéma TypeScript.
 - Moins d'abstraction → plus facile de tomber sur du SQL standard en cas de problème.
 
 **shadcn/ui plutôt que Mantine / MUI** :
+
 - Composants **copiés dans le repo** (pas de dépendance NPM lourde) → contrôle total, pas de breaking change imposé par une lib.
 - Accessible par défaut (Radix UI sous-jacent).
 - Tailwind natif, pas de moteur CSS en runtime.
 
 **PWA plutôt qu'app native** :
+
 - 1 codebase, pas de comptes Apple (99€/an) ni Google Play (25€ à vie), pas de review Store.
 - iOS et Android supportent le offline-first moderne (Service Worker, IndexedDB, Background Sync).
 - Suffisant pour le pointage chantier (saisie d'heures, pas de caméra haute résolution ni GPS natif).
 
 **Scaleway Serverless Containers plutôt que Vercel** :
+
 - **Région Paris**, souveraineté FR.
 - Pricing prévisible, support entreprise FR.
 - Vercel acceptable pour démarrer mais le hébergement FR est une exigence explicite.
@@ -86,6 +92,7 @@ Proposition initiale envisagée : **NestJS + Prisma + React/Vite + Keycloak auto
 ### Contraintes de simplification assumées
 
 Pour rester maintenable à 1 personne :
+
 - Pas d'architecture hexagonale stricte → **features folders Next.js** (colocation UI + logic + data par domaine).
 - Pas de microservices → **monolithe Next.js**.
 - Pas de Kubernetes → **containers managés**.
@@ -121,6 +128,7 @@ Pour rester maintenable à 1 personne :
 ## Révision
 
 À revisiter si :
+
 - Supabase change significativement de politique prix ou de région disponible.
 - Next.js App Router montre une instabilité majeure dans les 12 prochains mois.
 - L'équipe s'étoffe (>3 devs) : évaluer un découpage en services.

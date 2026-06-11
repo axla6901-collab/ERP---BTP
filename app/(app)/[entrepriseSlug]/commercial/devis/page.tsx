@@ -21,10 +21,7 @@ export default async function DevisPage() {
         title="Devis"
         actions={
           peutEcrire ? (
-            <Link
-              href="/commercial/devis/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/commercial/devis/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouveau devis
             </Link>
           ) : null

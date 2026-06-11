@@ -120,13 +120,23 @@ async function main(dbUrl: string) {
               const cid = corpsId.get(m.corps);
               const nid = natId.get(doc);
               return cid && nid
-                ? [{ entrepriseId, corpsEtatId: cid, natureDocumentId: nid, natureTiers: nature, estBloquant: true }]
+                ? [
+                    {
+                      entrepriseId,
+                      corpsEtatId: cid,
+                      natureDocumentId: nid,
+                      natureTiers: nature,
+                      estBloquant: true,
+                    },
+                  ]
                 : [];
             }),
           ),
         );
         await tx.insert(corpsEtatDocumentsRequis).values(lignes);
-        console.log(`✔ Référentiel seedé (${NATURES_DOCUMENT_DEFAUT.length} natures, ${CORPS_ETAT_DEFAUT.length} corps d'état, ${lignes.length} correspondances).`);
+        console.log(
+          `✔ Référentiel seedé (${NATURES_DOCUMENT_DEFAUT.length} natures, ${CORPS_ETAT_DEFAUT.length} corps d'état, ${lignes.length} correspondances).`,
+        );
       } else {
         console.log('• Référentiel déjà présent (seed ignoré).');
       }
@@ -141,8 +151,18 @@ async function main(dbUrl: string) {
 
       // 2. Tiers de démo (idempotent par code)
       const DEMOS = [
-        { code: 'ELEC-DEMO-AJOUR', nom: 'Démo Électricité (à jour)', email: 'ajour@demo.test', tousValides: true },
-        { code: 'ELEC-DEMO-RELANCE', nom: 'Démo Électricité (à relancer)', email: 'relance@demo.test', tousValides: false },
+        {
+          code: 'ELEC-DEMO-AJOUR',
+          nom: 'Démo Électricité (à jour)',
+          email: 'ajour@demo.test',
+          tousValides: true,
+        },
+        {
+          code: 'ELEC-DEMO-RELANCE',
+          nom: 'Démo Électricité (à relancer)',
+          email: 'relance@demo.test',
+          tousValides: false,
+        },
       ];
 
       for (const demo of DEMOS) {
@@ -173,7 +193,13 @@ async function main(dbUrl: string) {
           .values({ entrepriseId, tierId: tier.id, corpsEtatId: elec.id });
 
         // Documents requis pour ELECTRICITE/artisan : KBIS, URSSAF, RC, honneur, fiscale.
-        const requis = ['KBIS', 'URSSAF', 'ASSURANCE_RC', 'ATTESTATION_HONNEUR', 'REGULARITE_FISCALE'];
+        const requis = [
+          'KBIS',
+          'URSSAF',
+          'ASSURANCE_RC',
+          'ATTESTATION_HONNEUR',
+          'REGULARITE_FISCALE',
+        ];
         for (const code of requis) {
           const nat = natByCode.get(code);
           if (!nat) continue;
@@ -191,20 +217,31 @@ async function main(dbUrl: string) {
             // KBIS valide, URSSAF expiré, RC bientôt expirée, les 2 autres manquants.
             if (code === 'KBIS') {
               await tx.insert(tierDocuments).values({
-                entrepriseId, tierId: tier.id, natureDocumentId: nat.id,
-                nomFichierOrigine: 'KBIS.pdf', statut: 'valide',
-                dateObtention: plusJours(-30), dateFinValidite: plusJours(300),
+                entrepriseId,
+                tierId: tier.id,
+                natureDocumentId: nat.id,
+                nomFichierOrigine: 'KBIS.pdf',
+                statut: 'valide',
+                dateObtention: plusJours(-30),
+                dateFinValidite: plusJours(300),
               });
             } else if (code === 'URSSAF') {
               await tx.insert(tierDocuments).values({
-                entrepriseId, tierId: tier.id, natureDocumentId: nat.id,
-                nomFichierOrigine: 'URSSAF.pdf', statut: 'valide',
-                dateObtention: plusJours(-120), dateFinValidite: plusJours(-15), // expiré
+                entrepriseId,
+                tierId: tier.id,
+                natureDocumentId: nat.id,
+                nomFichierOrigine: 'URSSAF.pdf',
+                statut: 'valide',
+                dateObtention: plusJours(-120),
+                dateFinValidite: plusJours(-15), // expiré
               });
             } else if (code === 'ASSURANCE_RC') {
               await tx.insert(tierDocuments).values({
-                entrepriseId, tierId: tier.id, natureDocumentId: nat.id,
-                nomFichierOrigine: 'RC.pdf', statut: 'valide',
+                entrepriseId,
+                tierId: tier.id,
+                natureDocumentId: nat.id,
+                nomFichierOrigine: 'RC.pdf',
+                statut: 'valide',
                 dateFinValidite: plusJours(5), // dans la fenêtre de relance (10 j)
               });
             }
@@ -218,7 +255,14 @@ async function main(dbUrl: string) {
       const naturesById = new Map<string, NatureDocLite>(
         nats.map((n) => [
           n.id,
-          { id: n.id, code: n.code, libelle: n.libelle, modeControle: n.modeControle, delaiValiditeJours: n.delaiValiditeJours, delaiRelanceJours: n.delaiRelanceJours },
+          {
+            id: n.id,
+            code: n.code,
+            libelle: n.libelle,
+            modeControle: n.modeControle,
+            delaiValiditeJours: n.delaiValiditeJours,
+            delaiRelanceJours: n.delaiRelanceJours,
+          },
         ]),
       );
       const matriceRows = await tx.select().from(corpsEtatDocumentsRequis);
@@ -231,7 +275,12 @@ async function main(dbUrl: string) {
       const tousTiers = await tx.select().from(tiers).where(isNull(tiers.deletedAt));
       const liens = await tx.select().from(tierCorpsEtat);
       const docs = await tx
-        .select({ tierId: tierDocuments.tierId, natureDocumentId: tierDocuments.natureDocumentId, statut: tierDocuments.statut, dateFinValidite: tierDocuments.dateFinValidite })
+        .select({
+          tierId: tierDocuments.tierId,
+          natureDocumentId: tierDocuments.natureDocumentId,
+          statut: tierDocuments.statut,
+          dateFinValidite: tierDocuments.dateFinValidite,
+        })
         .from(tierDocuments)
         .where(isNull(tierDocuments.deletedAt));
 
@@ -241,15 +290,24 @@ async function main(dbUrl: string) {
         const docsTier = new Map<string, DocumentLite>();
         for (const d of docs.filter((d) => d.tierId === t.id)) {
           if (!docsTier.has(d.natureDocumentId)) {
-            docsTier.set(d.natureDocumentId, { natureDocumentId: d.natureDocumentId, statut: d.statut, dateFinValidite: d.dateFinValidite });
+            docsTier.set(d.natureDocumentId, {
+              natureDocumentId: d.natureDocumentId,
+              statut: d.statut,
+              dateFinValidite: d.dateFinValidite,
+            });
           }
         }
         const conf = evaluerConformiteTier(
           { natureTiers: t.natureTiers as NatureTiers, corpsEtatIds: corpsIds },
-          matrice, naturesById, docsTier, iso(today),
+          matrice,
+          naturesById,
+          docsTier,
+          iso(today),
         );
         const detail = conf.lignes.map((l) => `${l.code}:${l.statut}`).join(', ');
-        console.log(`  • ${t.nom} → ${conf.classe.toUpperCase()} (${conf.nbProblemes} pb) [${detail}]`);
+        console.log(
+          `  • ${t.nom} → ${conf.classe.toUpperCase()} (${conf.nbProblemes} pb) [${detail}]`,
+        );
       }
     });
 

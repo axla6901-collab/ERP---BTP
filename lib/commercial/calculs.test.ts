@@ -6,11 +6,7 @@ import type {
   PosteInterneFormInput,
 } from '@/lib/validation/commercial';
 
-import {
-  calculerMontantLigne,
-  calculerPuDepuisComposants,
-  calculerTotauxDevis,
-} from './calculs';
+import { calculerMontantLigne, calculerPuDepuisComposants, calculerTotauxDevis } from './calculs';
 
 const UUID_A = '00000000-0000-4000-8000-00000000000a';
 const UUID_B = '00000000-0000-4000-8000-00000000000b';

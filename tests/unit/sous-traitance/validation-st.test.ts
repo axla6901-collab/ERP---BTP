@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  contratStSchema,
-  TRANSITIONS_CONTRAT_ST,
-} from '@/lib/validation/contrat-st';
+import { contratStSchema, TRANSITIONS_CONTRAT_ST } from '@/lib/validation/contrat-st';
 import {
   factureStSchema,
   paiementStSchema,
@@ -37,11 +34,20 @@ describe('contratStSchema', () => {
 
   it('normalise le taux de retenue (virgule) et borne à 10 %', () => {
     expect(
-      contratStSchema.parse({ sousTraitantId: ST, chantierId: CH, montantHt: 1, tauxRetenueGarantie: '5,5' })
-        .tauxRetenueGarantie,
+      contratStSchema.parse({
+        sousTraitantId: ST,
+        chantierId: CH,
+        montantHt: 1,
+        tauxRetenueGarantie: '5,5',
+      }).tauxRetenueGarantie,
     ).toBe('5.50');
     expect(() =>
-      contratStSchema.parse({ sousTraitantId: ST, chantierId: CH, montantHt: 1, tauxRetenueGarantie: 12 }),
+      contratStSchema.parse({
+        sousTraitantId: ST,
+        chantierId: CH,
+        montantHt: 1,
+        tauxRetenueGarantie: 12,
+      }),
     ).toThrow(/10 %/);
   });
 

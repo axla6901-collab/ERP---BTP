@@ -1,6 +1,13 @@
 'use client';
 
-import { CalculatorIcon, LockIcon, PencilIcon, PlusIcon, Trash2Icon, UnlockIcon } from 'lucide-react';
+import {
+  CalculatorIcon,
+  LockIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+  UnlockIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -470,7 +477,9 @@ export function CompteProrataTab({
                 onSubmit={async (values) => {
                   const r = await actions.enregistrerParticipant(values);
                   if (r.ok) {
-                    toast.success(participantForm === 'new' ? 'Participant ajouté' : 'Participant modifié');
+                    toast.success(
+                      participantForm === 'new' ? 'Participant ajouté' : 'Participant modifié',
+                    );
                     setParticipantForm(null);
                     refresh();
                   }
@@ -591,8 +600,18 @@ export function CompteProrataTab({
               </p>
               {peutArreter ? (
                 <div className="mt-3 flex flex-wrap items-end gap-2">
-                  <Input type="date" value={today} readOnly className="w-40" aria-label="Date d'arrêté" />
-                  <Button size="sm" disabled={isPending || participants.length === 0} onClick={handleArreter}>
+                  <Input
+                    type="date"
+                    value={today}
+                    readOnly
+                    className="w-40"
+                    aria-label="Date d'arrêté"
+                  />
+                  <Button
+                    size="sm"
+                    disabled={isPending || participants.length === 0}
+                    onClick={handleArreter}
+                  >
                     <LockIcon className="mr-1 size-4" /> Arrêter le compte au {today}
                   </Button>
                 </div>

@@ -86,9 +86,7 @@ describe('gantt-utils — computeRange', () => {
   });
 
   it('étend la plage de -3j à gauche et +6j à droite', () => {
-    const r = computeRange([
-      { dateDebutPrevue: '2024-01-10', dateFinPrevue: '2024-01-20' },
-    ]);
+    const r = computeRange([{ dateDebutPrevue: '2024-01-10', dateFinPrevue: '2024-01-20' }]);
     expect(r.projectStart).toBe('2024-01-10');
     expect(r.projectEnd).toBe('2024-01-20');
     expect(r.start).toBe(dnum('2024-01-10') - 3);
@@ -168,9 +166,27 @@ describe('gantt-utils — niveaux', () => {
 describe('gantt-utils — buildLayout', () => {
   it('groupe par niveau et calcule les Y des rangs', () => {
     const taches: PlanningTacheRow[] = [
-      tache({ id: 'a', niveau: 'rdc', libelle: 'A', dateDebutPrevue: '2024-01-01', dateFinPrevue: '2024-01-05' }),
-      tache({ id: 'b', niveau: 'rdc', libelle: 'B', dateDebutPrevue: '2024-01-06', dateFinPrevue: '2024-01-10' }),
-      tache({ id: 'c', niveau: 'r1', libelle: 'C', dateDebutPrevue: '2024-01-11', dateFinPrevue: '2024-01-15' }),
+      tache({
+        id: 'a',
+        niveau: 'rdc',
+        libelle: 'A',
+        dateDebutPrevue: '2024-01-01',
+        dateFinPrevue: '2024-01-05',
+      }),
+      tache({
+        id: 'b',
+        niveau: 'rdc',
+        libelle: 'B',
+        dateDebutPrevue: '2024-01-06',
+        dateFinPrevue: '2024-01-10',
+      }),
+      tache({
+        id: 'c',
+        niveau: 'r1',
+        libelle: 'C',
+        dateDebutPrevue: '2024-01-11',
+        dateFinPrevue: '2024-01-15',
+      }),
     ];
     const { rows, height } = buildLayout(taches, {
       groupBy: 'niveau',
@@ -241,8 +257,20 @@ describe('gantt-utils — buildLayout', () => {
 
   it('hiddenCats filtre par corps de métier', () => {
     const taches: PlanningTacheRow[] = [
-      tache({ id: 'a', niveau: 'rdc', corpsMetier: 'gros_oeuvre', dateDebutPrevue: '2024-01-01', dateFinPrevue: '2024-01-05' }),
-      tache({ id: 'b', niveau: 'rdc', corpsMetier: 'finitions', dateDebutPrevue: '2024-01-06', dateFinPrevue: '2024-01-10' }),
+      tache({
+        id: 'a',
+        niveau: 'rdc',
+        corpsMetier: 'gros_oeuvre',
+        dateDebutPrevue: '2024-01-01',
+        dateFinPrevue: '2024-01-05',
+      }),
+      tache({
+        id: 'b',
+        niveau: 'rdc',
+        corpsMetier: 'finitions',
+        dateDebutPrevue: '2024-01-06',
+        dateFinPrevue: '2024-01-10',
+      }),
     ];
     const { rows } = buildLayout(taches, {
       groupBy: 'niveau',
@@ -259,8 +287,18 @@ describe('gantt-utils — buildLayout', () => {
 
   it('group by metier : utilise corps_metier comme clé', () => {
     const taches: PlanningTacheRow[] = [
-      tache({ id: 'a', corpsMetier: 'gros_oeuvre', dateDebutPrevue: '2024-01-01', dateFinPrevue: '2024-01-05' }),
-      tache({ id: 'b', corpsMetier: 'finitions', dateDebutPrevue: '2024-01-06', dateFinPrevue: '2024-01-10' }),
+      tache({
+        id: 'a',
+        corpsMetier: 'gros_oeuvre',
+        dateDebutPrevue: '2024-01-01',
+        dateFinPrevue: '2024-01-05',
+      }),
+      tache({
+        id: 'b',
+        corpsMetier: 'finitions',
+        dateDebutPrevue: '2024-01-06',
+        dateFinPrevue: '2024-01-10',
+      }),
     ];
     const { rows } = buildLayout(taches, {
       groupBy: 'metier',
@@ -278,9 +316,7 @@ describe('gantt-utils — buildLayout', () => {
 });
 
 describe('gantt-utils — calculerKpis', () => {
-  const range = computeRange([
-    { dateDebutPrevue: '2024-01-01', dateFinPrevue: '2024-01-31' },
-  ]);
+  const range = computeRange([{ dateDebutPrevue: '2024-01-01', dateFinPrevue: '2024-01-31' }]);
 
   it('avancement et heures pondérés par les heures planifiées', () => {
     const taches: PlanningTacheRow[] = [

@@ -110,7 +110,7 @@ export function ChantierForm({
       <form
         method="post"
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="grid gap-4 max-w-3xl"
+        className="grid max-w-3xl gap-4"
       >
         {erreur && (
           <Alert variant="destructive">
@@ -191,7 +191,9 @@ export function ChantierForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue>{(v) => responsableLibelle((v as string) || null)}</SelectValue>
+                        <SelectValue>
+                          {(v) => responsableLibelle((v as string) || null)}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -295,7 +297,12 @@ export function ChantierForm({
           </FormSubCard>
         </FormSection>
 
-        <FormSection number={4} title="Adresse du chantier" storageKey="chantier:adresse" defaultOpen={false}>
+        <FormSection
+          number={4}
+          title="Adresse du chantier"
+          storageKey="chantier:adresse"
+          defaultOpen={false}
+        >
           <FormField
             control={form.control}
             name="adresseLigne1"
@@ -383,7 +390,12 @@ export function ChantierForm({
         </FormSection>
 
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" type="button" onClick={() => router.back()} disabled={isSubmitting}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+          >
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>

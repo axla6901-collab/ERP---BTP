@@ -56,7 +56,7 @@ export function messagePourRejet(reason: SyncRejectReason): string {
     case 'doublon_metier':
       return 'Un pointage existe déjà pour cet employé, cette date et ce chantier.';
     case 'reference_supprimee':
-      return 'Le chantier, la tâche ou l\'employé a été supprimé entre-temps.';
+      return "Le chantier, la tâche ou l'employé a été supprimé entre-temps.";
     case 'donnees_invalides':
       return 'Données du pointage invalides.';
   }

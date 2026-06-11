@@ -48,9 +48,7 @@ describe('FormSection', () => {
       </FormSection>,
     );
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      '1.Affaire / Client',
-    );
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('1.Affaire / Client');
     expect(screen.getByText('contenu')).toBeVisible();
   });
 
@@ -148,11 +146,7 @@ describe('FormSection', () => {
       window.localStorage.setItem(STORAGE_KEY, 'open');
 
       render(
-        <FormSection
-          title="Affaire"
-          storageKey="devis:affaire-client"
-          defaultOpen={false}
-        >
+        <FormSection title="Affaire" storageKey="devis:affaire-client" defaultOpen={false}>
           <p>corps</p>
         </FormSection>,
       );

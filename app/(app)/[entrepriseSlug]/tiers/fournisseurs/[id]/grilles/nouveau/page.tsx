@@ -32,7 +32,7 @@ export default async function NouvelleGrillePage({
   if (!fournisseur) notFound();
 
   const chantierFige = chantierIdParam
-    ? chantiers.find((c) => c.id === chantierIdParam) ?? null
+    ? (chantiers.find((c) => c.id === chantierIdParam) ?? null)
     : null;
 
   return (
@@ -41,13 +41,12 @@ export default async function NouvelleGrillePage({
         <h2 className="text-xl font-medium">
           Nouvelle grille tarifaire — {fournisseur.nom}
           {chantierFige && (
-            <span className="ml-2 text-base text-muted-foreground">
-              pour {chantierFige.numero}
-            </span>
+            <span className="ml-2 text-base text-muted-foreground">pour {chantierFige.numero}</span>
           )}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Définissez la période de validité, puis ajoutez les articles concernés avec leur prix négocié.
+          Définissez la période de validité, puis ajoutez les articles concernés avec leur prix
+          négocié.
           {chantierFige ? ' Grille rattachée au chantier sélectionné.' : ''}
         </p>
       </div>
@@ -63,9 +62,7 @@ export default async function NouvelleGrillePage({
           return creerGrille(fournisseurId, values);
         }}
         successRedirect={
-          chantierFige
-            ? `/chantiers/${chantierFige.id}`
-            : `/tiers/fournisseurs/${fournisseurId}`
+          chantierFige ? `/chantiers/${chantierFige.id}` : `/tiers/fournisseurs/${fournisseurId}`
         }
       />
     </div>

@@ -4,11 +4,7 @@ import { DeleteButton } from '@/components/catalogue/delete-button';
 import { GrilleTarifaireEditor } from '@/components/catalogue/grille-tarifaire-editor';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerArticlesPourSelecteur } from '@/lib/catalogue/articles';
-import {
-  lireGrille,
-  mettreAJourGrille,
-  supprimerGrille,
-} from '@/lib/catalogue/grilles-tarifaires';
+import { lireGrille, mettreAJourGrille, supprimerGrille } from '@/lib/catalogue/grilles-tarifaires';
 import { listerUnites } from '@/lib/catalogue/unites';
 import { listerChantiersPourSelecteur } from '@/lib/chantiers/chantiers';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
@@ -46,8 +42,8 @@ export default async function GrillePage({
           )}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {grille.lignes.length} article{grille.lignes.length > 1 ? 's' : ''} · valide à partir
-          du {grille.validFrom}
+          {grille.lignes.length} article{grille.lignes.length > 1 ? 's' : ''} · valide à partir du{' '}
+          {grille.validFrom}
           {grille.validTo ? ` jusqu'au ${grille.validTo}` : ' (sans date de fin)'}
         </p>
       </div>
@@ -81,7 +77,7 @@ export default async function GrillePage({
         successRedirect={`/tiers/fournisseurs/${fournisseurId}`}
       />
 
-      <div className="border-t pt-6 max-w-xl">
+      <div className="max-w-xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer cette grille"

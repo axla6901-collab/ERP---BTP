@@ -67,14 +67,8 @@ import {
   type ChantierInput,
   type StatutChantier,
 } from '@/lib/validation/chantiers';
-import {
-  type ChantierTacheInput,
-  type StatutTache,
-} from '@/lib/validation/chantier-taches';
-import {
-  LIBELLES_STATUT_DEVIS,
-  type StatutDevis,
-} from '@/lib/validation/commercial';
+import { type ChantierTacheInput, type StatutTache } from '@/lib/validation/chantier-taches';
+import { LIBELLES_STATUT_DEVIS, type StatutDevis } from '@/lib/validation/commercial';
 
 function libelleClient(c: {
   type: string;
@@ -507,8 +501,8 @@ export default async function ChantierDetailPage({
             <CardTitle className="text-base">Commandes</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Module commandes à venir — les commandes fournisseur rattachées à ce chantier
-            seront listées ici.
+            Module commandes à venir — les commandes fournisseur rattachées à ce chantier seront
+            listées ici.
           </CardContent>
         </Card>
       )}
@@ -516,9 +510,7 @@ export default async function ChantierDetailPage({
       {tab === 'devis' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              Devis liés ({chantier.devisLies.length})
-            </CardTitle>
+            <CardTitle className="text-base">Devis liés ({chantier.devisLies.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {chantier.devisLies.length === 0 ? (

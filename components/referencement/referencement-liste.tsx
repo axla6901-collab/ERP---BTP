@@ -65,7 +65,9 @@ function colonnesCommunes(): DataTableColumn<TierConformiteRow>[] {
       id: 'nature',
       header: 'Nature',
       cell: (t) => (
-        <span className="text-sm text-muted-foreground">{LIBELLES_NATURE_TIERS[t.natureTiers]}</span>
+        <span className="text-sm text-muted-foreground">
+          {LIBELLES_NATURE_TIERS[t.natureTiers]}
+        </span>
       ),
       sortAccessor: (t) => t.natureTiers,
     },

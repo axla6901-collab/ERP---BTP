@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -167,7 +167,8 @@ function RoleFormCreate({
                     />
                   </FormControl>
                   <FormDescription>
-                    Identifiant stable, en minuscules avec underscores. Non modifiable après création.
+                    Identifiant stable, en minuscules avec underscores. Non modifiable après
+                    création.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

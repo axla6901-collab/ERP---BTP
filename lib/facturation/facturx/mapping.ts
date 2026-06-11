@@ -52,9 +52,9 @@ export function uniteToCode(unite: string | null | undefined): string {
     u: 'C62',
     'u.': 'C62',
     unite: 'C62',
-    'unité': 'C62',
+    unité: 'C62',
     pce: 'C62',
-    'pièce': 'C62',
+    pièce: 'C62',
     piece: 'C62',
     ens: 'C62',
     ensemble: 'C62',
@@ -63,7 +63,7 @@ export function uniteToCode(unite: string | null | undefined): string {
     f: 'C62',
     ml: 'MTR',
     m: 'MTR',
-    'mètre': 'MTR',
+    mètre: 'MTR',
     metre: 'MTR',
     m2: 'MTK',
     'm²': 'MTK',
@@ -200,9 +200,7 @@ export function construireDocumentFacturX(input: FacturXModel): FacturXDocument 
     const taux = l.tauxTva ?? 0;
     grossByRate.set(taux, (grossByRate.get(taux) ?? 0) + (l.montantHt ?? 0));
   }
-  const lineTotalAmount = round2(
-    facturable.reduce((s, l) => s + (l.montantHt ?? 0), 0),
-  );
+  const lineTotalAmount = round2(facturable.reduce((s, l) => s + (l.montantHt ?? 0), 0));
 
   const allowances: Array<Record<string, unknown>> = [];
   if (input.remiseGlobaleMontant > 0) {

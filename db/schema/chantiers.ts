@@ -80,10 +80,7 @@ export const chantiers = pgTable(
       'chk_chantiers_dates_reelles',
       sql`date_fin_reelle IS NULL OR date_debut_reelle IS NULL OR date_fin_reelle >= date_debut_reelle`,
     ),
-    check(
-      'chk_chantiers_code_postal',
-      sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`,
-    ),
+    check('chk_chantiers_code_postal', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
   ],
 );
 
@@ -134,10 +131,9 @@ export const chantierTaches = pgTable(
     /** Jalon (point sans durée) ; impose start = end côté DB. */
     estJalon: boolean('est_jalon').notNull().default(false),
     /** Prédécesseur (une seule dépendance par tâche, cf. champ `dep` de la maquette). */
-    predecesseurId: uuid('predecesseur_id').references(
-      (): AnyPgColumn => chantierTaches.id,
-      { onDelete: 'set null' },
-    ),
+    predecesseurId: uuid('predecesseur_id').references((): AnyPgColumn => chantierTaches.id, {
+      onDelete: 'set null',
+    }),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -211,12 +207,11 @@ export const chantierTacheEquipe = pgTable(
     uniqueIndex('uq_chantier_tache_equipe_actif')
       .on(t.tacheId, t.utilisateurId)
       .where(sql`deleted_at IS NULL`),
-    index('idx_chantier_tache_equipe_tache').on(t.tacheId).where(sql`deleted_at IS NULL`),
+    index('idx_chantier_tache_equipe_tache')
+      .on(t.tacheId)
+      .where(sql`deleted_at IS NULL`),
     index('idx_chantier_tache_equipe_entreprise').on(t.entrepriseId),
-    check(
-      'chk_chantier_tache_equipe_heures_pos',
-      sql`heures_prevues >= 0 AND heures_faites >= 0`,
-    ),
+    check('chk_chantier_tache_equipe_heures_pos', sql`heures_prevues >= 0 AND heures_faites >= 0`),
   ],
 );
 

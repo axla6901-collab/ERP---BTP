@@ -21,7 +21,7 @@ export type FormatImport = 'json' | 'excel';
 export function detectFormatImport(filename: string): FormatImport | null {
   const lower = filename.toLowerCase();
   if (lower.endsWith('.json')) return 'json';
-  if (lower.endsWith('.xlsx') || lower.endsWith('.xls') || lower.endsWith('.csv')) {
+  if (lower.endsWith('.xlsx') || lower.endsWith('.csv')) {
     return 'excel';
   }
   return null;

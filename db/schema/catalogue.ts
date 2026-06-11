@@ -44,12 +44,7 @@ export const uniteType = pgEnum('unite_type', [
   'autre',
 ]);
 
-export const articleType = pgEnum('article_type', [
-  'simple',
-  'compose',
-  'prestation',
-  'operation',
-]);
+export const articleType = pgEnum('article_type', ['simple', 'compose', 'prestation', 'operation']);
 
 // ─────────────────────────────────────────────────────────────
 // Unités
@@ -156,9 +151,12 @@ export const articles = pgTable(
 
     // Fournisseur préféré (M2.2). Si défini, son prix est utilisé en priorité
     // dans le calcul de prix de revient (cf. fonction PG prix_courant_article).
-    fournisseurPrefereId: uuid('fournisseur_prefere_id').references((): AnyPgColumn => fournisseurs.id, {
-      onDelete: 'set null',
-    }),
+    fournisseurPrefereId: uuid('fournisseur_prefere_id').references(
+      (): AnyPgColumn => fournisseurs.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
 
     // Caractéristiques physiques pour la conversion cross-type (M² ↔ KG, etc.)
     densite: numeric('densite', { precision: 10, scale: 4 }),
@@ -180,7 +178,9 @@ export const articles = pgTable(
   (t) => [
     index('idx_articles_famille').on(t.familleId),
     index('idx_articles_type').on(t.type),
-    index('idx_articles_favori').on(t.favori).where(sql`favori = true`),
+    index('idx_articles_favori')
+      .on(t.favori)
+      .where(sql`favori = true`),
   ],
 );
 
@@ -318,7 +318,9 @@ export const nomenclatureLignes = pgTable(
     uniteEmploiId: uuid('unite_emploi_id')
       .notNull()
       .references(() => unites.id, { onDelete: 'restrict' }),
-    coefficientPerte: numeric('coefficient_perte', { precision: 5, scale: 4 }).notNull().default('0'),
+    coefficientPerte: numeric('coefficient_perte', { precision: 5, scale: 4 })
+      .notNull()
+      .default('0'),
     notes: text('notes'),
   },
   (t) => [
@@ -354,7 +356,9 @@ export const prixArticles = pgTable(
      * NULL = prix de référence générique (catalogue interne).
      * Sinon = prix négocié chez ce fournisseur.
      */
-    fournisseurId: uuid('fournisseur_id').references(() => fournisseurs.id, { onDelete: 'set null' }),
+    fournisseurId: uuid('fournisseur_id').references(() => fournisseurs.id, {
+      onDelete: 'set null',
+    }),
     referenceFournisseur: text('reference_fournisseur'),
     quantiteMin: numeric('quantite_min', { precision: 14, scale: 4 }),
     validFrom: date('valid_from').notNull(),

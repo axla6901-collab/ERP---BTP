@@ -102,9 +102,9 @@ describe('compteProrataDepenseSchema', () => {
   });
 
   it('rejette une date mal formée', () => {
-    expect(compteProrataDepenseSchema.safeParse({ ...base, dateDepense: '10/06/2026' }).success).toBe(
-      false,
-    );
+    expect(
+      compteProrataDepenseSchema.safeParse({ ...base, dateDepense: '10/06/2026' }).success,
+    ).toBe(false);
   });
 
   it('rejette un payeur non-uuid', () => {

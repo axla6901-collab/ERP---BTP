@@ -2,7 +2,14 @@ import Link from 'next/link';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { requireAuth } from '@/lib/auth/guards';
 import { LIBELLES_ROLE, ROLES_MFA_OBLIGATOIRE } from '@/lib/auth/rbac';
 

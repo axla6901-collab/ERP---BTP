@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -29,7 +29,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { uniteSchema, UNITE_TYPES, type UniteInput, type UniteType } from '@/lib/validation/catalogue';
+import {
+  uniteSchema,
+  UNITE_TYPES,
+  type UniteInput,
+  type UniteType,
+} from '@/lib/validation/catalogue';
 
 const LIBELLES_TYPE: Record<UniteType, string> = {
   masse: 'Masse',

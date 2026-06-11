@@ -34,11 +34,7 @@ export const viewport: Viewport = {
   themeColor: '#f59e0b',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={cn('font-sans', inter.variable)}>
       <body className="min-h-screen bg-background text-foreground antialiased">

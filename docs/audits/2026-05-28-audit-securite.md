@@ -19,19 +19,19 @@ Base solide (RLS très propre, Better-Auth + MFA, Zod systématique, headers OWA
 
 ## 🟢 Solide (à conserver)
 
-| Domaine | État |
-|---|---|
-| RLS multi-tenant | 40 tables couvertes, `USING + WITH CHECK`, `FORCE RLS`, helper `withTenant()`, `assertRlsEnabled()` au boot, aucune fuite détectée |
-| Rôles DB | `app_admin` (BYPASSRLS) / `app_migrator` / `app_rw` correctement séparés |
-| Auth | Better-Auth 1.6 + MFA TOTP + backup codes + `requireAuthWithMfa` pour rôles `admin/comptable/rh` |
-| Validation | Zod systématique sur les Server Actions (82 fichiers `'use server'`) + `safeParse` + fieldErrors |
-| Sanitization | `isomorphic-dompurify` présent, aucun `dangerouslySetInnerHTML`, TipTap échappe par défaut |
-| Headers HTTP partiels | HSTS 2 ans + preload, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy |
-| Cookies | `__Secure-` prefix, `HttpOnly`, `SameSite` corrects |
-| Audit log métier | Table `audit_log` avec before/after JSONB, index optimisés |
-| Soft-delete systématique | `deleted_at` partout |
-| Dépendances | Versions à jour (Next 15.5.18, React 19, better-auth 1.6.11, drizzle 0.45.2) |
-| `.gitignore` | `.env*` exclus correctement, aucun secret commité |
+| Domaine                  | État                                                                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| RLS multi-tenant         | 40 tables couvertes, `USING + WITH CHECK`, `FORCE RLS`, helper `withTenant()`, `assertRlsEnabled()` au boot, aucune fuite détectée |
+| Rôles DB                 | `app_admin` (BYPASSRLS) / `app_migrator` / `app_rw` correctement séparés                                                           |
+| Auth                     | Better-Auth 1.6 + MFA TOTP + backup codes + `requireAuthWithMfa` pour rôles `admin/comptable/rh`                                   |
+| Validation               | Zod systématique sur les Server Actions (82 fichiers `'use server'`) + `safeParse` + fieldErrors                                   |
+| Sanitization             | `isomorphic-dompurify` présent, aucun `dangerouslySetInnerHTML`, TipTap échappe par défaut                                         |
+| Headers HTTP partiels    | HSTS 2 ans + preload, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy                                           |
+| Cookies                  | `__Secure-` prefix, `HttpOnly`, `SameSite` corrects                                                                                |
+| Audit log métier         | Table `audit_log` avec before/after JSONB, index optimisés                                                                         |
+| Soft-delete systématique | `deleted_at` partout                                                                                                               |
+| Dépendances              | Versions à jour (Next 15.5.18, React 19, better-auth 1.6.11, drizzle 0.45.2)                                                       |
+| `.gitignore`             | `.env*` exclus correctement, aucun secret commité                                                                                  |
 
 ---
 
@@ -124,19 +124,19 @@ Champs en clair dans Postgres :
 
 ## Roadmap proposée
 
-| # | Chantier | Effort | Priorité |
-|---|---|---|---|
-| 1 | Rate-limit auth + TOTP (Redis ou postgres-based) | 1 j | 🔴 |
-| 2 | CSP avec nonces (Server Actions + scripts Next) | 1-2 j | 🔴 |
-| 3 | Audit log auth (table dédiée + hooks Better-Auth + trigger immuabilité) | 1-2 j | 🔴 |
-| 4 | Reset password (flow Better-Auth + UI + mail) | 1 j | 🔴 |
-| 5 | Chiffrement applicatif champs sensibles (`lib/crypto/` AES-256-GCM + KMS, migration `iban/bic/numero_secu` en `bytea` chiffré) | 3-5 j | 🔴 |
-| 6 | Sentry `beforeSend` scrubber | 0.5 j | 🟠 |
-| 7 | Tests cross-tenant isolation (vitest + 2 users 2 entreprises) | 1 j | 🟠 |
-| 8 | Gestion sessions utilisateur (page liste + révocation + idle timeout) | 1 j | 🟠 |
-| 9 | Validation MIME + SHA-256 + SSE sur S3 | 1 j | 🟠 |
-| 10 | RGPD : registre + export + anonymisation | 2-3 j | 🟠 |
-| 11 | CI security : Dependabot + CodeQL + gitleaks + SBOM | 0.5 j | 🟡 |
+| #   | Chantier                                                                                                                       | Effort | Priorité |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | ------ | -------- |
+| 1   | Rate-limit auth + TOTP (Redis ou postgres-based)                                                                               | 1 j    | 🔴       |
+| 2   | CSP avec nonces (Server Actions + scripts Next)                                                                                | 1-2 j  | 🔴       |
+| 3   | Audit log auth (table dédiée + hooks Better-Auth + trigger immuabilité)                                                        | 1-2 j  | 🔴       |
+| 4   | Reset password (flow Better-Auth + UI + mail)                                                                                  | 1 j    | 🔴       |
+| 5   | Chiffrement applicatif champs sensibles (`lib/crypto/` AES-256-GCM + KMS, migration `iban/bic/numero_secu` en `bytea` chiffré) | 3-5 j  | 🔴       |
+| 6   | Sentry `beforeSend` scrubber                                                                                                   | 0.5 j  | 🟠       |
+| 7   | Tests cross-tenant isolation (vitest + 2 users 2 entreprises)                                                                  | 1 j    | 🟠       |
+| 8   | Gestion sessions utilisateur (page liste + révocation + idle timeout)                                                          | 1 j    | 🟠       |
+| 9   | Validation MIME + SHA-256 + SSE sur S3                                                                                         | 1 j    | 🟠       |
+| 10  | RGPD : registre + export + anonymisation                                                                                       | 2-3 j  | 🟠       |
+| 11  | CI security : Dependabot + CodeQL + gitleaks + SBOM                                                                            | 0.5 j  | 🟡       |
 
 **Total bloquants (1-5) : ~8-11 jours** avant commercialisation sereine.
 

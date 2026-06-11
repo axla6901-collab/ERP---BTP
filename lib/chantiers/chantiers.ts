@@ -148,7 +148,10 @@ export async function lireChantier(id: string): Promise<ChantierDetail | null> {
       code: row.client.code,
       nom: libelleClient(row.client),
     },
-    responsable: row.responsable && row.responsable.id ? { id: row.responsable.id, email: row.responsable.email } : null,
+    responsable:
+      row.responsable && row.responsable.id
+        ? { id: row.responsable.id, email: row.responsable.email }
+        : null,
     devisLies,
   };
 }
@@ -225,10 +228,7 @@ export async function creerChantier(
   }
 }
 
-export async function mettreAJourChantier(
-  id: string,
-  input: ChantierInput,
-): Promise<ActionResult> {
+export async function mettreAJourChantier(id: string, input: ChantierInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_CHANTIER_WRITE);
   const parsed = chantierSchema.safeParse(input);
   if (!parsed.success) {

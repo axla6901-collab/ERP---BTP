@@ -7,10 +7,7 @@ import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { FilterPills, type FilterPillItem } from '@/components/ui/filter-pills';
 import type { FactureAvecClient } from '@/lib/facturation/factures';
-import {
-  LIBELLES_STATUT_FACTURE,
-  type StatutFacture,
-} from '@/lib/validation/facturation';
+import { LIBELLES_STATUT_FACTURE, type StatutFacture } from '@/lib/validation/facturation';
 
 function formatMontant(m: string): string {
   const n = Number(m);

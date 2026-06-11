@@ -32,29 +32,22 @@ export function EntreprisePlanningToggle({ initialActif, onToggle }: Props) {
         setActif(ancien); // rollback
         toast.error(res.error);
       } else {
-        toast.success(
-          nouveau ? 'Module Planning activé.' : 'Module Planning désactivé.',
-        );
+        toast.success(nouveau ? 'Module Planning activé.' : 'Module Planning désactivé.');
       }
     });
   }
 
   return (
     <div className="flex items-start gap-3">
-      <Switch
-        id="planning-active"
-        checked={actif}
-        onCheckedChange={basculer}
-        disabled={pending}
-      />
+      <Switch id="planning-active" checked={actif} onCheckedChange={basculer} disabled={pending} />
       <div className="space-y-1">
         <Label htmlFor="planning-active" className="text-sm font-medium">
           Module Planning (diagramme de Gantt)
         </Label>
         <p className="text-xs text-muted-foreground">
-          Active l&apos;onglet « Planning » dans la sidebar et sur chaque fiche chantier.
-          Permet de visualiser et piloter les tâches sur une vue calendaire,
-          d&apos;affecter des heures par ouvrier et de suivre l&apos;avancement.
+          Active l&apos;onglet « Planning » dans la sidebar et sur chaque fiche chantier. Permet de
+          visualiser et piloter les tâches sur une vue calendaire, d&apos;affecter des heures par
+          ouvrier et de suivre l&apos;avancement.
         </p>
       </div>
     </div>

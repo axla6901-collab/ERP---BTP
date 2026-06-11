@@ -33,7 +33,9 @@ export async function enregistrerPointageSync(opts: {
   const parsed = pointageSyncSchema.safeParse(input);
   if (!parsed.success) {
     const clientUuid =
-      (typeof input === 'object' && input !== null && 'clientUuid' in input &&
+      (typeof input === 'object' &&
+      input !== null &&
+      'clientUuid' in input &&
       typeof (input as { clientUuid?: unknown }).clientUuid === 'string'
         ? (input as { clientUuid: string }).clientUuid
         : fallbackClientUuid) ?? '';

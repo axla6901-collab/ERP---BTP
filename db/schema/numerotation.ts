@@ -78,9 +78,7 @@ export const modelesNumerotation = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     updatedBy: text('updated_by').references(() => utilisateurs.id, { onDelete: 'set null' }),
   },
-  (t) => [
-    uniqueIndex('uq_modeles_numerotation_entreprise_type').on(t.entrepriseId, t.typeDoc),
-  ],
+  (t) => [uniqueIndex('uq_modeles_numerotation_entreprise_type').on(t.entrepriseId, t.typeDoc)],
 );
 
 export type ModeleNumerotation = typeof modelesNumerotation.$inferSelect;

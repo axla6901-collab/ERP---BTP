@@ -15,10 +15,10 @@
 
 L'application utilise **deux rôles Postgres distincts** :
 
-| Rôle | Privilèges | Utilisé par |
-|---|---|---|
+| Rôle           | Privilèges                                                  | Utilisé par                                                  |
+| -------------- | ----------------------------------------------------------- | ------------------------------------------------------------ |
 | `app_migrator` | DDL + DML (CREATE/ALTER/DROP + SELECT/INSERT/UPDATE/DELETE) | `drizzle-kit` (migrations, `pnpm db:push`, `pnpm db:studio`) |
-| `app_rw` | DML uniquement | App Next.js runtime (Better Auth, Server Actions) |
+| `app_rw`       | DML uniquement                                              | App Next.js runtime (Better Auth, Server Actions)            |
 
 Avantage : si une faille applicative permet à un attaquant d'exécuter du SQL arbitraire via Next.js, il **ne peut pas modifier le schéma** (DROP TABLE, CREATE FUNCTION malveillante, etc.). Limite la surface d'attaque.
 
@@ -109,11 +109,11 @@ docker exec erp-btp-postgres psql -U erpbtp -d erpbtp -c "DROP ROLE app_rw; DROP
 
 ## Sécurité — bonnes pratiques
 
-| Élément | Visibilité |
-|---|---|
-| Mots de passe dans `docker-compose.yml` (`erpbtp`) | **Dev uniquement** — prod utilise un coffre |
-| Mots de passe `app_rw` / `app_migrator` | **Secrets** — `.env.local` non commité |
-| Superuser `erpbtp` | **Ne pas utiliser dans l'app** — admin seulement |
+| Élément                                            | Visibilité                                       |
+| -------------------------------------------------- | ------------------------------------------------ |
+| Mots de passe dans `docker-compose.yml` (`erpbtp`) | **Dev uniquement** — prod utilise un coffre      |
+| Mots de passe `app_rw` / `app_migrator`            | **Secrets** — `.env.local` non commité           |
+| Superuser `erpbtp`                                 | **Ne pas utiliser dans l'app** — admin seulement |
 
 - **Drizzle Studio** utilise `DATABASE_MIGRATOR_URL` (peut modifier le schéma). Réservé à l'admin.
 - **Better Auth** utilise `DATABASE_URL` (DML seulement). Limite l'impact d'une éventuelle injection SQL.

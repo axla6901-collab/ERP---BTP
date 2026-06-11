@@ -62,7 +62,7 @@ describe('EntreprisesTable', () => {
       expect(screen.getByText('AL')).toBeInTheDocument(); // 2 premières lettres
     });
 
-    it('affiche l\'<img> du logo quand une URL est fournie', () => {
+    it("affiche l'<img> du logo quand une URL est fournie", () => {
       render(
         <EntreprisesTable
           items={[ALPHA]}

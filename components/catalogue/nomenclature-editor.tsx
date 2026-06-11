@@ -4,7 +4,7 @@ import { Trash2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -159,13 +159,10 @@ export function NomenclatureEditor({
               const quantite = toNumber(form.watch(`lignes.${idx}.quantite`));
               const perteRaw = toNumber(form.watch(`lignes.${idx}.coefficientPerte`));
               // Accepter saisie en % (5) ou en décimal (0.05)
-              const perte =
-                perteRaw == null ? 0 : perteRaw >= 1 ? perteRaw / 100 : perteRaw;
+              const perte = perteRaw == null ? 0 : perteRaw >= 1 ? perteRaw / 100 : perteRaw;
               const prixUnit = toNumber(composant?.prixComposant ?? null);
               const sousTotal =
-                quantite != null && prixUnit != null
-                  ? quantite * (1 + perte) * prixUnit
-                  : null;
+                quantite != null && prixUnit != null ? quantite * (1 + perte) * prixUnit : null;
               const estCompose = composant?.type === 'compose';
 
               return (
@@ -185,11 +182,7 @@ export function NomenclatureEditor({
                       }}
                     >
                       <SelectTrigger
-                        className={
-                          estCompose
-                            ? 'text-indigo-700 dark:text-indigo-400'
-                            : undefined
-                        }
+                        className={estCompose ? 'text-indigo-700 dark:text-indigo-400' : undefined}
                       >
                         <SelectValue placeholder="Choisir un composant">
                           {(value) => {
@@ -347,8 +340,7 @@ export function NomenclatureEditor({
                     const composant = articlesDisponibles.find((a) => a.id === composantId);
                     const quantite = toNumber(form.watch(`lignes.${idx}.quantite`));
                     const perteRaw = toNumber(form.watch(`lignes.${idx}.coefficientPerte`));
-                    const perte =
-                      perteRaw == null ? 0 : perteRaw >= 1 ? perteRaw / 100 : perteRaw;
+                    const perte = perteRaw == null ? 0 : perteRaw >= 1 ? perteRaw / 100 : perteRaw;
                     const prixUnit = toNumber(composant?.prixComposant ?? null);
                     if (quantite == null || prixUnit == null) return acc;
                     return acc + quantite * (1 + perte) * prixUnit;
@@ -384,7 +376,8 @@ export function NomenclatureEditor({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Chaque enregistrement crée une nouvelle version immutable. Les anciennes restent consultables.
+        Chaque enregistrement crée une nouvelle version immutable. Les anciennes restent
+        consultables.
       </p>
     </form>
   );

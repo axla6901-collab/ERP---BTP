@@ -29,18 +29,14 @@ describe('StatutToggleButton', () => {
   });
 
   it('propose « Activer » quand l’entité est inactive', () => {
-    render(
-      <StatutToggleButton actif={false} action={vi.fn().mockResolvedValue({ ok: true })} />,
-    );
+    render(<StatutToggleButton actif={false} action={vi.fn().mockResolvedValue({ ok: true })} />);
     expect(screen.getByRole('button', { name: 'Activer' })).toBeInTheDocument();
   });
 
   it('appelle l’action avec l’état cible (false) puis rafraîchit et notifie', async () => {
     const action = vi.fn().mockResolvedValue({ ok: true });
     const onDone = vi.fn();
-    render(
-      <StatutToggleButton actif libelle="Fournisseur" action={action} onDone={onDone} />,
-    );
+    render(<StatutToggleButton actif libelle="Fournisseur" action={action} onDone={onDone} />);
     fireEvent.click(screen.getByRole('button', { name: 'Désactiver' }));
 
     await waitFor(() => expect(action).toHaveBeenCalledWith(false));

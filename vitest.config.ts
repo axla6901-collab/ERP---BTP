@@ -20,13 +20,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json'],
-      exclude: [
-        'node_modules/**',
-        '.next/**',
-        'tests/**',
-        'db/migrations/**',
-        '**/*.config.*',
-      ],
+      exclude: ['node_modules/**', '.next/**', 'tests/**', 'db/migrations/**', '**/*.config.*'],
       thresholds: {
         lines: 70,
         functions: 70,

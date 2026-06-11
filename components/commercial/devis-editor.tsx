@@ -1123,9 +1123,7 @@ export function DevisEditor({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {remiseGlobaleType === 'montant'
-                      ? 'Montant de la remise (€)'
-                      : 'Remise (%)'}
+                    {remiseGlobaleType === 'montant' ? 'Montant de la remise (€)' : 'Remise (%)'}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -2004,7 +2002,9 @@ function MenuAjouterArticle({
         <div className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Emplacement
         </div>
-        <div className="max-h-64 overflow-y-auto">{arbre.map((noeud) => rendreNoeud(noeud, 0))}</div>
+        <div className="max-h-64 overflow-y-auto">
+          {arbre.map((noeud) => rendreNoeud(noeud, 0))}
+        </div>
         <div className="my-1 border-t" />
         <button
           type="button"

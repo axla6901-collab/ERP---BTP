@@ -20,10 +20,7 @@ import { getDownloadUrl } from '@/lib/storage/s3';
  *
  * Redirige vers une URL S3 signée (TTL court — cf. lib/storage/s3.ts).
  */
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const utilisateur = await getCurrentUtilisateur();

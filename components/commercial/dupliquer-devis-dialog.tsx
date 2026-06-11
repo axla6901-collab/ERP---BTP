@@ -27,16 +27,8 @@ type Props = {
  *  - Nouvelle version pour le même client (gated COMMERCIAL_DEVIS_VERSION)
  *  - Duplication pour un autre client (libre, l'utilisateur changera le
  *    client après ouverture du nouveau devis) */
-export function DupliquerDevisDialog({
-  open,
-  onClose,
-  action,
-  peutVersionner,
-  onSuccess,
-}: Props) {
-  const [mode, setMode] = useState<DupliquerMode>(
-    peutVersionner ? 'meme_client' : 'autre_client',
-  );
+export function DupliquerDevisDialog({ open, onClose, action, peutVersionner, onSuccess }: Props) {
+  const [mode, setMode] = useState<DupliquerMode>(peutVersionner ? 'meme_client' : 'autre_client');
   const [submitting, setSubmitting] = useState(false);
 
   // Reset au ré-ouverture (en cas de toggle de la permission ou changement
@@ -113,12 +105,9 @@ export function DupliquerDevisDialog({
               className="mt-1 size-4"
             />
             <div className="min-w-0">
-              <div className="text-sm font-medium">
-                Nouvelle version pour ce client
-              </div>
+              <div className="text-sm font-medium">Nouvelle version pour ce client</div>
               <div className="mt-0.5 text-xs text-muted-foreground">
-                Créer une révision du devis (négociation, ajustement) pour le
-                même client.
+                Créer une révision du devis (négociation, ajustement) pour le même client.
                 {!peutVersionner && (
                   <span className="block text-red-600">
                     Droit manquant : « Gérer les versions d&apos;un devis ».
@@ -144,31 +133,20 @@ export function DupliquerDevisDialog({
               className="mt-1 size-4"
             />
             <div className="min-w-0">
-              <div className="text-sm font-medium">
-                Pour un autre client
-              </div>
+              <div className="text-sm font-medium">Pour un autre client</div>
               <div className="mt-0.5 text-xs text-muted-foreground">
-                Copier la structure du devis ; vous changerez le client à
-                l&apos;ouverture du nouveau devis.
+                Copier la structure du devis ; vous changerez le client à l&apos;ouverture du
+                nouveau devis.
               </div>
             </div>
           </label>
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-          >
+          <Button variant="ghost" type="button" onClick={onClose} disabled={submitting}>
             Annuler
           </Button>
-          <Button
-            type="button"
-            onClick={handleConfirm}
-            disabled={submitting}
-          >
+          <Button type="button" onClick={handleConfirm} disabled={submitting}>
             {submitting ? 'Duplication…' : 'Dupliquer'}
           </Button>
         </div>

@@ -8,10 +8,7 @@ import { TierForm } from '@/components/referencement/tier-form';
 import { FormSection } from '@/components/ui/form-section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireTenantContext } from '@/lib/auth/tenant-guards';
-import {
-  peutEcrireDocumentsTiers,
-  peutStatuerAgrement,
-} from '@/lib/referencement/permissions';
+import { peutEcrireDocumentsTiers, peutStatuerAgrement } from '@/lib/referencement/permissions';
 import { lireReferentielTiers, lireTier, mettreAJourTier } from '@/lib/referencement/registre';
 
 export default async function FicheTierPage({
@@ -68,9 +65,7 @@ export default async function FicheTierPage({
             <CardTitle className="flex items-center gap-3 text-base">
               Agrément <StatutAgrementBadge statut={detail.tier.statutAgrement} />
             </CardTitle>
-            {peutDocs && detail.conformite.classe === 'a_relancer' && (
-              <RelanceButton tierId={id} />
-            )}
+            {peutDocs && detail.conformite.classe === 'a_relancer' && <RelanceButton tierId={id} />}
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="text-sm text-muted-foreground">

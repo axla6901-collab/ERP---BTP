@@ -109,7 +109,11 @@ export async function creerFournisseur(
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   const parsed = fournisseurSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -164,7 +168,11 @@ export async function mettreAJourFournisseur(
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   const parsed = fournisseurSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -224,10 +232,7 @@ export async function mettreAJourFournisseur(
  * on ne touche ni la ligne ni l'audit. Réutilisée par la liste et le bandeau
  * de la fiche.
  */
-export async function changerStatutFournisseur(
-  id: string,
-  actif: boolean,
-): Promise<ActionResult> {
+export async function changerStatutFournisseur(id: string, actif: boolean): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   try {
     await withTenant(ctx.entreprise.id, async (tx) => {

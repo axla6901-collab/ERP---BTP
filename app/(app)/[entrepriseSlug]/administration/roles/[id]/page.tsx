@@ -11,17 +11,9 @@ import { mettreAJourRole, supprimerRole } from '@/lib/admin/roles';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (RBAC, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
 
-export default async function EditionRolePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditionRolePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [role] = await db
-    .select()
-    .from(roles)
-    .where(eq(roles.id, id))
-    .limit(1);
+  const [role] = await db.select().from(roles).where(eq(roles.id, id)).limit(1);
   if (!role) notFound();
 
   const [compte] = await db
@@ -47,13 +39,10 @@ export default async function EditionRolePage({
       {role.systeme && (
         <Alert>
           <AlertDescription>
-            Ce rôle est <strong>système</strong> : le code est figé, et il ne peut pas être supprimé.
-            Le libellé, la description et l&apos;état actif/désactivé restent modifiables. Ses
-            permissions s&apos;éditent dans la matrice de la page{' '}
-            <Link
-              href="/administration/roles"
-              className="underline underline-offset-4"
-            >
+            Ce rôle est <strong>système</strong> : le code est figé, et il ne peut pas être
+            supprimé. Le libellé, la description et l&apos;état actif/désactivé restent modifiables.
+            Ses permissions s&apos;éditent dans la matrice de la page{' '}
+            <Link href="/administration/roles" className="underline underline-offset-4">
               Rôles &amp; permissions
             </Link>
             .
@@ -78,7 +67,7 @@ export default async function EditionRolePage({
       />
 
       {peutSupprimer && (
-        <div className="border-t pt-6 max-w-xl">
+        <div className="max-w-xl border-t pt-6">
           <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
           <DeleteButton
             label="Supprimer ce rôle"

@@ -122,9 +122,7 @@ export async function listerArticles(typeFilter?: ArticleType): Promise<ArticleA
     }
     const symboles = new Map<string, string>();
     if (uniteIds.size > 0) {
-      const us = await tx
-        .select({ id: unites.id, symbole: unites.symbole })
-        .from(unites);
+      const us = await tx.select({ id: unites.id, symbole: unites.symbole }).from(unites);
       for (const u of us) symboles.set(u.id, u.symbole);
     }
 
@@ -133,8 +131,12 @@ export async function listerArticles(typeFilter?: ArticleType): Promise<ArticleA
       familleCode: r.famille?.code ?? null,
       familleLibelle: r.famille?.libelle ?? null,
       uniteAchatSymbole: r.uniteAchat ?? null,
-      uniteStockSymbole: r.article.uniteStockId ? symboles.get(r.article.uniteStockId) ?? null : null,
-      uniteVenteSymbole: r.article.uniteVenteId ? symboles.get(r.article.uniteVenteId) ?? null : null,
+      uniteStockSymbole: r.article.uniteStockId
+        ? (symboles.get(r.article.uniteStockId) ?? null)
+        : null,
+      uniteVenteSymbole: r.article.uniteVenteId
+        ? (symboles.get(r.article.uniteVenteId) ?? null)
+        : null,
     }));
   });
 }
@@ -328,16 +330,18 @@ export async function listerArticleIdsParChantier(chantierId: string): Promise<s
         ),
       ),
   );
-  return rows
-    .map((r) => r.articleId)
-    .filter((id): id is string => id != null);
+  return rows.map((r) => r.articleId).filter((id): id is string => id != null);
 }
 
 export async function creerArticle(input: ArticleInput): Promise<ActionResult<{ id: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = articleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -386,14 +390,15 @@ export async function creerArticle(input: ArticleInput): Promise<ActionResult<{ 
   }
 }
 
-export async function mettreAJourArticle(
-  id: string,
-  input: ArticleInput,
-): Promise<ActionResult> {
+export async function mettreAJourArticle(id: string, input: ArticleInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = articleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {

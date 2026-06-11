@@ -104,7 +104,7 @@ export function parseTemplate(template: string): TemplateParse {
   if (matches.length > 1) {
     return {
       ok: false,
-      error: 'Le template ne doit contenir qu\'un seul compteur (%0Nd).',
+      error: "Le template ne doit contenir qu'un seul compteur (%0Nd).",
     };
   }
 
@@ -188,11 +188,7 @@ export function validerCadence(
  * production c'est `generate_numero` côté Postgres qui produit le numéro
  * réellement attribué (sous transaction + séquence atomique).
  */
-export function formatNumero(
-  template: string,
-  sequence: number,
-  date: Date = new Date(),
-): string {
+export function formatNumero(template: string, sequence: number, date: Date = new Date()): string {
   const parsed = parseTemplate(template);
   if (!parsed.ok) return template;
 
@@ -220,5 +216,9 @@ export const TOKENS_AIDE: Array<{ token: string; description: string; exemple: s
   { token: '[@Year2]', description: 'Année sur 2 chiffres', exemple: '26' },
   { token: '[@Month]', description: 'Mois sur 2 chiffres', exemple: '05' },
   { token: '[@Day]', description: 'Jour sur 2 chiffres', exemple: '26' },
-  { token: '%03d', description: 'Compteur zero-padded — la largeur (1-9) contrôle le nombre de chiffres', exemple: '001' },
+  {
+    token: '%03d',
+    description: 'Compteur zero-padded — la largeur (1-9) contrôle le nombre de chiffres',
+    exemple: '001',
+  },
 ];

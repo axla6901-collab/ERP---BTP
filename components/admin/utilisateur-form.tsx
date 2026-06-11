@@ -83,11 +83,7 @@ export function UtilisateurForm({
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label>Rôle</Label>
-            <Select
-              value={roleId}
-              onValueChange={(v) => v && setRoleId(v)}
-              disabled={isPending}
-            >
+            <Select value={roleId} onValueChange={(v) => v && setRoleId(v)} disabled={isPending}>
               <SelectTrigger>
                 <SelectValue>
                   {(value) => {

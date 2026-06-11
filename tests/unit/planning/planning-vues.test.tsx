@@ -34,9 +34,13 @@ afterEach(() => {
 describe('PlanningVues', () => {
   it("affiche la « Vue d'ensemble » (Gantt) par défaut, pas le tableau", () => {
     render(
-      <PlanningVues chantiers={[som()]} entrepriseSlug="acme"
+      <PlanningVues
+        chantiers={[som()]}
+        entrepriseSlug="acme"
         today="2026-06-15"
-        peutVueEnsemble={true} chargerTaches={vi.fn()} />,
+        peutVueEnsemble={true}
+        chargerTaches={vi.fn()}
+      />,
     );
     // Le sélecteur de vue place « Vue d'ensemble » en pressé.
     expect(screen.getByRole('button', { name: "Vue d'ensemble" })).toHaveAttribute(
@@ -50,9 +54,13 @@ describe('PlanningVues', () => {
 
   it('bascule vers la « Liste » (tableau) puis revient', () => {
     render(
-      <PlanningVues chantiers={[som()]} entrepriseSlug="acme"
+      <PlanningVues
+        chantiers={[som()]}
+        entrepriseSlug="acme"
         today="2026-06-15"
-        peutVueEnsemble={true} chargerTaches={vi.fn()} />,
+        peutVueEnsemble={true}
+        chargerTaches={vi.fn()}
+      />,
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Liste' }));
@@ -84,9 +92,13 @@ describe('PlanningVues', () => {
   it('transmet chargerTaches au Gantt (appelé au dépliage)', async () => {
     const chargerTaches = vi.fn().mockResolvedValue([]);
     render(
-      <PlanningVues chantiers={[som()]} entrepriseSlug="acme"
+      <PlanningVues
+        chantiers={[som()]}
+        entrepriseSlug="acme"
         today="2026-06-15"
-        peutVueEnsemble={true} chargerTaches={chargerTaches} />,
+        peutVueEnsemble={true}
+        chargerTaches={chargerTaches}
+      />,
     );
     fireEvent.click(screen.getByRole('button', { name: /Déplier/ }));
     expect(chargerTaches).toHaveBeenCalledWith('c1');

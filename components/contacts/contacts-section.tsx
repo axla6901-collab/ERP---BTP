@@ -57,8 +57,8 @@ export function ContactsSection({ source, tiersId, contacts, className }: Props)
       <div>
         <h3 className="text-sm font-medium text-muted-foreground">Contacts</h3>
         <p className="text-xs text-muted-foreground">
-          Interlocuteurs chez le tiers. Un seul contact peut être marqué « principal ».
-          Les contacts inactifs restent visibles pour traçabilité.
+          Interlocuteurs chez le tiers. Un seul contact peut être marqué « principal ». Les contacts
+          inactifs restent visibles pour traçabilité.
         </p>
       </div>
 

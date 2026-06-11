@@ -15,11 +15,7 @@
 
 import { openDB, type IDBPDatabase } from 'idb';
 
-import type {
-  OutboxEntry,
-  SyncItemResult,
-  SyncResponse,
-} from './types';
+import type { OutboxEntry, SyncItemResult, SyncResponse } from './types';
 
 const DB_NAME = 'erp-pointage';
 const DB_VERSION = 1;

@@ -24,10 +24,7 @@ function variantePour(t: StatutDevis): 'default' | 'destructive' | 'outline' {
 type Props = {
   devisId: string;
   statutCourant: StatutDevis;
-  action: (
-    id: string,
-    nouveau: StatutDevis,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  action: (id: string, nouveau: StatutDevis) => Promise<{ ok: boolean; error?: string }>;
 };
 
 export function ChangerStatut({ devisId, statutCourant, action }: Props) {
@@ -41,9 +38,7 @@ export function ChangerStatut({ devisId, statutCourant, action }: Props) {
 
   if (transitionsPossibles.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Statut final : aucune transition possible.
-      </p>
+      <p className="text-sm text-muted-foreground">Statut final : aucune transition possible.</p>
     );
   }
 

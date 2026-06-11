@@ -1,7 +1,12 @@
 import Link from 'next/link';
 import { PlusIcon } from 'lucide-react';
 
-import { couleurBarre, positionBarre, type CouleurBarre, type Frise } from '@/lib/dashboard/compute';
+import {
+  couleurBarre,
+  positionBarre,
+  type CouleurBarre,
+  type Frise,
+} from '@/lib/dashboard/compute';
 import type { ChantierTimeline } from '@/lib/dashboard/dashboard';
 import { cn } from '@/lib/utils';
 

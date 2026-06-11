@@ -30,8 +30,7 @@ export function MatriceEngagementEditor({ initial, peutEcrire }: Props) {
   const [isPending, startTransition] = useTransition();
   const [etat, setEtat] = useState<Record<string, boolean>>(() => {
     const e: Record<string, boolean> = {};
-    for (const n of NATURES_TIERS)
-      for (const t of TYPES_ENGAGEMENT) e[cle(n, t)] = false;
+    for (const n of NATURES_TIERS) for (const t of TYPES_ENGAGEMENT) e[cle(n, t)] = false;
     for (const c of initial) e[cle(c.natureTiers, c.typeEngagement)] = c.autorise;
     return e;
   });

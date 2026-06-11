@@ -74,10 +74,7 @@ const INTERACTIVE_SELECTOR =
   'a, button, input, select, textarea, label, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [data-no-row-nav]';
 
 function normaliser(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
 function alignClass(align?: 'left' | 'right' | 'center'): string {
@@ -99,9 +96,7 @@ export function DataTable<T>({
 }: Props<T>) {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<{ id: string; dir: 'asc' | 'desc' } | null>(
-    defaultSort ?? null,
-  );
+  const [sort, setSort] = useState<{ id: string; dir: 'asc' | 'desc' } | null>(defaultSort ?? null);
 
   function handleRowClick(e: MouseEvent<HTMLTableRowElement>, href: string) {
     // Si la cible (ou un ancêtre jusqu'à la ligne) est un élément interactif,
@@ -190,7 +185,7 @@ export function DataTable<T>({
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs text-muted-foreground tabular-nums">
+          <span className="text-xs tabular-nums text-muted-foreground">
             {filteredSorted.length}
             {query ? ` / ${rows.length}` : ''}
           </span>
@@ -200,9 +195,7 @@ export function DataTable<T>({
 
       {filteredSorted.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
-          {query
-            ? `Aucun résultat pour « ${query} ».`
-            : emptyMessage ?? 'Aucune donnée.'}
+          {query ? `Aucun résultat pour « ${query} ».` : (emptyMessage ?? 'Aucune donnée.')}
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -230,10 +223,7 @@ export function DataTable<T>({
                         >
                           <span>{col.header}</span>
                           {!actif && (
-                            <ChevronsUpDownIcon
-                              className="size-3 opacity-50"
-                              aria-hidden="true"
-                            />
+                            <ChevronsUpDownIcon className="size-3 opacity-50" aria-hidden="true" />
                           )}
                           {actif && sort?.dir === 'asc' && (
                             <ArrowUpIcon className="size-3" aria-hidden="true" />
@@ -268,8 +258,7 @@ export function DataTable<T>({
                           // L'accessibilité passe par le lien « Ouvrir » de la
                           // colonne actions, déjà focusable au clavier.
                           tabIndex: 0,
-                          onClick: (e: MouseEvent<HTMLTableRowElement>) =>
-                            handleRowClick(e, href),
+                          onClick: (e: MouseEvent<HTMLTableRowElement>) => handleRowClick(e, href),
                           onAuxClick: (e: MouseEvent<HTMLTableRowElement>) => {
                             // Clic molette : ouvrir en nouvel onglet.
                             if (e.button !== 1) return;
@@ -284,10 +273,7 @@ export function DataTable<T>({
                       : {})}
                   >
                     {columns.map((col) => (
-                      <TableCell
-                        key={col.id}
-                        className={cn(alignClass(col.align), col.className)}
-                      >
+                      <TableCell key={col.id} className={cn(alignClass(col.align), col.className)}>
                         {col.cell(row)}
                       </TableCell>
                     ))}

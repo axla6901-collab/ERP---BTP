@@ -14,10 +14,7 @@ import {
 type Props = {
   chantierId: string;
   statutCourant: StatutChantier;
-  action: (
-    id: string,
-    nouveau: StatutChantier,
-  ) => Promise<{ ok: boolean; error?: string }>;
+  action: (id: string, nouveau: StatutChantier) => Promise<{ ok: boolean; error?: string }>;
 };
 
 export function ChangerStatutChantier({ chantierId, statutCourant, action }: Props) {
@@ -27,9 +24,7 @@ export function ChangerStatutChantier({ chantierId, statutCourant, action }: Pro
 
   if (transitionsPossibles.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Statut final : aucune transition possible.
-      </p>
+      <p className="text-sm text-muted-foreground">Statut final : aucune transition possible.</p>
     );
   }
 
@@ -50,9 +45,7 @@ export function ChangerStatutChantier({ chantierId, statutCourant, action }: Pro
       {transitionsPossibles.map((t) => (
         <Button
           key={t}
-          variant={
-            t === 'termine' ? 'default' : t === 'annule' ? 'destructive' : 'outline'
-          }
+          variant={t === 'termine' ? 'default' : t === 'annule' ? 'destructive' : 'outline'}
           size="sm"
           onClick={() => handle(t)}
           disabled={isPending}

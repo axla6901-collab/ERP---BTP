@@ -8,11 +8,7 @@ vi.mock('@/lib/auth/guards', () => ({
   requirePermission: vi.fn().mockResolvedValue({ id: 'u1', role: 'admin' }),
 }));
 
-import {
-  analyserClasseurDpgf,
-  importerAvecMappingDpgf,
-  type MappingDpgf,
-} from './import-dpgf';
+import { analyserClasseurDpgf, importerAvecMappingDpgf, type MappingDpgf } from './import-dpgf';
 
 /**
  * DPGF "type économiste" :
@@ -32,7 +28,15 @@ function buildDpgfBuffer(): string {
 
   const aoa: (string | number | null)[][] = [
     [null, null, null, null, null, null, null],
-    [null, 'DESIGNATION DU POSTE', 'U', 'Quantité économiste', 'Quantité entreprise', 'P.U.', 'Total'],
+    [
+      null,
+      'DESIGNATION DU POSTE',
+      'U',
+      'Quantité économiste',
+      'Quantité entreprise',
+      'P.U.',
+      'Total',
+    ],
     [null, null, null, null, null, null, null],
     ['2.1', 'PRESTATIONS COMPLEMENTAIRES', null, null, null, null, null],
     ['2.1.1', "Études d'exécution", 'Ft', 1, 1, 19800, 19800],

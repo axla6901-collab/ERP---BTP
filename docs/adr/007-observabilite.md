@@ -7,6 +7,7 @@
 ## Contexte
 
 Le projet a besoin d'une **plateforme de monitoring d'erreurs et de performance** pour :
+
 - Diagnostiquer les bugs en prod (un utilisateur ne peut pas décrire un stack trace au téléphone)
 - Suivre les régressions de performance (temps de réponse des Server Actions, requêtes SQL lentes)
 - Auditer les comportements suspects (tentatives de connexion répétées, erreurs RBAC inattendues)
@@ -67,6 +68,7 @@ Stack plus moderne mais beaucoup plus complexe à opérer (4-6 conteneurs suppl�
 ## Révision
 
 À revisiter si :
+
 - GlitchTip annonce sa fin ou un changement majeur de licence
 - Le besoin de traces distribuées devient critique → évaluer OpenTelemetry
 - L'équipe s'étoffe et un GlitchTip mutualisé entreprise devient justifiable

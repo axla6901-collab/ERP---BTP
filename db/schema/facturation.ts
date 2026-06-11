@@ -115,10 +115,7 @@ export const factures = pgTable(
       'chk_factures_retenue_pct',
       sql`retenue_garantie_pct IS NULL OR (retenue_garantie_pct >= 0 AND retenue_garantie_pct <= 10)`,
     ),
-    check(
-      'chk_factures_dates',
-      sql`date_echeance IS NULL OR date_echeance >= date_facture`,
-    ),
+    check('chk_factures_dates', sql`date_echeance IS NULL OR date_echeance >= date_facture`),
     check(
       'chk_factures_remise_globale',
       sql`remise_globale_type IS NULL OR (remise_globale_type IN ('pourcent','montant') AND remise_globale_valeur IS NOT NULL AND remise_globale_valeur > 0 AND (remise_globale_type <> 'pourcent' OR remise_globale_valeur <= 100))`,
@@ -310,10 +307,7 @@ export const factureDocuments = pgTable(
   (t) => [
     index('idx_facture_documents_facture').on(t.factureId, t.genereAt.desc()),
     index('idx_facture_documents_entreprise').on(t.entrepriseId),
-    check(
-      'chk_facture_documents_taille',
-      sql`taille_bytes IS NULL OR taille_bytes > 0`,
-    ),
+    check('chk_facture_documents_taille', sql`taille_bytes IS NULL OR taille_bytes > 0`),
   ],
 );
 

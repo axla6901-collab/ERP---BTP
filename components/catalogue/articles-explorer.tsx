@@ -89,7 +89,7 @@ export function ArticlesExplorer({
   }, [items]);
 
   const familleLibelle = familleId
-    ? famillesList.find((f) => f.id === familleId)?.libelle ?? 'Famille'
+    ? (famillesList.find((f) => f.id === familleId)?.libelle ?? 'Famille')
     : null;
 
   const filtered = useMemo(() => {
@@ -199,7 +199,11 @@ export function ArticlesExplorer({
 
             <FilterRailSection title="Filtres rapides">
               <div className="space-y-1.5 text-sm">
-                <QuickFilter label="Actifs uniquement" checked={actifsOnly} onChange={setActifsOnly} />
+                <QuickFilter
+                  label="Actifs uniquement"
+                  checked={actifsOnly}
+                  onChange={setActifsOnly}
+                />
                 <QuickFilter label="Sans prix" checked={sansPrix} onChange={setSansPrix} />
                 <QuickFilter
                   label="Composition multi-articles"

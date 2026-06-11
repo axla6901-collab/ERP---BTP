@@ -45,7 +45,8 @@ export function NavigationProgress() {
         const url = new URL(href, window.location.href);
         if (url.origin !== window.location.origin) return;
         // Même chemin & même query : pas de navigation perçue
-        if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+        if (url.pathname === window.location.pathname && url.search === window.location.search)
+          return;
       } catch {
         return;
       }

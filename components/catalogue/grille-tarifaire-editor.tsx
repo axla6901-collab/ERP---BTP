@@ -3,7 +3,7 @@
 import { Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,10 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  grilleTarifaireSchema,
-  type GrilleTarifaireInput,
-} from '@/lib/validation/catalogue';
+import { grilleTarifaireSchema, type GrilleTarifaireInput } from '@/lib/validation/catalogue';
 
 type ServerActionResult = {
   ok: boolean;
@@ -101,9 +98,10 @@ export function GrilleTarifaireEditor({
       validTo: defaultValues?.validTo ?? null,
       actif: defaultValues?.actif ?? true,
       notes: defaultValues?.notes ?? null,
-      lignes: defaultValues?.lignes && defaultValues.lignes.length > 0
-        ? defaultValues.lignes
-        : [ligneVide()],
+      lignes:
+        defaultValues?.lignes && defaultValues.lignes.length > 0
+          ? defaultValues.lignes
+          : [ligneVide()],
     },
   });
   useUnsavedChangesGuard({ isDirty: form.formState.isDirty });
@@ -154,9 +152,7 @@ export function GrilleTarifaireEditor({
             {...form.register('libelle')}
           />
           {form.formState.errors.libelle && (
-            <p className="mt-1 text-xs text-destructive">
-              {form.formState.errors.libelle.message}
-            </p>
+            <p className="mt-1 text-xs text-destructive">{form.formState.errors.libelle.message}</p>
           )}
         </div>
         <div className="lg:col-span-2">
@@ -165,9 +161,7 @@ export function GrilleTarifaireEditor({
           </label>
           {chantierFige ? (
             <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
-              <span className="font-mono text-xs text-muted-foreground">
-                {chantierFige.numero}
-              </span>{' '}
+              <span className="font-mono text-xs text-muted-foreground">{chantierFige.numero}</span>{' '}
               {chantierFige.libelle}
             </div>
           ) : (
@@ -191,9 +185,7 @@ export function GrilleTarifaireEditor({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={SENTINEL_GENERALE}>
-                  Grille générale (aucun chantier)
-                </SelectItem>
+                <SelectItem value={SENTINEL_GENERALE}>Grille générale (aucun chantier)</SelectItem>
                 {chantiers.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.numero} — {c.libelle}
@@ -203,7 +195,8 @@ export function GrilleTarifaireEditor({
             </Select>
           )}
           <p className="mt-1 text-xs text-muted-foreground">
-            Si rattachée à un chantier, cette grille devient prioritaire pour le calcul du prix de revient sur ce chantier.
+            Si rattachée à un chantier, cette grille devient prioritaire pour le calcul du prix de
+            revient sur ce chantier.
           </p>
         </div>
         <div>
@@ -228,9 +221,7 @@ export function GrilleTarifaireEditor({
             defaultValue={form.getValues('validTo') ?? ''}
           />
           {form.formState.errors.validTo && (
-            <p className="mt-1 text-xs text-destructive">
-              {form.formState.errors.validTo.message}
-            </p>
+            <p className="mt-1 text-xs text-destructive">{form.formState.errors.validTo.message}</p>
           )}
         </div>
         <div className="flex items-center gap-3 sm:col-span-2">
@@ -310,9 +301,7 @@ export function GrilleTarifaireEditor({
                       </SelectContent>
                     </Select>
                     {ligneErr?.articleId && (
-                      <p className="mt-1 text-xs text-destructive">
-                        {ligneErr.articleId.message}
-                      </p>
+                      <p className="mt-1 text-xs text-destructive">{ligneErr.articleId.message}</p>
                     )}
                   </TableCell>
                   <TableCell>
@@ -404,9 +393,9 @@ export function GrilleTarifaireEditor({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Le calcul du prix de revient utilise en priorité la grille active du fournisseur préféré
-        de chaque article, puis retombe sur les prix d&apos;article ad-hoc et les prix de
-        référence du catalogue.
+        Le calcul du prix de revient utilise en priorité la grille active du fournisseur préféré de
+        chaque article, puis retombe sur les prix d&apos;article ad-hoc et les prix de référence du
+        catalogue.
       </p>
     </form>
   );

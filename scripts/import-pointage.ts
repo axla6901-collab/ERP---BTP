@@ -44,12 +44,7 @@ import { chantiers } from '@/db/schema/chantiers';
 import { employes } from '@/db/schema/employes';
 import { entreprises } from '@/db/schema/entreprises';
 import { pointages } from '@/db/schema/pointages';
-import type {
-  MotifAbsence,
-  TypeContrat,
-  TypePointage,
-  ZoneDeplacement,
-} from '@/lib/validation/rh';
+import type { MotifAbsence, TypeContrat, TypePointage, ZoneDeplacement } from '@/lib/validation/rh';
 
 type SourceBdd = {
   collaborateurs?: string | null;
@@ -128,8 +123,7 @@ function parseCollab(raw: string): {
 
   // CHECK SQL employes : type=INT exige societe_interim NOT NULL.
   // Pour les INT sans société renseignée dans Pointage, on met une valeur sentinel.
-  const societeFinale =
-    typeContrat === 'INT' ? societe || 'Non précisée' : societe || null;
+  const societeFinale = typeContrat === 'INT' ? societe || 'Non précisée' : societe || null;
 
   return {
     nom,
@@ -152,9 +146,9 @@ function parseChantier(raw: string): {
   if (parts.length >= 3) {
     const ville = parts[0]!;
     const zoneRaw = parts[parts.length - 1]!.toUpperCase();
-    const zone = (['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'GD', 'GE'].includes(zoneRaw)
-      ? zoneRaw
-      : null) as ZoneDeplacement | null;
+    const zone = (
+      ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'GD', 'GE'].includes(zoneRaw) ? zoneRaw : null
+    ) as ZoneDeplacement | null;
     return {
       libelle: parts.slice(0, parts.length - (zone ? 1 : 0)).join(' - '),
       ville,
@@ -283,7 +277,12 @@ async function main() {
 
   const empMap = new Map<string, string>(); // raw → id
   const existingEmp = await db
-    .select({ id: employes.id, nom: employes.nom, prenom: employes.prenom, societe: employes.societeInterim })
+    .select({
+      id: employes.id,
+      nom: employes.nom,
+      prenom: employes.prenom,
+      societe: employes.societeInterim,
+    })
     .from(employes);
   // index par libellé canonique pour l'idempotence
   function cle(nom: string, prenom: string, societe: string | null): string {
@@ -349,7 +348,9 @@ async function main() {
   console.log(`[4/6] Chantiers (${chantiersRaw.size} uniques)…`);
 
   const chMap = new Map<string, string>(); // raw → id
-  const existingCh = await db.select({ id: chantiers.id, libelle: chantiers.libelle }).from(chantiers);
+  const existingCh = await db
+    .select({ id: chantiers.id, libelle: chantiers.libelle })
+    .from(chantiers);
   const existingChByLibelle = new Map<string, string>();
   for (const c of existingCh) existingChByLibelle.set(c.libelle, c.id);
 

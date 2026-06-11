@@ -40,14 +40,7 @@ export const ALIAS_COLONNES = {
   designation: ['designation', 'libelle', 'libelles', 'poste', 'description', 'intitule'],
   quantite: ['quantite', 'qte', 'qty', 'quantity', 'q'],
   unite: ['unite', 'u', 'unit'],
-  prixUnitaireHt: [
-    'prixunitaireht',
-    'pu',
-    'puht',
-    'prixunitaire',
-    'prixu',
-    'unitprice',
-  ],
+  prixUnitaireHt: ['prixunitaireht', 'pu', 'puht', 'prixunitaire', 'prixu', 'unitprice'],
   montantMarcheHt: [
     'montantmarcheht',
     'montantmarche',
@@ -123,10 +116,7 @@ export function nettoyerNombre(raw: unknown): string | null {
   if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw);
   const s = String(raw).trim();
   if (s === '') return null;
-  const nettoye = s
-    .replace(/\s| /g, '')
-    .replace(/%/g, '')
-    .replace(',', '.');
+  const nettoye = s.replace(/\s| /g, '').replace(/%/g, '').replace(',', '.');
   const n = Number(nettoye);
   return Number.isFinite(n) ? String(n) : null;
 }

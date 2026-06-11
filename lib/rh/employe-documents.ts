@@ -10,10 +10,7 @@ import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { employeDocuments, type EmployeDocument } from '@/db/schema/employes';
 import { getDownloadUrl, getUploadUrl } from '@/lib/storage/s3';
-import {
-  documentSchema,
-  type DocumentInput,
-} from '@/lib/validation/rh';
+import { documentSchema, type DocumentInput } from '@/lib/validation/rh';
 
 import { ROLES_RH_WRITE } from './permissions';
 import type { ActionResult } from '@/lib/catalogue/types';
@@ -41,8 +38,7 @@ export async function preparerUploadDocument(
   filename: string,
   tailleBytes: number,
 ): Promise<
-  | { ok: true; data: { uploadUrl: string; minioKey: string } }
-  | { ok: false; error: string }
+  { ok: true; data: { uploadUrl: string; minioKey: string } } | { ok: false; error: string }
 > {
   await requireTenantContextWithMfa(ROLES_RH_WRITE);
   if (!contentType || contentType.length > 200) {

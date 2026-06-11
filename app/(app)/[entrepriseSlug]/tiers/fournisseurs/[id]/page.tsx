@@ -103,7 +103,7 @@ export default async function FournisseurDetailPage({
 
   if (!peutEcrire) {
     return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="max-w-3xl space-y-6">
         <h2 className="text-xl font-medium">{fournisseur.nom}</h2>
         <Card>
           <CardHeader>
@@ -125,12 +125,7 @@ export default async function FournisseurDetailPage({
           </CardContent>
         </Card>
 
-        <GrillesSection
-          fournisseurId={id}
-          grilles={grilles}
-          today={today}
-          peutEcrire={false}
-        />
+        <GrillesSection fournisseurId={id} grilles={grilles} today={today} peutEcrire={false} />
 
         {documentsSection}
       </div>
@@ -188,16 +183,11 @@ export default async function FournisseurDetailPage({
         className="max-w-5xl"
       />
 
-      <GrillesSection
-        fournisseurId={id}
-        grilles={grilles}
-        today={today}
-        peutEcrire
-      />
+      <GrillesSection fournisseurId={id} grilles={grilles} today={today} peutEcrire />
 
       {documentsSection}
 
-      <div className="border-t pt-6 max-w-3xl">
+      <div className="max-w-3xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer ce fournisseur"
@@ -230,7 +220,8 @@ function GrillesSection({
         <h3 className="text-lg font-medium">Grilles tarifaires</h3>
         <p className="text-sm text-muted-foreground">
           Liste d&apos;articles avec prix négociés sous une période de validité.
-          {peutEcrire && ' Utilisez « Import catalogue » ou « Création catalogue » en haut de la fiche.'}
+          {peutEcrire &&
+            ' Utilisez « Import catalogue » ou « Création catalogue » en haut de la fiche.'}
         </p>
       </div>
 
@@ -254,9 +245,7 @@ function GrillesSection({
             <TableBody>
               {grilles.map((g) => {
                 const enCours =
-                  g.actif &&
-                  g.validFrom <= today &&
-                  (g.validTo === null || g.validTo >= today);
+                  g.actif && g.validFrom <= today && (g.validTo === null || g.validTo >= today);
                 return (
                   <TableRow key={g.id}>
                     <TableCell className="font-medium">{g.libelle}</TableCell>
@@ -269,7 +258,7 @@ function GrillesSection({
                           <span className="ml-1">{g.chantierLibelle}</span>
                         </>
                       ) : (
-                        <span className="text-muted-foreground italic">générale</span>
+                        <span className="italic text-muted-foreground">générale</span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm">

@@ -53,13 +53,7 @@ export type PrixCourant = {
   prix: string | null;
   uniteId: string | null;
   fournisseurId: string | null;
-  source:
-    | 'grille_prefere'
-    | 'prefere'
-    | 'reference'
-    | 'grille_mini'
-    | 'mini_fournisseur'
-    | null;
+  source: 'grille_prefere' | 'prefere' | 'reference' | 'grille_mini' | 'mini_fournisseur' | null;
 };
 
 export async function prixCourant(articleId: string, atDate?: string): Promise<PrixCourant> {
@@ -71,7 +65,9 @@ export async function prixCourant(articleId: string, atDate?: string): Promise<P
       unite_id: string;
       fournisseur_id: string | null;
       source: string;
-    }>(sql`SELECT prix, unite_id, fournisseur_id, source FROM prix_courant_article(${articleId}::uuid, ${date}::date)`),
+    }>(
+      sql`SELECT prix, unite_id, fournisseur_id, source FROM prix_courant_article(${articleId}::uuid, ${date}::date)`,
+    ),
   );
   const first = rows[0];
   if (!first) return { prix: null, uniteId: null, fournisseurId: null, source: null };
@@ -135,7 +131,11 @@ export async function enregistrerPrix(
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = prixArticleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {

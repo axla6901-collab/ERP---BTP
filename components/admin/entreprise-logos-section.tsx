@@ -279,10 +279,7 @@ function LogoPreview({
             if (fallback) fallback.style.display = 'flex';
           }}
         />
-        <ImageIcon
-          className="hidden size-8 text-muted-foreground"
-          aria-hidden
-        />
+        <ImageIcon className="hidden size-8 text-muted-foreground" aria-hidden />
       </div>
       <div className="min-w-0 flex-1">
         {editing ? (
@@ -300,12 +297,7 @@ function LogoPreview({
                 }
               }}
             />
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleSaveLibelle}
-              disabled={isPending}
-            >
+            <Button type="button" size="sm" onClick={handleSaveLibelle} disabled={isPending}>
               OK
             </Button>
           </div>

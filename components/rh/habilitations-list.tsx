@@ -174,9 +174,7 @@ export function HabilitationsList({ items, peutEcrire, actions }: Props) {
                   <SelectTrigger>
                     <SelectValue>
                       {(v) =>
-                        v
-                          ? (LIBELLES_TYPE_HABILITATION[v as TypeHabilitation] ?? v)
-                          : 'Choisir…'
+                        v ? (LIBELLES_TYPE_HABILITATION[v as TypeHabilitation] ?? v) : 'Choisir…'
                       }
                     </SelectValue>
                   </SelectTrigger>
@@ -238,7 +236,12 @@ export function HabilitationsList({ items, peutEcrire, actions }: Props) {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setShowAdd(false)} disabled={isPending}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAdd(false)}
+                  disabled={isPending}
+                >
                   Annuler
                 </Button>
                 <Button size="sm" onClick={handleAdd} disabled={isPending}>

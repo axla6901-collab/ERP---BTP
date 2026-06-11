@@ -56,12 +56,7 @@ function cle(roleId: string, permId: string): string {
   return `${roleId}::${permId}`;
 }
 
-export function MatricePermissions({
-  roles,
-  groupes,
-  accordeesInitiales,
-  onEnregistrer,
-}: Props) {
+export function MatricePermissions({ roles, groupes, accordeesInitiales, onEnregistrer }: Props) {
   /** roleId::permissionId → granted (état souhaité, différent de l'initial) */
   const [changements, setChangements] = useState<Map<string, boolean>>(new Map());
   const [modulesReplies, setModulesReplies] = useState<Set<string>>(
@@ -71,9 +66,7 @@ export function MatricePermissions({
     () =>
       new Set(
         groupes.flatMap((g) =>
-          g.sousGroupes
-            .filter((sg) => sg.sousModule)
-            .map((sg) => `${g.module}::${sg.sousModule}`),
+          g.sousGroupes.filter((sg) => sg.sousModule).map((sg) => `${g.module}::${sg.sousModule}`),
         ),
       ),
   );
@@ -171,12 +164,7 @@ export function MatricePermissions({
           <Undo2Icon className="mr-1 size-3.5" />
           Annuler
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          onClick={enregistrer}
-          disabled={!dirty || isPending}
-        >
+        <Button type="button" size="sm" onClick={enregistrer} disabled={!dirty || isPending}>
           <SaveIcon className="mr-1 size-3.5" />
           {isPending ? 'Enregistrement…' : 'Enregistrer la matrice'}
         </Button>
@@ -192,7 +180,7 @@ export function MatricePermissions({
                   <div className="font-mono text-[10px] uppercase">{r.code}</div>
                   <div className="text-xs font-normal text-muted-foreground">{r.libelle}</div>
                   {r.id === adminRoleId && (
-                    <div className="text-[10px] text-muted-foreground italic">verrouillé</div>
+                    <div className="text-[10px] italic text-muted-foreground">verrouillé</div>
                   )}
                 </TableHead>
               ))}
@@ -202,93 +190,95 @@ export function MatricePermissions({
             {groupes.map((g) => {
               const moduleReplie = modulesReplies.has(g.module);
               return (
-              <Fragment key={`mod-${g.module}`}>
-                <TableRow className="bg-muted/40">
-                  <TableCell colSpan={1 + roles.length} className="p-0 font-medium">
-                    <button
-                      type="button"
-                      className="flex w-full cursor-pointer items-center gap-2 px-2 py-2 text-left hover:bg-muted/60"
-                      aria-expanded={!moduleReplie}
-                      onClick={() => toggleModule(g.module)}
-                    >
-                      {moduleReplie ? (
-                        <ChevronRightIcon className="size-4" />
-                      ) : (
-                        <ChevronDownIcon className="size-4" />
-                      )}
-                      {g.module}
-                    </button>
-                  </TableCell>
-                </TableRow>
-                {!moduleReplie && g.sousGroupes.map((sg) => {
-                  const cleSousModule = `${g.module}::${sg.sousModule ?? '_'}`;
-                  const sousModuleReplie = sousModulesReplies.has(cleSousModule);
-                  return (
-                  <Fragment key={`sub-${cleSousModule}`}>
-                    {sg.sousModule && (
-                      <TableRow className="bg-muted/20">
-                        <TableCell
-                          colSpan={1 + roles.length}
-                          className="p-0 text-xs font-medium text-muted-foreground"
-                        >
-                          <button
-                            type="button"
-                            className="flex w-full cursor-pointer items-center gap-2 py-2 pl-6 pr-2 text-left hover:bg-muted/40"
-                            aria-expanded={!sousModuleReplie}
-                            onClick={() => toggleSousModule(cleSousModule)}
-                          >
-                            {sousModuleReplie ? (
-                              <ChevronRightIcon className="size-3.5" />
-                            ) : (
-                              <ChevronDownIcon className="size-3.5" />
-                            )}
-                            {sg.sousModule}
-                          </button>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {!sousModuleReplie && sg.permissions.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="pl-8">
-                          <div>{p.libelle}</div>
-                          <div
-                            className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
-                            title={p.description ?? undefined}
-                          >
-                            {p.code}
-                          </div>
-                        </TableCell>
-                        {roles.map((r) => {
-                          const k = cle(r.id, p.id);
-                          const etat = etatCourant(r.id, p.id);
-                          const modifie = changements.has(k);
-                          const verrouille = r.id === adminRoleId;
-                          return (
-                            <TableCell
-                              key={r.id}
-                              className={
-                                modifie
-                                  ? 'bg-amber-50 text-center dark:bg-amber-950/40'
-                                  : 'text-center'
-                              }
-                            >
-                              <input
-                                type="checkbox"
-                                className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-                                checked={etat}
-                                onChange={() => toggle(r.id, p.id)}
-                                disabled={verrouille || isPending}
-                                aria-label={`${p.libelle} pour ${r.libelle}`}
-                              />
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
-                  </Fragment>
-                  );
-                })}
-              </Fragment>
+                <Fragment key={`mod-${g.module}`}>
+                  <TableRow className="bg-muted/40">
+                    <TableCell colSpan={1 + roles.length} className="p-0 font-medium">
+                      <button
+                        type="button"
+                        className="flex w-full cursor-pointer items-center gap-2 px-2 py-2 text-left hover:bg-muted/60"
+                        aria-expanded={!moduleReplie}
+                        onClick={() => toggleModule(g.module)}
+                      >
+                        {moduleReplie ? (
+                          <ChevronRightIcon className="size-4" />
+                        ) : (
+                          <ChevronDownIcon className="size-4" />
+                        )}
+                        {g.module}
+                      </button>
+                    </TableCell>
+                  </TableRow>
+                  {!moduleReplie &&
+                    g.sousGroupes.map((sg) => {
+                      const cleSousModule = `${g.module}::${sg.sousModule ?? '_'}`;
+                      const sousModuleReplie = sousModulesReplies.has(cleSousModule);
+                      return (
+                        <Fragment key={`sub-${cleSousModule}`}>
+                          {sg.sousModule && (
+                            <TableRow className="bg-muted/20">
+                              <TableCell
+                                colSpan={1 + roles.length}
+                                className="p-0 text-xs font-medium text-muted-foreground"
+                              >
+                                <button
+                                  type="button"
+                                  className="flex w-full cursor-pointer items-center gap-2 py-2 pl-6 pr-2 text-left hover:bg-muted/40"
+                                  aria-expanded={!sousModuleReplie}
+                                  onClick={() => toggleSousModule(cleSousModule)}
+                                >
+                                  {sousModuleReplie ? (
+                                    <ChevronRightIcon className="size-3.5" />
+                                  ) : (
+                                    <ChevronDownIcon className="size-3.5" />
+                                  )}
+                                  {sg.sousModule}
+                                </button>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                          {!sousModuleReplie &&
+                            sg.permissions.map((p) => (
+                              <TableRow key={p.id}>
+                                <TableCell className="pl-8">
+                                  <div>{p.libelle}</div>
+                                  <div
+                                    className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+                                    title={p.description ?? undefined}
+                                  >
+                                    {p.code}
+                                  </div>
+                                </TableCell>
+                                {roles.map((r) => {
+                                  const k = cle(r.id, p.id);
+                                  const etat = etatCourant(r.id, p.id);
+                                  const modifie = changements.has(k);
+                                  const verrouille = r.id === adminRoleId;
+                                  return (
+                                    <TableCell
+                                      key={r.id}
+                                      className={
+                                        modifie
+                                          ? 'bg-amber-50 text-center dark:bg-amber-950/40'
+                                          : 'text-center'
+                                      }
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                        checked={etat}
+                                        onChange={() => toggle(r.id, p.id)}
+                                        disabled={verrouille || isPending}
+                                        aria-label={`${p.libelle} pour ${r.libelle}`}
+                                      />
+                                    </TableCell>
+                                  );
+                                })}
+                              </TableRow>
+                            ))}
+                        </Fragment>
+                      );
+                    })}
+                </Fragment>
               );
             })}
           </TableBody>

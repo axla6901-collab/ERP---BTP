@@ -44,6 +44,7 @@ Réponse sous 72h ouvrées.
 ### En-têtes HTTP
 
 Configurés dans `next.config.mjs` :
+
 - `Strict-Transport-Security` (HSTS preload)
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`

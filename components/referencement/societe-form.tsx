@@ -128,7 +128,12 @@ export function SocieteForm({ defaultValues, onSubmit, successRedirect, titre }:
                 <FormItem>
                   <FormLabel>SIRET (optionnel)</FormLabel>
                   <FormControl>
-                    <Input maxLength={14} placeholder="14 chiffres" {...field} value={field.value ?? ''} />
+                    <Input
+                      maxLength={14}
+                      placeholder="14 chiffres"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

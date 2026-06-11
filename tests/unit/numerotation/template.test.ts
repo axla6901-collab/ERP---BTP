@@ -114,7 +114,7 @@ describe('formatNumero', () => {
     expect(formatNumero('D-[@Year]-%06d', 1, date)).toBe('D-2026-000001');
   });
 
-  it('compose CST20260526001 sur l\'exemple utilisateur', () => {
+  it("compose CST20260526001 sur l'exemple utilisateur", () => {
     expect(formatNumero('CST[@Year][@Month][@Day]%03d', 1, date)).toBe('CST20260526001');
   });
 

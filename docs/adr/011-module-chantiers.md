@@ -9,6 +9,7 @@
 M3.1 a livré le module commercial avec devis multi-lignes. Un champ placeholder `devis.chantier_id` UUID NULL (sans FK) attendait l'arrivée du module chantiers. M4.1 transforme cette intention en réalité.
 
 Spécificités BTP qui ont guidé le modèle :
+
 - Un chantier est rattaché à **un client** mais peut avoir **plusieurs devis** (devis initial + avenants)
 - Un chantier a une **adresse de chantier** distincte de l'adresse de facturation du client
 - Le **planning** distingue prévisionnel et réel (souvent décalé)
@@ -19,6 +20,7 @@ Spécificités BTP qui ont guidé le modèle :
 ### Modèle data
 
 **Table `chantiers`** — champs principaux :
+
 - `numero` : `CH-2026-NNNNNN` via `generate_numero('chantier')` (extension de la fonction PG)
 - `libelle` : titre court
 - `client_id` : FK obligatoire vers `clients`
@@ -31,6 +33,7 @@ Spécificités BTP qui ont guidé le modèle :
 - audit standard + soft delete
 
 **CHECK SQL** :
+
 - Cohérence des dates (fin ≥ début quand les deux sont renseignées)
 - Code postal FR si renseigné
 
@@ -46,6 +49,7 @@ termine, annule → terminal
 ```
 
 **Auto-remplissage des dates réelles** :
+
 - Passage à `en_cours` → `date_debut_reelle = CURRENT_DATE` si pas déjà saisie
 - Passage à `termine` → `date_fin_reelle = CURRENT_DATE` si pas déjà saisie
 
@@ -56,6 +60,7 @@ termine, annule → terminal
 Choix pragmatique : on utilise `utilisateurs.id` comme `responsable_id` au lieu d'attendre la table `employes` (M5).
 
 Justification :
+
 - ADR-002 a déjà acté la séparation `user/utilisateurs/employes` mais autorise une **transition souple**
 - Un responsable de chantier est forcément un utilisateur du système (il doit pouvoir se connecter pour piloter)
 - Si en M5 on introduit `employes`, on ajoutera `chantiers.employe_responsable_id` en parallèle sans casser l'existant
@@ -63,6 +68,7 @@ Justification :
 ### Lien devis ↔ chantier
 
 **Activation de la FK** :
+
 ```sql
 ALTER TABLE devis ADD CONSTRAINT fk_devis_chantier
   FOREIGN KEY (chantier_id) REFERENCES chantiers(id) ON DELETE SET NULL;
@@ -71,10 +77,12 @@ ALTER TABLE devis ADD CONSTRAINT fk_devis_chantier
 `ON DELETE SET NULL` plutôt que `CASCADE` : si un chantier disparaît (soft delete → puis hard delete éventuel en archivage), le devis reste consultable, juste sans lien. Cohérence fiscale du devis maintenue.
 
 **Cardinalité** :
+
 - 1 devis = au plus 1 chantier (1 chantier référencé par `devis.chantier_id`)
 - 1 chantier = N devis possibles (devis initial + avenants)
 
 **Workflow devis → chantier** :
+
 - Bouton **« Créer le chantier depuis ce devis »** visible sur un devis `accepte` non encore lié, pour les rôles `ROLES_CHANTIER_WRITE`
 - Server Action `creerChantierDepuisDevis(devisId)` : transactionnelle
   1. Lit le devis, vérifie statut=`accepte` + `chantier_id IS NULL`
@@ -86,6 +94,7 @@ ALTER TABLE devis ADD CONSTRAINT fk_devis_chantier
 ## Conséquences
 
 ### Positives
+
 - **Continuité métier** : un devis accepté débouche naturellement sur un chantier sans ressaisie
 - **Souplesse avenants** : un chantier peut accumuler plusieurs devis (architecture prête pour la facturation par situations M6)
 - **Adresse chantier séparée** : on peut facturer le client à un siège et délivrer ailleurs (chantier réel)
@@ -93,6 +102,7 @@ ALTER TABLE devis ADD CONSTRAINT fk_devis_chantier
 - **Audit complet** : chaque mutation + changement de statut tracée
 
 ### Négatives / Risques
+
 - **Responsable = utilisateur** : non scalable pour les chantiers avec sous-traitants ou ouvriers non-app. Mitigation : M5 introduira `employes` avec FK séparée.
 - **Pas de tâches en M4.1** : pas de planning fin (M4.2)
 - **Pas de documents en M4.1** : pas d'upload PV/PPSPS (M4.3 via MinIO)
@@ -108,6 +118,7 @@ ALTER TABLE devis ADD CONSTRAINT fk_devis_chantier
 ## Révision
 
 À revisiter quand :
+
 - M4.2 introduit `chantier_taches` (planning) → workflow `en_cours` plus riche (% avancement basé sur tâches)
 - M4.3 introduit upload documents → champ obligatoire `dossier_minio_id` ?
 - M5 livre `employes` → ajouter `employe_responsable_id`, basculer l'UI, déprécier `responsable_id` ?

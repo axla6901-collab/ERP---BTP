@@ -30,14 +30,14 @@ change.
 
 ### Conséquences concrètes
 
-| Aspect | Choix |
-|---|---|
-| Génération SW | Aucune. `public/sw.js` est servi tel quel (statique). |
-| Cache | Stratégies écrites à la main : `NetworkFirst` (navigation + `/api/v1/pointage-refs`), `CacheFirst` (`/_next/static`, `/icons`), fallback hors-ligne **inline** (pas de route `/offline`). |
-| IndexedDB | Côté **client React** : `idb` (déjà en dépendances). Côté **SW** : API IndexedDB **native** (le SW ne peut pas bundler `idb`). Contrat de schéma partagé documenté dans les deux fichiers. |
-| Background Sync | `sync` tag `sync-pointages` (Chrome/Android). Fallback iOS : flush déclenché par le client à l'ouverture + à chaque `online` (cf. `lib/pwa/sw-register.tsx`). |
-| Mise à jour | Pas de `skipWaiting()` auto : bannière « Nouvelle version disponible » → `postMessage('SKIP_WAITING')` → `controllerchange` → reload. Versionnée par `CACHE_VERSION` dans `public/sw.js`. |
-| Environnement | SW **enregistré en production uniquement** (en dev il casse le HMR Turbopack). La saisie terrain reste fonctionnelle en ligne sans SW. |
+| Aspect          | Choix                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Génération SW   | Aucune. `public/sw.js` est servi tel quel (statique).                                                                                                                                      |
+| Cache           | Stratégies écrites à la main : `NetworkFirst` (navigation + `/api/v1/pointage-refs`), `CacheFirst` (`/_next/static`, `/icons`), fallback hors-ligne **inline** (pas de route `/offline`).  |
+| IndexedDB       | Côté **client React** : `idb` (déjà en dépendances). Côté **SW** : API IndexedDB **native** (le SW ne peut pas bundler `idb`). Contrat de schéma partagé documenté dans les deux fichiers. |
+| Background Sync | `sync` tag `sync-pointages` (Chrome/Android). Fallback iOS : flush déclenché par le client à l'ouverture + à chaque `online` (cf. `lib/pwa/sw-register.tsx`).                              |
+| Mise à jour     | Pas de `skipWaiting()` auto : bannière « Nouvelle version disponible » → `postMessage('SKIP_WAITING')` → `controllerchange` → reload. Versionnée par `CACHE_VERSION` dans `public/sw.js`.  |
+| Environnement   | SW **enregistré en production uniquement** (en dev il casse le HMR Turbopack). La saisie terrain reste fonctionnelle en ligne sans SW.                                                     |
 
 ### Dépendances
 
@@ -67,6 +67,7 @@ change.
 ## Révision
 
 À revisiter si :
+
 - iOS supporte un jour le Background Sync de façon fiable (supprimer le flush de
   fallback),
 - les besoins de cache se complexifient au point de justifier Workbox,

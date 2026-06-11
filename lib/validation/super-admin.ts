@@ -16,7 +16,7 @@ const slugEntreprise = z
   .max(40, 'Slug trop long (max 40 caractères).')
   .regex(
     slugRegex,
-    'Slug invalide : minuscules, chiffres et tirets uniquement. Sert d\'identifiant dans l\'URL.',
+    "Slug invalide : minuscules, chiffres et tirets uniquement. Sert d'identifiant dans l'URL.",
   );
 
 const raisonSociale = z
@@ -36,10 +36,7 @@ const siret = z
 const tvaIntracom = z
   .string()
   .trim()
-  .regex(
-    /^[A-Z]{2}[A-Z0-9]{2,13}$/,
-    'TVA intracommunautaire invalide (ex : FR12345678901).',
-  )
+  .regex(/^[A-Z]{2}[A-Z0-9]{2,13}$/, 'TVA intracommunautaire invalide (ex : FR12345678901).')
   .optional()
   .nullable()
   .transform((v) => (v && v.length > 0 ? v.toUpperCase() : null));
@@ -66,10 +63,7 @@ const iban = z
   .string()
   .trim()
   .transform((v) => v.replace(/\s+/g, '').toUpperCase())
-  .refine(
-    (v) => v === '' || /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/.test(v),
-    'IBAN invalide.',
-  )
+  .refine((v) => v === '' || /^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/.test(v), 'IBAN invalide.')
   .optional()
   .nullable()
   .transform((v) => (v && v.length > 0 ? v : null));
@@ -102,11 +96,7 @@ const codeApe = z
   .nullable()
   .transform((v) => (v && v.length > 0 ? v : null));
 
-const emailAdmin = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email('Email administrateur invalide.');
+const emailAdmin = z.string().trim().toLowerCase().email('Email administrateur invalide.');
 
 /**
  * Création d'une entreprise par un super-admin.
@@ -124,12 +114,7 @@ export const entrepriseCreateSchema = z.object({
   adresseLigne2: optTrimmed(200, 'Adresse ligne 2'),
   codePostal,
   ville: optTrimmed(100, 'Ville'),
-  pays: z
-    .string()
-    .trim()
-    .min(2)
-    .max(100)
-    .default('France'),
+  pays: z.string().trim().min(2).max(100).default('France'),
   /** Email du compte qui sera promu admin de cette entreprise. */
   adminEmail: emailAdmin,
 });

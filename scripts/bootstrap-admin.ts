@@ -47,7 +47,9 @@ async function main(email: string, dbUrl: string) {
       .limit(1);
 
     if (!roleAdmin) {
-      console.error('❌ Rôle "admin" introuvable en base. Migration 0021_rbac_granulaire appliquée ?');
+      console.error(
+        '❌ Rôle "admin" introuvable en base. Migration 0021_rbac_granulaire appliquée ?',
+      );
       process.exit(1);
     }
 
@@ -64,13 +66,15 @@ async function main(email: string, dbUrl: string) {
 
     if (!existing) {
       console.error(`❌ Aucun compte avec l'email "${email}".`);
-      console.error('   Crée d\'abord ce compte via la console super-admin (création d\'entreprise).');
+      console.error(
+        "   Crée d'abord ce compte via la console super-admin (création d'entreprise).",
+      );
       process.exit(1);
     }
 
     if (!existing.actif) {
       console.error(`❌ Le compte "${email}" est désactivé (utilisateurs.actif = false).`);
-      console.error('   Réactive-le d\'abord (cf. runbook user-management.md).');
+      console.error("   Réactive-le d'abord (cf. runbook user-management.md).");
       process.exit(1);
     }
 

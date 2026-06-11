@@ -32,12 +32,7 @@ afterEach(() => {
 
 describe('CreerPlanningButton', () => {
   it('affiche le bouton « Créer un planning »', () => {
-    render(
-      <CreerPlanningButton
-        chantiersSansPlanning={[chantier()]}
-        entrepriseSlug="acme"
-      />,
-    );
+    render(<CreerPlanningButton chantiersSansPlanning={[chantier()]} entrepriseSlug="acme" />);
     expect(screen.getByRole('button', { name: /créer un planning/i })).toBeInTheDocument();
   });
 
@@ -45,10 +40,7 @@ describe('CreerPlanningButton', () => {
     render(<CreerPlanningButton chantiersSansPlanning={[]} entrepriseSlug="acme" />);
     const btn = screen.getByRole('button', { name: /créer un planning/i });
     expect(btn).toBeDisabled();
-    expect(btn).toHaveAttribute(
-      'title',
-      'Tous les chantiers ont déjà un planning',
-    );
+    expect(btn).toHaveAttribute('title', 'Tous les chantiers ont déjà un planning');
   });
 
   it('ouvre la modale et liste les chantiers sans planning', () => {

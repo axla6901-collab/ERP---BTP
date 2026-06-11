@@ -19,7 +19,8 @@ export default async function ReferentielTiersPage() {
   const tuiles: Array<{ titre: string; description: string; href: string; compteur?: number }> = [
     {
       titre: 'Corps d’état',
-      description: 'Activités des tiers (gros œuvre, charpente, électricité…). Un tier peut en avoir plusieurs.',
+      description:
+        'Activités des tiers (gros œuvre, charpente, électricité…). Un tier peut en avoir plusieurs.',
       href: '/administration/referentiel-tiers/corps-etat',
       compteur: corpsEtat.length,
     },
@@ -38,7 +39,8 @@ export default async function ReferentielTiersPage() {
     },
     {
       titre: 'Sociétés & règles',
-      description: 'Sociétés du groupe et règles applicables (ex. suspension de chantier avec LRAR).',
+      description:
+        'Sociétés du groupe et règles applicables (ex. suspension de chantier avec LRAR).',
       href: '/administration/referentiel-tiers/societes',
       compteur: societes.length,
     },
@@ -63,7 +65,9 @@ export default async function ReferentielTiersPage() {
               <CardHeader>
                 <CardTitle className="flex items-baseline justify-between gap-2">
                   <span>{t.titre}</span>
-                  {t.compteur != null ? <span className="text-2xl font-bold">{t.compteur}</span> : null}
+                  {t.compteur != null ? (
+                    <span className="text-2xl font-bold">{t.compteur}</span>
+                  ) : null}
                 </CardTitle>
                 <CardDescription>{t.description}</CardDescription>
               </CardHeader>

@@ -76,13 +76,23 @@ describe('DevisEditor — bouton « tout déplier / replier » en état mixte', 
   afterEach(() => cleanup());
 
   it('propose « Tout replier » quand toutes les sections sont dépliées', () => {
-    renderEditor([section('Gros œuvre'), ligneLibre('A'), section('Second œuvre'), ligneLibre('B')]);
+    renderEditor([
+      section('Gros œuvre'),
+      ligneLibre('A'),
+      section('Second œuvre'),
+      ligneLibre('B'),
+    ]);
     expect(screen.getByLabelText('Replier toutes les sections')).toBeVisible();
     expect(screen.queryByLabelText('Déplier toutes les sections')).toBeNull();
   });
 
   it('bascule sur « Tout déplier » dès qu’une seule sous-section est repliée (état mixte)', () => {
-    renderEditor([section('Gros œuvre'), ligneLibre('A'), section('Second œuvre'), ligneLibre('B')]);
+    renderEditor([
+      section('Gros œuvre'),
+      ligneLibre('A'),
+      section('Second œuvre'),
+      ligneLibre('B'),
+    ]);
 
     // On replie la PREMIÈRE section uniquement → état mixte.
     fireEvent.click(screen.getAllByLabelText('Replier la section')[0]!);
@@ -93,7 +103,12 @@ describe('DevisEditor — bouton « tout déplier / replier » en état mixte', 
   });
 
   it('« Tout déplier » rouvre la section repliée (et le bouton repasse à « Tout replier »)', () => {
-    renderEditor([section('Gros œuvre'), ligneLibre('A'), section('Second œuvre'), ligneLibre('B')]);
+    renderEditor([
+      section('Gros œuvre'),
+      ligneLibre('A'),
+      section('Second œuvre'),
+      ligneLibre('B'),
+    ]);
 
     // État mixte : une section repliée.
     fireEvent.click(screen.getAllByLabelText('Replier la section')[0]!);

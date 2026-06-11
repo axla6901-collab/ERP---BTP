@@ -91,9 +91,7 @@ export type ModeleSuperInput = z.infer<typeof modeleSuperInputSchema>;
  * Identique à `mettreAJourModeleNumerotation` mais sans la garde tenant : la
  * sécurité repose sur `requireSuperAdmin()` + audit log avec l'id du super-admin.
  */
-export async function mettreAJourModeleSuperAdmin(
-  input: ModeleSuperInput,
-): Promise<ActionResult> {
+export async function mettreAJourModeleSuperAdmin(input: ModeleSuperInput): Promise<ActionResult> {
   const superAdmin = await requireSuperAdmin();
   const parsed = modeleSuperInputSchema.safeParse(input);
   if (!parsed.success) {

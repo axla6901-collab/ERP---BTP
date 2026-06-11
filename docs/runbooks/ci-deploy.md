@@ -21,6 +21,7 @@ Le workflow [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) défini
 - **`security`** : `pnpm audit --prod --audit-level=high`
 
 Déclencheurs :
+
 - `push` sur la branche `main`
 - `pull_request` ciblant `main`
 
@@ -97,13 +98,13 @@ Cette extension sera formalisée par un ADR séparé en M6+.
 
 ## Vérification
 
-| Test | Attendu |
-|---|---|
-| `git remote -v` | URL GitHub | 
-| `git push -u origin main` | Lefthook pre-push passe + push OK |
-| Page Actions GitHub | Workflow `CI` apparaît, status vert |
-| Étape `Lint + Typecheck + Test + Build` | 0 erreur (~3-5 min) |
-| Étape `Security audit` | 0 vulnérabilité high+ |
+| Test                                    | Attendu                             |
+| --------------------------------------- | ----------------------------------- |
+| `git remote -v`                         | URL GitHub                          |
+| `git push -u origin main`               | Lefthook pre-push passe + push OK   |
+| Page Actions GitHub                     | Workflow `CI` apparaît, status vert |
+| Étape `Lint + Typecheck + Test + Build` | 0 erreur (~3-5 min)                 |
+| Étape `Security audit`                  | 0 vulnérabilité high+               |
 
 ## Rollback
 
@@ -113,13 +114,13 @@ Cette extension sera formalisée par un ADR séparé en M6+.
 
 ## Sécurité — bonnes pratiques
 
-| Élément | Recommandation |
-|---|---|
-| Visibilité du repo | **Privé** tant que pas d'audit sécurité complet (M5+) |
-| `.gitignore` | Vérifie qu'il ignore `.env.local*`, `.claude/` (déjà fait depuis M1.2) |
-| Pre-commit Lefthook | Bloque les commits avec erreurs de format/lint |
+| Élément                 | Recommandation                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| Visibilité du repo      | **Privé** tant que pas d'audit sécurité complet (M5+)                                         |
+| `.gitignore`            | Vérifie qu'il ignore `.env.local*`, `.claude/` (déjà fait depuis M1.2)                        |
+| Pre-commit Lefthook     | Bloque les commits avec erreurs de format/lint                                                |
 | Branche `main` protégée | Configurer **branch protection rules** en M2+ : require PR review, require status checks (CI) |
-| Dependabot | À activer (Settings → Code security and analysis → Dependabot alerts) |
+| Dependabot              | À activer (Settings → Code security and analysis → Dependabot alerts)                         |
 
 ## Contacts
 

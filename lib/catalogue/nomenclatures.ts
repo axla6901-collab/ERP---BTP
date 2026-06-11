@@ -71,7 +71,9 @@ export async function lireNomenclatureCourante(
   });
 }
 
-export async function lireHistoriqueNomenclatures(articleId: string): Promise<NomenclatureHydratee[]> {
+export async function lireHistoriqueNomenclatures(
+  articleId: string,
+): Promise<NomenclatureHydratee[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, async (tx) => {
     const heads = await tx
@@ -95,7 +97,11 @@ export async function enregistrerNomenclature(
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = nomenclatureSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {

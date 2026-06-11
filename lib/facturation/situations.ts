@@ -17,15 +17,9 @@ import {
   type LigneSituation,
   type SituationTravaux,
 } from '@/db/schema/facturation';
-import {
-  situationTravauxSchema,
-  type SituationTravauxInput,
-} from '@/lib/validation/facturation';
+import { situationTravauxSchema, type SituationTravauxInput } from '@/lib/validation/facturation';
 
-import {
-  calculerLigneSituation,
-  calculerTotauxSituation,
-} from './calculs';
+import { calculerLigneSituation, calculerTotauxSituation } from './calculs';
 import {
   appliquerRemiseGlobale,
   calculerMontantRemiseGlobale,
@@ -101,12 +95,7 @@ export async function listerSituationsChantier(
       .from(situationsTravaux)
       .leftJoin(chantiers, eq(situationsTravaux.chantierId, chantiers.id))
       .leftJoin(factures, eq(situationsTravaux.factureId, factures.id))
-      .where(
-        and(
-          eq(situationsTravaux.chantierId, chantierId),
-          isNull(situationsTravaux.deletedAt),
-        ),
-      )
+      .where(and(eq(situationsTravaux.chantierId, chantierId), isNull(situationsTravaux.deletedAt)))
       .orderBy(desc(situationsTravaux.numero)),
   );
 
@@ -253,11 +242,7 @@ export async function listerDevisFacturablesChantier(
       })
       .from(devis)
       .where(
-        and(
-          eq(devis.clientId, c.clientId),
-          eq(devis.statut, 'gagne'),
-          isNull(devis.deletedAt),
-        ),
+        and(eq(devis.clientId, c.clientId), eq(devis.statut, 'gagne'), isNull(devis.deletedAt)),
       )
       .orderBy(desc(devis.dateDevis));
     return rows;
@@ -276,9 +261,7 @@ export type RemiseReprise = { type: 'pourcent'; valeur: string } | null;
  * applique la remise éventuelle pour obtenir le montant marché HT du poste.
  * Renvoie aussi la remise globale du devis (cf. [[RemiseReprise]]).
  */
-export async function chargerLignesDevis(
-  devisId: string,
-): Promise<{
+export async function chargerLignesDevis(devisId: string): Promise<{
   lignes: LigneDevisPourSituation[];
   devisNumero: string;
   remiseGlobale: RemiseReprise;
@@ -571,10 +554,7 @@ export async function genererFactureDepuisSituation(
       const factureNumero = await generateNumero(tx, 'facture', ctx.entreprise.id);
 
       const tauxTva = Number(situation.tauxTva);
-      const totalHt = lignesAFacturer.reduce(
-        (acc, l) => acc + Number(l.montantAFacturerHt),
-        0,
-      );
+      const totalHt = lignesAFacturer.reduce((acc, l) => acc + Number(l.montantAFacturerHt), 0);
       const totalTva = (totalHt * tauxTva) / 100;
       const totalTtc = totalHt + totalTva;
 
@@ -632,9 +612,7 @@ export async function genererFactureDepuisSituation(
             entrepriseId: ctx.entreprise.id,
             factureId: insertedFacture.id,
             ordre: idx,
-            type: (l.articleId ? 'article_catalogue' : 'libre') as
-              | 'article_catalogue'
-              | 'libre',
+            type: (l.articleId ? 'article_catalogue' : 'libre') as 'article_catalogue' | 'libre',
             designation: `${l.designation} (avancement cumulé ${pct} %)`,
             articleId: l.articleId,
             quantite: '1',

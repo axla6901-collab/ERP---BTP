@@ -95,11 +95,7 @@ const adresseShape = {
 export const contactSchema = z.object({
   // Présent en update (contact existant), absent en création (nouveau contact).
   id: z.string().uuid().optional(),
-  nom: z
-    .string()
-    .trim()
-    .min(1, 'Nom requis.')
-    .max(100, 'Nom trop long (max 100 caractères).'),
+  nom: z.string().trim().min(1, 'Nom requis.').max(100, 'Nom trop long (max 100 caractères).'),
   prenom: z
     .string()
     .trim()
@@ -197,10 +193,7 @@ export const STATUT_SOUS_TRAITANT_LABELS: Record<StatutSousTraitant, string> = {
 const nTvaIntra = z
   .string()
   .trim()
-  .regex(
-    /^[A-Z]{2}[A-Z0-9]{2,13}$/i,
-    'N° TVA intracom invalide (ex. FR12345678901).',
-  )
+  .regex(/^[A-Z]{2}[A-Z0-9]{2,13}$/i, 'N° TVA intracom invalide (ex. FR12345678901).')
   .transform((v) => v.toUpperCase())
   .optional()
   .nullable()

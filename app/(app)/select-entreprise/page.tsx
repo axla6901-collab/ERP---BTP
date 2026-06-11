@@ -23,7 +23,7 @@ export default async function SelectEntreprisePage() {
   if (entreprises.length === 0) {
     return (
       <div className="mx-auto max-w-md p-8">
-        <h1 className="text-xl font-semibold mb-4">Aucune entreprise accessible</h1>
+        <h1 className="mb-4 text-xl font-semibold">Aucune entreprise accessible</h1>
         <p className="text-sm text-muted-foreground">
           Votre compte n&apos;est rattaché à aucune entreprise. Contactez votre administrateur pour
           obtenir un accès.
@@ -40,11 +40,11 @@ export default async function SelectEntreprisePage() {
 
   return (
     <div className="mx-auto max-w-2xl p-8">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="mb-6 flex items-center gap-3">
         <Building2Icon className="size-6 text-primary" />
         <h1 className="text-2xl font-semibold">Choisir une entreprise</h1>
       </div>
-      <p className="text-sm text-muted-foreground mb-6">
+      <p className="mb-6 text-sm text-muted-foreground">
         Vous êtes rattaché à plusieurs entreprises. Sélectionnez celle sur laquelle vous souhaitez
         travailler. Vous pourrez en changer à tout moment via le sélecteur en haut de la barre
         latérale.

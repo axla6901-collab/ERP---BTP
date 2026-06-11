@@ -25,9 +25,7 @@ import {
 
 export async function lireMatriceEngagement(): Promise<NatureTiersTypeEngagement[]> {
   const ctx = await requireTenantContextWithMfa();
-  return withTenant(ctx.entreprise.id, (tx) =>
-    tx.select().from(natureTiersTypesEngagement),
-  );
+  return withTenant(ctx.entreprise.id, (tx) => tx.select().from(natureTiersTypesEngagement));
 }
 
 export async function enregistrerMatriceEngagement(

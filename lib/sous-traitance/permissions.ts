@@ -12,11 +12,7 @@ import type { Role } from '@/lib/auth/rbac';
 
 export const ROLES_CONTRAT_ST_WRITE: readonly Role[] = ['admin', 'conducteur_travaux', 'acheteur'];
 
-export const ROLES_FACTURE_ST_WRITE: readonly Role[] = [
-  'admin',
-  'comptable',
-  'conducteur_travaux',
-];
+export const ROLES_FACTURE_ST_WRITE: readonly Role[] = ['admin', 'comptable', 'conducteur_travaux'];
 
 export function peutEcrireContratSt(role: Role): boolean {
   return ROLES_CONTRAT_ST_WRITE.includes(role);

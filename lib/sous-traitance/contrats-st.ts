@@ -75,13 +75,15 @@ export async function lireContratSt(id: string): Promise<ContratStAvecContexte |
   return row ?? null;
 }
 
-export async function creerContratSt(
-  input: ContratStInput,
-): Promise<ActionResult<{ id: string }>> {
+export async function creerContratSt(input: ContratStInput): Promise<ActionResult<{ id: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_CONTRAT_ST_WRITE);
   const parsed = contratStSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const d = parsed.data;
   const montantRetenue = calculerMontantRetenue(d.montantHt, d.tauxRetenueGarantie);
@@ -133,7 +135,11 @@ export async function mettreAJourContratSt(
   const ctx = await requireTenantContextWithMfa(ROLES_CONTRAT_ST_WRITE);
   const parsed = contratStSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const d = parsed.data;
   const montantRetenue = calculerMontantRetenue(d.montantHt, d.tauxRetenueGarantie);
@@ -169,7 +175,9 @@ export async function mettreAJourContratSt(
         after: { ...d, montantRetenue },
       });
     });
-    revalidatePath(`/${ctx.entreprise.slug}/tiers/sous-traitants/${d.sousTraitantId}/contrats/${id}`);
+    revalidatePath(
+      `/${ctx.entreprise.slug}/tiers/sous-traitants/${d.sousTraitantId}/contrats/${id}`,
+    );
     return { ok: true, data: undefined };
   } catch (err) {
     if (err instanceof Error && err.message === 'NOT_FOUND') {
@@ -240,7 +248,10 @@ export async function changerStatutContratSt(
       return { ok: false, error: 'Transition de statut non autorisée.' };
     }
     if (err instanceof Error && err.message.startsWith('CONFORMITE:')) {
-      return { ok: false, error: `Activation refusée — ${err.message.slice('CONFORMITE:'.length)}` };
+      return {
+        ok: false,
+        error: `Activation refusée — ${err.message.slice('CONFORMITE:'.length)}`,
+      };
     }
     throw err;
   }

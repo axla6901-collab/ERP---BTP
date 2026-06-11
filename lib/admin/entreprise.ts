@@ -8,11 +8,7 @@ import { sanitizeConditionsHtml } from '@/lib/admin/sanitize-html';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa, type TenantContext } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
-import {
-  entrepriseConditions,
-  entrepriseLogos,
-  entreprises,
-} from '@/db/schema/entreprises';
+import { entrepriseConditions, entrepriseLogos, entreprises } from '@/db/schema/entreprises';
 import {
   conditionNouvelleVersionSchema,
   entrepriseIdentiteSchema,
@@ -200,12 +196,7 @@ export async function uploadLogo(formData: FormData): Promise<ActionResult<{ id:
         const [ancien] = await tx
           .select({ id: entrepriseLogos.id, storageKey: entrepriseLogos.storageKey })
           .from(entrepriseLogos)
-          .where(
-            and(
-              eq(entrepriseLogos.type, 'principal'),
-              isNull(entrepriseLogos.deletedAt),
-            ),
-          )
+          .where(and(eq(entrepriseLogos.type, 'principal'), isNull(entrepriseLogos.deletedAt)))
           .limit(1);
         if (ancien) {
           await tx
@@ -221,10 +212,7 @@ export async function uploadLogo(formData: FormData): Promise<ActionResult<{ id:
         .select({ max: sql<number>`coalesce(max(${entrepriseLogos.ordre}), -1)::int` })
         .from(entrepriseLogos)
         .where(
-          and(
-            eq(entrepriseLogos.type, parsedMeta.data.type),
-            isNull(entrepriseLogos.deletedAt),
-          ),
+          and(eq(entrepriseLogos.type, parsedMeta.data.type), isNull(entrepriseLogos.deletedAt)),
         );
 
       const [inserted] = await tx
@@ -279,10 +267,7 @@ export async function uploadLogo(formData: FormData): Promise<ActionResult<{ id:
   }
 }
 
-export async function renommerLogo(
-  id: string,
-  input: LogoRenommerInput,
-): Promise<ActionResult> {
+export async function renommerLogo(id: string, input: LogoRenommerInput): Promise<ActionResult> {
   const ctx = await requireAdmin();
   const parsed = logoRenommerSchema.safeParse(input);
   if (!parsed.success) {
@@ -526,9 +511,7 @@ export async function listerVersionsConditions(type: ConditionType) {
         tailleHtml: sql<number>`length(${entrepriseConditions.contenuHtml})::int`,
       })
       .from(entrepriseConditions)
-      .where(
-        and(eq(entrepriseConditions.type, type), isNull(entrepriseConditions.deletedAt)),
-      )
+      .where(and(eq(entrepriseConditions.type, type), isNull(entrepriseConditions.deletedAt)))
       .orderBy(desc(entrepriseConditions.dateEffet), desc(entrepriseConditions.version)),
   );
 }

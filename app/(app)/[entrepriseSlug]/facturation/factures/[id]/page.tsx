@@ -49,11 +49,7 @@ function formatMontant(m: string | null): string {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export default async function FactureDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function FactureDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const peutEcrire = peutEcrireFacturation(utilisateur.role);
@@ -82,7 +78,7 @@ export default async function FactureDetailPage({
 
   if (!editable) {
     return (
-      <div className="space-y-6 max-w-3xl">
+      <div className="max-w-3xl space-y-6">
         <div className="flex items-baseline justify-between">
           <h2 className="text-xl font-medium">
             Facture <span className="font-mono">{facture.numero}</span>
@@ -227,36 +223,34 @@ export default async function FactureDetailPage({
     retenueGarantiePct: facture.retenueGarantiePct,
     remiseGlobaleType: facture.remiseGlobaleType as RemiseGlobaleType | null,
     remiseGlobaleValeur: facture.remiseGlobaleValeur,
-    lignes: facture.lignes.map(
-      (l): LigneFactureInput => {
-        if (l.type === 'section') {
-          return {
-            type: 'section',
-            designation: l.designation,
-            articleId: null,
-            quantite: null,
-            unite: null,
-            prixUnitaireHt: null,
-            tauxTva: null,
-            remisePourcent: null,
-            notes: l.notes,
-          };
-        }
-        const commun = {
+    lignes: facture.lignes.map((l): LigneFactureInput => {
+      if (l.type === 'section') {
+        return {
+          type: 'section',
           designation: l.designation,
-          quantite: l.quantite ?? '1',
-          unite: l.unite ?? 'u',
-          prixUnitaireHt: l.prixUnitaireHt ?? '0',
-          tauxTva: l.tauxTva ?? '20.00',
-          remisePourcent: l.remisePourcent ?? '0',
+          articleId: null,
+          quantite: null,
+          unite: null,
+          prixUnitaireHt: null,
+          tauxTva: null,
+          remisePourcent: null,
           notes: l.notes,
         };
-        if (l.type === 'article_catalogue') {
-          return { type: 'article_catalogue', articleId: l.articleId ?? '', ...commun };
-        }
-        return { type: 'libre', articleId: null, ...commun };
-      },
-    ),
+      }
+      const commun = {
+        designation: l.designation,
+        quantite: l.quantite ?? '1',
+        unite: l.unite ?? 'u',
+        prixUnitaireHt: l.prixUnitaireHt ?? '0',
+        tauxTva: l.tauxTva ?? '20.00',
+        remisePourcent: l.remisePourcent ?? '0',
+        notes: l.notes,
+      };
+      if (l.type === 'article_catalogue') {
+        return { type: 'article_catalogue', articleId: l.articleId ?? '', ...commun };
+      }
+      return { type: 'libre', articleId: null, ...commun };
+    }),
   };
 
   return (
@@ -312,8 +306,8 @@ export default async function FactureDetailPage({
       <div className="border-t pt-6">
         <h3 className="mb-2 text-sm font-medium">Facturation électronique</h3>
         <p className="mb-3 text-sm text-muted-foreground">
-          Aperçu du Factur-X (PDF/A-3 + XML EN&nbsp;16931). Régénérez après chaque
-          modification ; le document est archivé à l&apos;émission.
+          Aperçu du Factur-X (PDF/A-3 + XML EN&nbsp;16931). Régénérez après chaque modification ; le
+          document est archivé à l&apos;émission.
         </p>
         <FactureFacturXButton
           factureId={id}
@@ -329,7 +323,7 @@ export default async function FactureDetailPage({
         />
       </div>
 
-      <div className="border-t pt-6 max-w-xl">
+      <div className="max-w-xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer cette facture"

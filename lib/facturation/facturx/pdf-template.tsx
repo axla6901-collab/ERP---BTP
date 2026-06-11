@@ -231,8 +231,8 @@ export function FacturXPdf({ model }: { model: FacturXModel }) {
 
         {model.autoLiquidation ? (
           <Text style={styles.bandeauAutoliq}>
-            Autoliquidation de la TVA par le preneur — art. 283-2 nonies du CGI. TVA non
-            facturée par le prestataire.
+            Autoliquidation de la TVA par le preneur — art. 283-2 nonies du CGI. TVA non facturée
+            par le prestataire.
           </Text>
         ) : null}
 
@@ -287,8 +287,7 @@ export function FacturXPdf({ model }: { model: FacturXModel }) {
           {model.tva.map((t, i) => (
             <View key={i} style={styles.totalLine}>
               <Text style={styles.small}>
-                TVA {model.autoLiquidation ? '(autoliquidée)' : fmtPct(t.taux)} sur{' '}
-                {nf(t.base)}
+                TVA {model.autoLiquidation ? '(autoliquidée)' : fmtPct(t.taux)} sur {nf(t.base)}
               </Text>
               <Text style={styles.small}>{fmtMontant(t.montant, devise)}</Text>
             </View>

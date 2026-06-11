@@ -36,11 +36,7 @@ export const statutDevis = pgEnum('statut_devis', [
   'annule',
 ]);
 
-export const typeLigneDevis = pgEnum('type_ligne_devis', [
-  'section',
-  'article_catalogue',
-  'libre',
-]);
+export const typeLigneDevis = pgEnum('type_ligne_devis', ['section', 'article_catalogue', 'libre']);
 
 // ─────────────────────────────────────────────────────────────
 // Clients
@@ -260,14 +256,8 @@ export const postesInternesDevis = pgTable(
   },
   (t) => [
     index('idx_postes_internes_devis').on(t.devisId, t.ordre),
-    check(
-      'chk_postes_internes_montant_pos',
-      sql`montant_ht > 0`,
-    ),
-    check(
-      'chk_postes_internes_libelle',
-      sql`length(trim(libelle)) > 0`,
-    ),
+    check('chk_postes_internes_montant_pos', sql`montant_ht > 0`),
+    check('chk_postes_internes_libelle', sql`length(trim(libelle)) > 0`),
     check(
       'chk_postes_internes_portee_chapitre',
       sql`(portee = 'devis' AND chapitre_ligne_id IS NULL)
@@ -293,9 +283,7 @@ export const repartitionsPosteInterne = pgTable(
       .references(() => lignesDevis.id, { onDelete: 'cascade' }),
     poids: numeric('poids', { precision: 10, scale: 4 }).notNull(),
   },
-  (t) => [
-    check('chk_repartitions_poids_nonneg', sql`poids >= 0`),
-  ],
+  (t) => [check('chk_repartitions_poids_nonneg', sql`poids >= 0`)],
 );
 
 export type RepartitionPosteInterne = typeof repartitionsPosteInterne.$inferSelect;
@@ -341,10 +329,7 @@ export const composantsLigneDevis = pgTable(
           OR (type = 'libre' AND article_id IS NULL AND designation IS NOT NULL AND length(trim(designation)) > 0)`,
     ),
     check('chk_composants_tva_libre_only', sql`type = 'libre' OR taux_tva IS NULL`),
-    check(
-      'chk_composants_remise_libre_only',
-      sql`type = 'libre' OR remise_pourcent IS NULL`,
-    ),
+    check('chk_composants_remise_libre_only', sql`type = 'libre' OR remise_pourcent IS NULL`),
     check(
       'chk_composants_taux_tva_range',
       sql`taux_tva IS NULL OR (taux_tva >= 0 AND taux_tva <= 100)`,

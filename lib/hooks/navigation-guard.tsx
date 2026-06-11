@@ -2,15 +2,7 @@
 
 import { AlertTriangleIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -148,12 +140,7 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
       {children}
       <dialog
         ref={dialogRef}
-        className="
-          m-auto bg-transparent p-0
-          backdrop:bg-black/50 backdrop:backdrop-blur-sm
-          open:animate-in open:fade-in-0 open:zoom-in-95 open:duration-150
-          backdrop:animate-in backdrop:fade-in-0 backdrop:duration-150
-        "
+        className="m-auto bg-transparent p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm backdrop:duration-150 backdrop:animate-in backdrop:fade-in-0 open:duration-150 open:animate-in open:fade-in-0 open:zoom-in-95"
         onCancel={(e) => {
           e.preventDefault();
           annuler();
@@ -175,8 +162,8 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
                 Modifications non enregistrées
               </h2>
               <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Vous avez des modifications en cours sur ce formulaire.
-                Souhaitez-vous les enregistrer avant de quitter cette page ?
+                Vous avez des modifications en cours sur ce formulaire. Souhaitez-vous les
+                enregistrer avant de quitter cette page ?
               </p>
             </div>
           </div>
@@ -219,9 +206,7 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
 export function useNavigationGuard() {
   const ctx = useContext(Context);
   if (!ctx) {
-    throw new Error(
-      'useNavigationGuard doit être utilisé sous <NavigationGuardProvider>',
-    );
+    throw new Error('useNavigationGuard doit être utilisé sous <NavigationGuardProvider>');
   }
   return ctx;
 }

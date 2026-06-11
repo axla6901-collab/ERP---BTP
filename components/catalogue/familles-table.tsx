@@ -70,9 +70,7 @@ export function FamillesTable({ items, rightActions, peutEcrire }: Props) {
       rowClassName={(f) => (f.actif ? undefined : 'opacity-60')}
       searchPlaceholder="Rechercher une famille…"
       emptyMessage={
-        peutEcrire
-          ? 'Aucune famille. Crée la première via le bouton ci-dessus.'
-          : 'Aucune famille.'
+        peutEcrire ? 'Aucune famille. Crée la première via le bouton ci-dessus.' : 'Aucune famille.'
       }
       rightActions={rightActions}
       defaultSort={{ id: 'code', dir: 'asc' }}

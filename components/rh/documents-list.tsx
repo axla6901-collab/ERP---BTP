@@ -46,13 +46,12 @@ type Props = {
       filename: string,
       tailleBytes: number,
     ) => Promise<
-      | { ok: true; data: { uploadUrl: string; minioKey: string } }
-      | { ok: false; error: string }
+      { ok: true; data: { uploadUrl: string; minioKey: string } } | { ok: false; error: string }
     >;
     enregistrer: (input: DocumentInput) => Promise<ServerActionResult<{ id: string }>>;
-    getDownloadUrl: (id: string) => Promise<
-      { ok: true; url: string; libelle: string } | { ok: false; error: string }
-    >;
+    getDownloadUrl: (
+      id: string,
+    ) => Promise<{ ok: true; url: string; libelle: string } | { ok: false; error: string }>;
     supprimer: (id: string) => Promise<ServerActionResult<void>>;
   };
 };
@@ -109,7 +108,11 @@ export function DocumentsList({ items, peutEcrire, actions }: Props) {
       return;
     }
     startTransition(async () => {
-      const prep = await actions.preparerUpload(file.type || 'application/octet-stream', file.name, file.size);
+      const prep = await actions.preparerUpload(
+        file.type || 'application/octet-stream',
+        file.name,
+        file.size,
+      );
       if (!prep.ok) {
         setErreur(prep.error);
         return;
@@ -259,10 +262,7 @@ export function DocumentsList({ items, peutEcrire, actions }: Props) {
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <Label>Type</Label>
-                  <Select
-                    value={type}
-                    onValueChange={(v) => setType(v as TypeDocumentEmploye)}
-                  >
+                  <Select value={type} onValueChange={(v) => setType(v as TypeDocumentEmploye)}>
                     <SelectTrigger>
                       <SelectValue>
                         {(v) => LIBELLES_TYPE_DOCUMENT[v as TypeDocumentEmploye] ?? v}

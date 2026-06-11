@@ -32,17 +32,9 @@ import {
   type PosteInterneFormInput,
   type StatutDevis,
 } from '@/lib/validation/commercial';
-import {
-  calculerMontantLigne,
-  calculerPuDepuisComposants,
-  calculerTotauxDevis,
-} from './calculs';
+import { calculerMontantLigne, calculerPuDepuisComposants, calculerTotauxDevis } from './calculs';
 import { appliquerRemiseGlobale } from '@/lib/remise-globale';
-import {
-  calculerVentilation,
-  chapitreInvalide,
-  type LigneVentilable,
-} from './ventilation';
+import { calculerVentilation, chapitreInvalide, type LigneVentilable } from './ventilation';
 
 import { ROLES_COMMERCIAL_WRITE } from './permissions';
 import type { ActionResult } from '@/lib/catalogue/types';
@@ -76,9 +68,7 @@ async function lirePostesInternesEnFormInput(
     .select({ id: lignesDevis.id, ordre: lignesDevis.ordre })
     .from(lignesDevis)
     .where(eq(lignesDevis.devisId, devisId));
-  const ligneIdToOrdre = new Map<string, number>(
-    lignesRows.map((l) => [l.id, l.ordre]),
-  );
+  const ligneIdToOrdre = new Map<string, number>(lignesRows.map((l) => [l.id, l.ordre]));
 
   const repartitions = await tx
     .select()
@@ -90,10 +80,7 @@ async function lirePostesInternesEnFormInput(
       ),
     );
 
-  const repartitionsParPoste = new Map<
-    string,
-    Array<{ ordreLigne: number; poids: string }>
-  >();
+  const repartitionsParPoste = new Map<string, Array<{ ordreLigne: number; poids: string }>>();
   for (const r of repartitions) {
     const ordre = ligneIdToOrdre.get(r.ligneDevisId);
     if (ordre === undefined) continue;
@@ -116,10 +103,7 @@ async function lirePostesInternesEnFormInput(
     }
     return {
       portee: 'chapitre',
-      chapitreOrdre:
-        p.chapitreLigneId !== null
-          ? (ligneIdToOrdre.get(p.chapitreLigneId) ?? 0)
-          : 0,
+      chapitreOrdre: p.chapitreLigneId !== null ? (ligneIdToOrdre.get(p.chapitreLigneId) ?? 0) : 0,
       libelle: p.libelle,
       montantHt: p.montantHt,
       notes: p.notes,
@@ -155,7 +139,12 @@ export type DevisHydrate = Devis & {
 // Lecture
 // ─────────────────────────────────────────────────────────────
 
-function libelleClient(c: { type: string; raisonSociale: string | null; nom: string | null; prenom: string | null }): string {
+function libelleClient(c: {
+  type: string;
+  raisonSociale: string | null;
+  nom: string | null;
+  prenom: string | null;
+}): string {
   if (c.type === 'professionnel') return c.raisonSociale ?? '?';
   return [c.prenom, c.nom].filter(Boolean).join(' ') || '?';
 }
@@ -253,10 +242,7 @@ export async function lireDevis(id: string): Promise<DevisHydrate | null> {
         .where(inArray(repartitionsPosteInterne.posteInterneId, ids));
     }
 
-    const repartitionsParPoste = new Map<
-      string,
-      Array<{ ordreLigne: number; poids: string }>
-    >();
+    const repartitionsParPoste = new Map<string, Array<{ ordreLigne: number; poids: string }>>();
     for (const r of repartitions) {
       const ordre = ligneIdToOrdre.get(r.ligneDevisId);
       if (ordre === undefined) continue; // ligne supprimée hors-bande
@@ -268,7 +254,7 @@ export async function lireDevis(id: string): Promise<DevisHydrate | null> {
     const postesInternes: PosteInterneHydrate[] = postes.map((p) => ({
       ...p,
       chapitreOrdre:
-        p.chapitreLigneId !== null ? ligneIdToOrdre.get(p.chapitreLigneId) ?? null : null,
+        p.chapitreLigneId !== null ? (ligneIdToOrdre.get(p.chapitreLigneId) ?? null) : null,
       repartitions: repartitionsParPoste.get(p.id) ?? [],
     }));
 
@@ -304,8 +290,7 @@ function preparerLignesAInserer(
     const puStocke =
       l.type === 'section'
         ? null
-        : (calculerPuDepuisComposants(l.composants ?? []) ??
-          (l.prixUnitaireHt as string));
+        : (calculerPuDepuisComposants(l.composants ?? []) ?? (l.prixUnitaireHt as string));
     return {
       entrepriseId,
       devisId,
@@ -413,13 +398,15 @@ function calculerApports(
   postes: PosteInterneFormInput[],
 ): Map<number, number> {
   return calculerVentilation(
-    lignes.map((l, i): LigneVentilable => ({
-      ordre: i,
-      type: l.type,
-      quantite: l.type === 'section' ? null : l.quantite,
-      prixUnitaireHt: l.type === 'section' ? null : l.prixUnitaireHt,
-      remisePourcent: l.type === 'section' ? null : (l.remisePourcent ?? '0'),
-    })),
+    lignes.map(
+      (l, i): LigneVentilable => ({
+        ordre: i,
+        type: l.type,
+        quantite: l.type === 'section' ? null : l.quantite,
+        prixUnitaireHt: l.type === 'section' ? null : l.prixUnitaireHt,
+        remisePourcent: l.type === 'section' ? null : (l.remisePourcent ?? '0'),
+      }),
+    ),
     postes.map((p) => ({
       montantHt: p.montantHt,
       portee: p.portee,
@@ -442,7 +429,7 @@ async function insererPostesInternes(
   for (let i = 0; i < postes.length; i++) {
     const p = postes[i]!;
     const chapitreLigneId =
-      p.portee === 'chapitre' ? ordreVersId.get(p.chapitreOrdre) ?? null : null;
+      p.portee === 'chapitre' ? (ordreVersId.get(p.chapitreOrdre) ?? null) : null;
     const [insertedPoste] = await tx
       .insert(postesInternesDevis)
       .values({
@@ -503,13 +490,10 @@ export async function creerDevis(
 
   const apportsParOrdre = calculerApports(parsed.data.lignes, postesEffectifs);
 
-  const totaux = appliquerRemiseGlobale(
-    calculerTotauxDevis(parsed.data.lignes, postesEffectifs),
-    {
-      type: parsed.data.remiseGlobaleType,
-      valeur: parsed.data.remiseGlobaleValeur,
-    },
-  );
+  const totaux = appliquerRemiseGlobale(calculerTotauxDevis(parsed.data.lignes, postesEffectifs), {
+    type: parsed.data.remiseGlobaleType,
+    valeur: parsed.data.remiseGlobaleValeur,
+  });
 
   try {
     const result = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -546,18 +530,21 @@ export async function creerDevis(
           parsed.data.lignes,
           apportsParOrdre,
         );
-        const rows = await tx
-          .insert(lignesDevis)
-          .values(values)
-          .returning({
-            id: lignesDevis.id,
-            ordre: lignesDevis.ordre,
-            type: lignesDevis.type,
-          });
+        const rows = await tx.insert(lignesDevis).values(values).returning({
+          id: lignesDevis.id,
+          ordre: lignesDevis.ordre,
+          type: lignesDevis.type,
+        });
         for (const r of rows) lignesInserees.push(r);
       }
 
-      await insererPostesInternes(tx, ctx.entreprise.id, inserted.id, lignesInserees, postesEffectifs);
+      await insererPostesInternes(
+        tx,
+        ctx.entreprise.id,
+        inserted.id,
+        lignesInserees,
+        postesEffectifs,
+      );
       await insererComposants(tx, ctx.entreprise.id, parsed.data.lignes, lignesInserees);
 
       await auditLogIn(tx, {
@@ -583,10 +570,7 @@ export async function creerDevis(
   }
 }
 
-export async function mettreAJourDevis(
-  id: string,
-  input: DevisInput,
-): Promise<ActionResult> {
+export async function mettreAJourDevis(id: string, input: DevisInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_COMMERCIAL_WRITE);
   const parsed = devisSchema.safeParse(input);
   if (!parsed.success) {
@@ -630,22 +614,22 @@ export async function mettreAJourDevis(
       // Replace all postes (cascade ON DELETE supprime les répartitions),
       // puis toutes les lignes, puis réinsère. Les IDs des lignes changent
       // donc les références sont reconstruites depuis les ordres du form.
-      await tx
-        .delete(postesInternesDevis)
-        .where(eq(postesInternesDevis.devisId, id));
+      await tx.delete(postesInternesDevis).where(eq(postesInternesDevis.devisId, id));
       await tx.delete(lignesDevis).where(eq(lignesDevis.devisId, id));
 
       const lignesInserees: { ordre: number; id: string; type: string }[] = [];
       if (parsed.data.lignes.length > 0) {
-        const values = preparerLignesAInserer(ctx.entreprise.id, id, parsed.data.lignes, apportsParOrdre);
-        const rows = await tx
-          .insert(lignesDevis)
-          .values(values)
-          .returning({
-            id: lignesDevis.id,
-            ordre: lignesDevis.ordre,
-            type: lignesDevis.type,
-          });
+        const values = preparerLignesAInserer(
+          ctx.entreprise.id,
+          id,
+          parsed.data.lignes,
+          apportsParOrdre,
+        );
+        const rows = await tx.insert(lignesDevis).values(values).returning({
+          id: lignesDevis.id,
+          ordre: lignesDevis.ordre,
+          type: lignesDevis.type,
+        });
         for (const r of rows) lignesInserees.push(r);
       }
 
@@ -703,13 +687,8 @@ const PERM_VALIDER = 'COMMERCIAL_DEVIS_VALIDATE';
 
 /** Vérifie si la transition demandée est une action réservée au valideur
  *  (en_validation → valide ou en_validation → brouillon pour refus). */
-function estTransitionValideur(
-  before: StatutDevis,
-  next: StatutDevis,
-): boolean {
-  return (
-    before === 'en_validation' && (next === 'valide' || next === 'brouillon')
-  );
+function estTransitionValideur(before: StatutDevis, next: StatutDevis): boolean {
+  return before === 'en_validation' && (next === 'valide' || next === 'brouillon');
 }
 
 export async function changerStatutDevis(
@@ -722,8 +701,7 @@ export async function changerStatutDevis(
     await withTenant(ctx.entreprise.id, async (tx) => {
       const [before] = await tx.select().from(devis).where(eq(devis.id, id));
       if (!before) throw new Error('NOT_FOUND');
-      const transitionsValides =
-        TRANSITIONS_STATUT_DEVIS[before.statut as StatutDevis];
+      const transitionsValides = TRANSITIONS_STATUT_DEVIS[before.statut as StatutDevis];
       if (!transitionsValides.includes(nouveauStatut)) {
         throw new Error(
           `TRANSITION_INTERDITE:${before.statut} → ${nouveauStatut}. Possible : ${transitionsValides.join(', ') || 'aucune'}.`,
@@ -758,11 +736,15 @@ export async function changerStatutDevis(
     if (err instanceof Error && err.message === 'NON_VALIDEUR') {
       return {
         ok: false,
-        error: 'Seul un utilisateur avec la permission « Valider un devis » peut approuver ou refuser.',
+        error:
+          'Seul un utilisateur avec la permission « Valider un devis » peut approuver ou refuser.',
       };
     }
     if (err instanceof Error && err.message.startsWith('TRANSITION_INTERDITE:')) {
-      return { ok: false, error: `Transition impossible : ${err.message.slice('TRANSITION_INTERDITE:'.length)}` };
+      return {
+        ok: false,
+        error: `Transition impossible : ${err.message.slice('TRANSITION_INTERDITE:'.length)}`,
+      };
     }
     throw err;
   }
@@ -855,7 +837,7 @@ export async function dupliquerDevis(
       return {
         ok: false,
         error:
-          'Permission manquante : gérer les versions d\'un devis (« COMMERCIAL_DEVIS_VERSION »).',
+          "Permission manquante : gérer les versions d'un devis (« COMMERCIAL_DEVIS_VERSION »).",
       };
     }
   }

@@ -156,9 +156,7 @@ describe('previewImportCatalogue', () => {
       ['OK-3', 'Article valide', 9.9],
     ];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Tarif');
-    const buf = (XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer).toString(
-      'base64',
-    );
+    const buf = (XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }) as Buffer).toString('base64');
     const res = await previewImportCatalogue(buf, 'tarif.xlsx', {
       feuille: 'Tarif',
       headerRow: 0,

@@ -26,8 +26,8 @@ export default async function TypesEngagementPage() {
       <Alert>
         <AlertTitle>Référentiel global</AlertTitle>
         <AlertDescription>
-          Cette matrice est partagée par toutes les entreprises (référentiel sectoriel BTP). La modifier
-          impacte l’ensemble des tenants.
+          Cette matrice est partagée par toutes les entreprises (référentiel sectoriel BTP). La
+          modifier impacte l’ensemble des tenants.
         </AlertDescription>
       </Alert>
       <MatriceEngagementEditor initial={initial} peutEcrire={peutEcrire} />

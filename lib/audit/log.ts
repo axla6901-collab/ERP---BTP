@@ -45,15 +45,17 @@ export async function auditLogEvent(params: AuditLogParams): Promise<void> {
   // réservé aux actions cross-tenant et n'est insérable que via un rôle
   // BYPASSRLS. On passe donc par la pool admin, pas par `db` (app_rw) qui
   // serait bloqué par la policy p_tenant.
-  await getDbAdmin().insert(auditLog).values({
-    entrepriseId: null,
-    action: params.action,
-    tableName: params.tableName,
-    rowId: params.rowId,
-    before: caviarderChampsSensibles(params.tableName, params.before) ?? null,
-    after: caviarderChampsSensibles(params.tableName, params.after) ?? null,
-    utilisateurId,
-  });
+  await getDbAdmin()
+    .insert(auditLog)
+    .values({
+      entrepriseId: null,
+      action: params.action,
+      tableName: params.tableName,
+      rowId: params.rowId,
+      before: caviarderChampsSensibles(params.tableName, params.before) ?? null,
+      after: caviarderChampsSensibles(params.tableName, params.after) ?? null,
+      utilisateurId,
+    });
 }
 
 /**

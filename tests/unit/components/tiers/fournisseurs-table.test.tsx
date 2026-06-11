@@ -40,12 +40,24 @@ describe('FournisseursTable — bascule de statut', () => {
   });
 
   it('avec onChangerStatut : « Désactiver » pour un fournisseur actif', () => {
-    render(<FournisseursTable items={[fournisseur({ actif: true })]} peutEcrire onChangerStatut={vi.fn()} />);
+    render(
+      <FournisseursTable
+        items={[fournisseur({ actif: true })]}
+        peutEcrire
+        onChangerStatut={vi.fn()}
+      />,
+    );
     expect(screen.getByRole('button', { name: 'Désactiver' })).toBeInTheDocument();
   });
 
   it('« Activer » pour un fournisseur inactif', () => {
-    render(<FournisseursTable items={[fournisseur({ actif: false })]} peutEcrire onChangerStatut={vi.fn()} />);
+    render(
+      <FournisseursTable
+        items={[fournisseur({ actif: false })]}
+        peutEcrire
+        onChangerStatut={vi.fn()}
+      />,
+    );
     expect(screen.getByRole('button', { name: 'Activer' })).toBeInTheDocument();
   });
 

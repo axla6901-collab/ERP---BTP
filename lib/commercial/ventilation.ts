@@ -51,10 +51,7 @@ export type ApportVentilation = {
  * Calcule la liste des articles d'un chapitre : tout ce qui suit la section
  * `chapitreOrdre` jusqu'à la prochaine section (exclusive).
  */
-function articlesDuChapitre(
-  lignes: LigneVentilable[],
-  chapitreOrdre: number,
-): LigneVentilable[] {
+function articlesDuChapitre(lignes: LigneVentilable[], chapitreOrdre: number): LigneVentilable[] {
   const ordonne = [...lignes].sort((a, b) => a.ordre - b.ordre);
   const idx = ordonne.findIndex((l) => l.ordre === chapitreOrdre && l.type === 'section');
   if (idx === -1) return [];
@@ -92,9 +89,7 @@ export function calculerVentilation(
 
     let poidsParLigne: Map<number, number>;
     if (poste.repartitions.length > 0) {
-      poidsParLigne = new Map(
-        poste.repartitions.map((r) => [r.ordreLigne, Number(r.poids)]),
-      );
+      poidsParLigne = new Map(poste.repartitions.map((r) => [r.ordreLigne, Number(r.poids)]));
     } else {
       poidsParLigne = new Map(scope.map((l) => [l.ordre, 1]));
     }
@@ -123,19 +118,11 @@ export function calculerVentilation(
  * Combine une ligne et son apport ventilé pour produire son PU et son
  * montant HT effectifs (= visibles au client après ventilation).
  */
-export function calculerApportLigne(
-  ligne: LigneVentilable,
-  apportHt: number,
-): ApportVentilation {
+export function calculerApportLigne(ligne: LigneVentilable, apportHt: number): ApportVentilation {
   const q = Number(ligne.quantite ?? 0);
   const pu = Number(ligne.prixUnitaireHt ?? 0);
   const remise = Number(ligne.remisePourcent ?? 0);
-  if (
-    ligne.type === 'section' ||
-    !Number.isFinite(q) ||
-    q <= 0 ||
-    !Number.isFinite(pu)
-  ) {
+  if (ligne.type === 'section' || !Number.isFinite(q) || q <= 0 || !Number.isFinite(pu)) {
     return { apportHt: 0, prixUnitaireEffectifHt: 0, montantEffectifHt: 0 };
   }
   const apportParUnite = apportHt / q;
@@ -150,10 +137,7 @@ export function calculerApportLigne(
  * pointe vers une ligne non-section). Sert à valider les postes internes
  * avant insertion.
  */
-export function chapitreInvalide(
-  lignes: LigneVentilable[],
-  chapitreOrdre: number,
-): boolean {
+export function chapitreInvalide(lignes: LigneVentilable[], chapitreOrdre: number): boolean {
   const cible = lignes.find((l) => l.ordre === chapitreOrdre);
   return !cible || cible.type !== 'section';
 }

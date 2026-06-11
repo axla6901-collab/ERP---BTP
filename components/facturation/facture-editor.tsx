@@ -3,7 +3,7 @@
 import { Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useMemo, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -30,10 +30,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
-import {
-  calculerMontantRetenue,
-  calculerTotauxFacture,
-} from '@/lib/facturation/calculs';
+import { calculerMontantRetenue, calculerTotauxFacture } from '@/lib/facturation/calculs';
 import { appliquerRemiseGlobale, libelleRemiseGlobale } from '@/lib/remise-globale';
 import {
   factureSchema,
@@ -160,10 +157,10 @@ export function FactureEditor({
 
   const totauxLive = useMemo(
     () =>
-      appliquerRemiseGlobale(
-        calculerTotauxFacture(lignesLive, { autoLiquidation: autoLiq }),
-        { type: remiseGlobaleType, valeur: remiseGlobaleValeur },
-      ),
+      appliquerRemiseGlobale(calculerTotauxFacture(lignesLive, { autoLiquidation: autoLiq }), {
+        type: remiseGlobaleType,
+        valeur: remiseGlobaleValeur,
+      }),
     [lignesLive, autoLiq, remiseGlobaleType, remiseGlobaleValeur],
   );
   const aRemise = Number(totauxLive.remiseGlobaleMontant) > 0;
@@ -264,9 +261,7 @@ export function FactureEditor({
   }
 
   const clientId = form.watch('clientId');
-  const devisFiltrees = clientId
-    ? devis.filter((d) => d.clientId === clientId)
-    : devis;
+  const devisFiltrees = clientId ? devis.filter((d) => d.clientId === clientId) : devis;
 
   return (
     <Form {...form}>
@@ -279,69 +274,30 @@ export function FactureEditor({
         )}
 
         {/* En-tête */}
-        <FormSection
-          number={1}
-          title="Client et rattachement"
-          storageKey="facture:client"
-        >
+        <FormSection number={1} title="Client et rattachement" storageKey="facture:client">
           <div className="grid gap-4">
-          <FormField
-            control={form.control}
-            name="clientId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir un client">
-                        {(v) => {
-                          if (!v) return 'Choisir un client';
-                          const c = clients.find((x) => x.id === v);
-                          return c ? `${c.code} — ${c.libelle}` : String(v);
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.code} — {c.libelle}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
-              name="chantierId"
+              name="clientId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chantier (optionnel)</FormLabel>
-                  <Select
-                    value={field.value ?? '__none__'}
-                    onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                  >
+                  <FormLabel>Client</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue>
+                        <SelectValue placeholder="Choisir un client">
                           {(v) => {
-                            if (!v || v === '__none__') return 'Aucun chantier';
-                            const c = chantiers.find((x) => x.id === v);
-                            return c ? `${c.numero} — ${c.libelle}` : String(v);
+                            if (!v) return 'Choisir un client';
+                            const c = clients.find((x) => x.id === v);
+                            return c ? `${c.code} — ${c.libelle}` : String(v);
                           }}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="__none__">Aucun chantier</SelectItem>
-                      {chantiers.map((c) => (
+                      {clients.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
-                          {c.numero} — {c.libelle}
+                          {c.code} — {c.libelle}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -350,49 +306,80 @@ export function FactureEditor({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="devisId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Devis source (optionnel)</FormLabel>
-                  <Select
-                    value={field.value ?? '__none__'}
-                    onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue>
-                          {(v) => {
-                            if (!v || v === '__none__') return 'Aucun devis';
-                            const d = devisFiltrees.find((x) => x.id === v);
-                            return d ? d.numero : String(v);
-                          }}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="__none__">Aucun devis</SelectItem>
-                      {devisFiltrees.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {d.numero}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="chantierId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chantier (optionnel)</FormLabel>
+                    <Select
+                      value={field.value ?? '__none__'}
+                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue>
+                            {(v) => {
+                              if (!v || v === '__none__') return 'Aucun chantier';
+                              const c = chantiers.find((x) => x.id === v);
+                              return c ? `${c.numero} — ${c.libelle}` : String(v);
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="__none__">Aucun chantier</SelectItem>
+                        {chantiers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.numero} — {c.libelle}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="devisId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Devis source (optionnel)</FormLabel>
+                    <Select
+                      value={field.value ?? '__none__'}
+                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue>
+                            {(v) => {
+                              if (!v || v === '__none__') return 'Aucun devis';
+                              const d = devisFiltrees.find((x) => x.id === v);
+                              return d ? d.numero : String(v);
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="__none__">Aucun devis</SelectItem>
+                        {devisFiltrees.map((d) => (
+                          <SelectItem key={d.id} value={d.id}>
+                            {d.numero}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </FormSection>
 
-        <FormSection
-          number={2}
-          title="Dates et objet"
-          storageKey="facture:dates"
-        >
+        <FormSection number={2} title="Dates et objet" storageKey="facture:dates">
           <div className="grid gap-4 sm:grid-cols-3">
             <FormField
               control={form.control}
@@ -470,10 +457,7 @@ export function FactureEditor({
           storageKey="facture:lignes"
           bodyClassName="p-0"
           rightSlot={
-            <SectionTotal
-              label="Total HT"
-              value={`${formatMontant(totauxLive.totalHt)} €`}
-            />
+            <SectionTotal label="Total HT" value={`${formatMontant(totauxLive.totalHt)} €`} />
           }
         >
           <div className="divide-y">
@@ -536,7 +520,7 @@ export function FactureEditor({
                         <Select
                           value={
                             'articleId' in lignesLive[idx]!
-                              ? (lignesLive[idx] as { articleId: string | null }).articleId ?? ''
+                              ? ((lignesLive[idx] as { articleId: string | null }).articleId ?? '')
                               : ''
                           }
                           onValueChange={(v) => v && applyArticle(idx, v)}
@@ -586,7 +570,7 @@ export function FactureEditor({
                         <Select
                           value={
                             'tauxTva' in lignesLive[idx]!
-                              ? (lignesLive[idx] as { tauxTva: string | null }).tauxTva ?? '20.00'
+                              ? ((lignesLive[idx] as { tauxTva: string | null }).tauxTva ?? '20.00')
                               : '20.00'
                           }
                           onValueChange={(v) =>
@@ -597,7 +581,9 @@ export function FactureEditor({
                             <SelectValue placeholder="TVA">
                               {(v) => {
                                 if (!v) return 'TVA';
-                                return `${Number(v).toFixed(2).replace(/\.?0+$/, '')} %`;
+                                return `${Number(v)
+                                  .toFixed(2)
+                                  .replace(/\.?0+$/, '')} %`;
                               }}
                             </SelectValue>
                           </SelectTrigger>
@@ -687,110 +673,39 @@ export function FactureEditor({
         </FormSection>
 
         {/* Options TVA + retenue + totaux */}
-        <FormSection
-          number={4}
-          title="TVA, retenue et totaux"
-          storageKey="facture:tva-totaux"
-        >
+        <FormSection number={4} title="TVA, retenue et totaux" storageKey="facture:tva-totaux">
           <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-3">
-            <FormField
-              control={form.control}
-              name="autoLiquidation"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-3">
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <div>
-                    <FormLabel className="!mt-0">Auto-liquidation TVA BTP</FormLabel>
-                    <p className="text-xs text-muted-foreground">
-                      Art. 283-2 nonies CGI — TVA collectée par le preneur. Force TVA = 0 €.
-                    </p>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="retenueGarantiePct"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Retenue de garantie (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      max={10}
-                      placeholder="5 (max 10 %)"
-                      {...field}
-                      value={field.value ?? ''}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === '' ? null : e.target.value)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="space-y-3">
               <FormField
                 control={form.control}
-                name="remiseGlobaleType"
+                name="autoLiquidation"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Remise globale</FormLabel>
-                    <Select
-                      value={field.value ?? '__aucune__'}
-                      onValueChange={(v) => {
-                        if (!v) return;
-                        if (v === '__aucune__') {
-                          field.onChange(null);
-                          form.setValue('remiseGlobaleValeur', null);
-                        } else {
-                          field.onChange(v);
-                        }
-                      }}
-                    >
-                      <FormControl>
-                        <SelectTrigger aria-label="Type de remise globale">
-                          <SelectValue>
-                            {(val) =>
-                              val === 'pourcent'
-                                ? 'Pourcentage (%)'
-                                : val === 'montant'
-                                  ? 'Montant (€)'
-                                  : 'Aucune'
-                            }
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__aucune__">Aucune</SelectItem>
-                        <SelectItem value="pourcent">Pourcentage (%)</SelectItem>
-                        <SelectItem value="montant">Montant (€)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="flex items-center gap-3">
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <div>
+                      <FormLabel className="!mt-0">Auto-liquidation TVA BTP</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Art. 283-2 nonies CGI — TVA collectée par le preneur. Force TVA = 0 €.
+                      </p>
+                    </div>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="remiseGlobaleValeur"
+                name="retenueGarantiePct"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      {remiseGlobaleType === 'montant' ? 'Montant (€)' : 'Valeur (%)'}
-                    </FormLabel>
+                    <FormLabel>Retenue de garantie (%)</FormLabel>
                     <FormControl>
                       <Input
-                        inputMode="decimal"
-                        placeholder={remiseGlobaleType === 'montant' ? '0.00' : '0'}
-                        disabled={remiseGlobaleType === null}
-                        aria-label="Valeur de la remise globale"
+                        type="number"
+                        step="0.01"
+                        min={0}
+                        max={10}
+                        placeholder="5 (max 10 %)"
                         {...field}
                         value={field.value ?? ''}
                         onChange={(e) =>
@@ -802,121 +717,189 @@ export function FactureEditor({
                   </FormItem>
                 )}
               />
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="remiseGlobaleType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Remise globale</FormLabel>
+                      <Select
+                        value={field.value ?? '__aucune__'}
+                        onValueChange={(v) => {
+                          if (!v) return;
+                          if (v === '__aucune__') {
+                            field.onChange(null);
+                            form.setValue('remiseGlobaleValeur', null);
+                          } else {
+                            field.onChange(v);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger aria-label="Type de remise globale">
+                            <SelectValue>
+                              {(val) =>
+                                val === 'pourcent'
+                                  ? 'Pourcentage (%)'
+                                  : val === 'montant'
+                                    ? 'Montant (€)'
+                                    : 'Aucune'
+                              }
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__aucune__">Aucune</SelectItem>
+                          <SelectItem value="pourcent">Pourcentage (%)</SelectItem>
+                          <SelectItem value="montant">Montant (€)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="remiseGlobaleValeur"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {remiseGlobaleType === 'montant' ? 'Montant (€)' : 'Valeur (%)'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          inputMode="decimal"
+                          placeholder={remiseGlobaleType === 'montant' ? '0.00' : '0'}
+                          disabled={remiseGlobaleType === null}
+                          aria-label="Valeur de la remise globale"
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === '' ? null : e.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-          </div>
-          <div className="space-y-1 rounded-md bg-muted/30 p-3 text-sm">
-            <div className="flex justify-between">
-              <span>Total HT{aRemise ? ' brut' : ''}</span>
-              <span className="tabular-nums">
-                {formatMontant(totauxLive.totalHtAvantRemise)} €
-              </span>
+            <div className="space-y-1 rounded-md bg-muted/30 p-3 text-sm">
+              <div className="flex justify-between">
+                <span>Total HT{aRemise ? ' brut' : ''}</span>
+                <span className="tabular-nums">
+                  {formatMontant(totauxLive.totalHtAvantRemise)} €
+                </span>
+              </div>
+              {aRemise && (
+                <>
+                  <div className="flex justify-between text-destructive">
+                    <span>
+                      Remise globale (
+                      {libelleRemiseGlobale({
+                        type: remiseGlobaleType,
+                        valeur: remiseGlobaleValeur,
+                      })}
+                      )
+                    </span>
+                    <span className="tabular-nums">
+                      − {formatMontant(totauxLive.remiseGlobaleMontant)} €
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Total HT net</span>
+                    <span className="tabular-nums">{formatMontant(totauxLive.totalHt)} €</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between text-muted-foreground">
+                <span>TVA{autoLiq ? ' (auto-liq.)' : ''}</span>
+                <span className="tabular-nums">{formatMontant(totauxLive.totalTva)} €</span>
+              </div>
+              <div className="flex justify-between border-t pt-1 font-medium">
+                <span>Total TTC</span>
+                <span className="tabular-nums">{formatMontant(totauxLive.totalTtc)} €</span>
+              </div>
+              {montantRetenueLive && (
+                <>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Retenue de garantie</span>
+                    <span className="tabular-nums">− {formatMontant(montantRetenueLive)} €</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-1 text-base font-semibold">
+                    <span>Net à payer</span>
+                    <span className="tabular-nums">{formatMontant(netAPayer)} €</span>
+                  </div>
+                </>
+              )}
             </div>
-            {aRemise && (
-              <>
-                <div className="flex justify-between text-destructive">
-                  <span>
-                    Remise globale (
-                    {libelleRemiseGlobale({
-                      type: remiseGlobaleType,
-                      valeur: remiseGlobaleValeur,
-                    })}
-                    )
-                  </span>
-                  <span className="tabular-nums">
-                    − {formatMontant(totauxLive.remiseGlobaleMontant)} €
-                  </span>
-                </div>
-                <div className="flex justify-between font-medium">
-                  <span>Total HT net</span>
-                  <span className="tabular-nums">{formatMontant(totauxLive.totalHt)} €</span>
-                </div>
-              </>
-            )}
-            <div className="flex justify-between text-muted-foreground">
-              <span>TVA{autoLiq ? ' (auto-liq.)' : ''}</span>
-              <span className="tabular-nums">{formatMontant(totauxLive.totalTva)} €</span>
-            </div>
-            <div className="flex justify-between border-t pt-1 font-medium">
-              <span>Total TTC</span>
-              <span className="tabular-nums">{formatMontant(totauxLive.totalTtc)} €</span>
-            </div>
-            {montantRetenueLive && (
-              <>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Retenue de garantie</span>
-                  <span className="tabular-nums">− {formatMontant(montantRetenueLive)} €</span>
-                </div>
-                <div className="flex justify-between border-t pt-1 font-semibold text-base">
-                  <span>Net à payer</span>
-                  <span className="tabular-nums">{formatMontant(netAPayer)} €</span>
-                </div>
-              </>
-            )}
-          </div>
           </div>
         </FormSection>
 
         {/* Mentions */}
-        <FormSection
-          number={5}
-          title="Conditions, mentions et notes"
-          storageKey="facture:mentions"
-        >
+        <FormSection number={5} title="Conditions, mentions et notes" storageKey="facture:mentions">
           <div className="grid gap-3">
-          <FormField
-            control={form.control}
-            name="conditionsPaiement"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Conditions de paiement (optionnel)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    rows={2}
-                    placeholder="Ex. Paiement à 30 jours, virement IBAN…"
-                    {...field}
-                    value={field.value ?? ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="mentionsLegales"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mentions légales (optionnel)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    rows={3}
-                    placeholder="Pénalités de retard, indemnité forfaitaire 40 €, assurance décennale…"
-                    {...field}
-                    value={field.value ?? ''}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes internes (non imprimées)</FormLabel>
-                <FormControl>
-                  <Textarea rows={2} {...field} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="conditionsPaiement"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Conditions de paiement (optionnel)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={2}
+                      placeholder="Ex. Paiement à 30 jours, virement IBAN…"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mentionsLegales"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mentions légales (optionnel)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={3}
+                      placeholder="Pénalités de retard, indemnité forfaitaire 40 €, assurance décennale…"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes internes (non imprimées)</FormLabel>
+                  <FormControl>
+                    <Textarea rows={2} {...field} value={field.value ?? ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </FormSection>
 
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" type="button" onClick={() => guardedRouter.back()} disabled={isSubmitting}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => guardedRouter.back()}
+            disabled={isSubmitting}
+          >
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>

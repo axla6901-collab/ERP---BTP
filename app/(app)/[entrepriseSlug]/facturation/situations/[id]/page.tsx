@@ -24,10 +24,7 @@ import {
   lireSituation,
   validerSituation,
 } from '@/lib/facturation/situations';
-import {
-  LIBELLES_STATUT_SITUATION,
-  type StatutSituation,
-} from '@/lib/validation/facturation';
+import { LIBELLES_STATUT_SITUATION, type StatutSituation } from '@/lib/validation/facturation';
 
 function formatMontant(m: string | null | number): string {
   if (m === null || m === undefined || m === '') return '—';
@@ -38,14 +35,12 @@ function formatMontant(m: string | null | number): string {
 
 function formatPct(p: string | null): string {
   if (p === null) return '—';
-  return `${Number(p).toFixed(2).replace(/\.?0+$/, '')} %`;
+  return `${Number(p)
+    .toFixed(2)
+    .replace(/\.?0+$/, '')} %`;
 }
 
-export default async function SituationDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function SituationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const peutEcrire = peutEcrireFacturation(utilisateur.role);
@@ -64,9 +59,7 @@ export default async function SituationDetailPage({
     remiseGlobale,
   );
   const aRemiseGlobale = montantRemiseGlobale > 0;
-  const aFacturerNetHt = (
-    Number(situation.montantAFacturerHt) - montantRemiseGlobale
-  ).toFixed(2);
+  const aFacturerNetHt = (Number(situation.montantAFacturerHt) - montantRemiseGlobale).toFixed(2);
 
   return (
     <div className="space-y-6">
@@ -196,7 +189,7 @@ export default async function SituationDetailPage({
                     <TableCell className="text-right tabular-nums">
                       {formatMontant(l.montantCumuleHt)}
                     </TableCell>
-                    <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
+                    <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
                       − {formatMontant(l.montantSituationPrecedenteHt)}
                     </TableCell>
                     <TableCell className="text-right font-semibold tabular-nums">
@@ -217,7 +210,7 @@ export default async function SituationDetailPage({
                   <TableCell className="text-right tabular-nums">
                     {formatMontant(situation.montantCumuleHt)}
                   </TableCell>
-                  <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
+                  <TableCell className="text-right text-xs tabular-nums text-muted-foreground">
                     − {formatMontant(situation.montantSituationPrecedenteHt)}
                   </TableCell>
                   <TableCell className="text-right font-semibold tabular-nums">

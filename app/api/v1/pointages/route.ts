@@ -42,16 +42,10 @@ export async function POST(request: Request) {
 
   const items = extraireItems(body);
   if (items === null) {
-    return NextResponse.json(
-      { error: 'Format attendu : { pointages: [...] }' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'Format attendu : { pointages: [...] }' }, { status: 400 });
   }
   if (items.length > MAX_BATCH) {
-    return NextResponse.json(
-      { error: `Lot trop volumineux (max ${MAX_BATCH}).` },
-      { status: 413 },
-    );
+    return NextResponse.json({ error: `Lot trop volumineux (max ${MAX_BATCH}).` }, { status: 413 });
   }
 
   const results: SyncItemResult[] = [];

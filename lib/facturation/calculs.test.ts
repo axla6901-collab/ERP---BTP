@@ -8,10 +8,7 @@ import {
   calculerTotauxSituation,
   resoudreMontantMarcheLigne,
 } from './calculs';
-import type {
-  LigneFactureInput,
-  LigneSituationInput,
-} from '@/lib/validation/facturation';
+import type { LigneFactureInput, LigneSituationInput } from '@/lib/validation/facturation';
 
 const ligneLibre = (q: number, pu: number, tva = 20): LigneFactureInput => ({
   type: 'libre',
@@ -135,9 +132,7 @@ describe('resoudreMontantMarcheLigne', () => {
   });
 
   it('calcule qty × PU si pas de montant direct', () => {
-    const r = resoudreMontantMarcheLigne(
-      ligneSit({ quantite: '12.5', prixUnitaireHt: '40' }),
-    );
+    const r = resoudreMontantMarcheLigne(ligneSit({ quantite: '12.5', prixUnitaireHt: '40' }));
     expect(r).toBe('500.00');
   });
 
@@ -195,9 +190,7 @@ describe('calculerLigneSituation', () => {
   });
 
   it('retourne null si aucun montant exploitable', () => {
-    expect(
-      calculerLigneSituation(ligneSit({ pctAvancementCumule: '50' })),
-    ).toBeNull();
+    expect(calculerLigneSituation(ligneSit({ pctAvancementCumule: '50' }))).toBeNull();
   });
 
   it('delta négatif possible si % saisi < cumulé précédent (à attraper au niveau Server Action)', () => {

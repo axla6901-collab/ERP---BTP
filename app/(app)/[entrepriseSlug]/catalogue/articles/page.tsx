@@ -5,10 +5,7 @@ import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { getChantierActif } from '@/lib/auth/chantier-context';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
-import {
-  listerArticleIdsParChantier,
-  listerArticlesAvecPrix,
-} from '@/lib/catalogue/articles';
+import { listerArticleIdsParChantier, listerArticlesAvecPrix } from '@/lib/catalogue/articles';
 import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
 import { listerChantiersPourSelecteur } from '@/lib/chantiers/chantiers';
 

@@ -30,11 +30,7 @@ import { sousTraitants } from './tiers';
 //   de compte figé.
 
 /** Cycle de vie d'un compte prorata. `arrete` = lecture seule (snapshot figé). */
-export const statutCompteProrata = pgEnum('statut_compte_prorata', [
-  'ouvert',
-  'cloture',
-  'arrete',
-]);
+export const statutCompteProrata = pgEnum('statut_compte_prorata', ['ouvert', 'cloture', 'arrete']);
 
 // ─────────────────────────────────────────────────────────────
 // 1. Compte prorata (paramètres, 1 par chantier)
@@ -114,7 +110,9 @@ export const compteProrataParticipants = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    index('idx_cpp_compte').on(t.compteProrataId, t.ordre).where(sql`deleted_at IS NULL`),
+    index('idx_cpp_compte')
+      .on(t.compteProrataId, t.ordre)
+      .where(sql`deleted_at IS NULL`),
     index('idx_cpp_sous_traitant').on(t.sousTraitantId),
     index('idx_cpp_entreprise').on(t.entrepriseId),
     // Pas deux fois le même sous-traitant dans un même compte.
@@ -169,7 +167,9 @@ export const compteProrataDepenses = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    index('idx_cpd_compte').on(t.compteProrataId, t.dateDepense).where(sql`deleted_at IS NULL`),
+    index('idx_cpd_compte')
+      .on(t.compteProrataId, t.dateDepense)
+      .where(sql`deleted_at IS NULL`),
     index('idx_cpd_avance_par').on(t.avanceParParticipantId),
     index('idx_cpd_entreprise').on(t.entrepriseId),
     check('chk_cpd_montant_pos', sql`montant_ht > 0`),

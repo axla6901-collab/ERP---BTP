@@ -50,10 +50,7 @@ export default async function FacturesPage() {
         subtitle={`${items.length} facture(s)`}
         actions={
           peutEcrire ? (
-            <Link
-              href="/facturation/factures/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/facturation/factures/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouvelle facture
             </Link>
           ) : null

@@ -101,16 +101,14 @@ const ligneAvecMontant = {
   quantite: numericStrictlyPositive('Quantité'),
   unite: z.string().trim().min(1, 'Unité requise.').max(20),
   prixUnitaireHt: numericPrix('Prix unitaire HT'),
-  tauxTva: z
-    .union([z.string(), z.number()])
-    .transform((v, ctx) => {
-      const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
-      if (Number.isNaN(n) || n < 0 || n > 100) {
-        ctx.addIssue({ code: 'custom', message: 'Taux TVA invalide.' });
-        return z.NEVER;
-      }
-      return n.toFixed(2);
-    }),
+  tauxTva: z.union([z.string(), z.number()]).transform((v, ctx) => {
+    const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
+    if (Number.isNaN(n) || n < 0 || n > 100) {
+      ctx.addIssue({ code: 'custom', message: 'Taux TVA invalide.' });
+      return z.NEVER;
+    }
+    return n.toFixed(2);
+  }),
   remisePourcent: numericPourcent('Remise'),
   notes: trimmedOptionalString(500),
 };
@@ -141,55 +139,55 @@ export type LigneFactureInput = z.infer<typeof ligneFactureSchema>;
 
 export const factureSchema = z
   .object({
-  clientId: z.uuid('Client invalide.'),
-  chantierId: optionalUuid,
-  devisId: optionalUuid,
-  dateFacture: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).'),
-  dateEcheance: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date d’échéance invalide.')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
-  delaiPaiementJours: z
-    .union([z.string(), z.number()])
-    .optional()
-    .nullable()
-    .transform((v, ctx) => {
-      if (v === null || v === undefined || v === '') return null;
-      const n = typeof v === 'number' ? v : Number(v);
-      if (Number.isNaN(n) || !Number.isInteger(n) || n < 0 || n > 365) {
-        ctx.addIssue({ code: 'custom', message: 'Délai paiement invalide (0-365 j).' });
-        return z.NEVER;
-      }
-      return n;
-    }),
-  objet: trimmedOptionalString(200),
-  conditionsPaiement: trimmedOptionalString(2000),
-  mentionsLegales: trimmedOptionalString(5000),
-  notes: trimmedOptionalString(2000),
-  autoLiquidation: z.boolean().default(false),
-  retenueGarantiePct: z
-    .union([z.string(), z.number()])
-    .optional()
-    .nullable()
-    .transform((v, ctx) => {
-      if (v === null || v === undefined || v === '') return null;
-      const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
-      if (Number.isNaN(n) || n < 0 || n > 10) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Retenue garantie : 0 à 10 % maximum (usage CCAG).',
-        });
-        return z.NEVER;
-      }
-      return n.toFixed(2);
-    }),
-  lignes: z.array(ligneFactureSchema).min(1, 'Au moins une ligne requise.'),
-  /** Remise globale sur le total HT (en plus des remises par ligne).
-   *  Voir [[lib/remise-globale.ts]]. */
-  remiseGlobaleType: remiseGlobaleTypeField,
-  remiseGlobaleValeur: remiseGlobaleValeurField,
+    clientId: z.uuid('Client invalide.'),
+    chantierId: optionalUuid,
+    devisId: optionalUuid,
+    dateFacture: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).'),
+    dateEcheance: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date d’échéance invalide.')
+      .optional()
+      .nullable()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    delaiPaiementJours: z
+      .union([z.string(), z.number()])
+      .optional()
+      .nullable()
+      .transform((v, ctx) => {
+        if (v === null || v === undefined || v === '') return null;
+        const n = typeof v === 'number' ? v : Number(v);
+        if (Number.isNaN(n) || !Number.isInteger(n) || n < 0 || n > 365) {
+          ctx.addIssue({ code: 'custom', message: 'Délai paiement invalide (0-365 j).' });
+          return z.NEVER;
+        }
+        return n;
+      }),
+    objet: trimmedOptionalString(200),
+    conditionsPaiement: trimmedOptionalString(2000),
+    mentionsLegales: trimmedOptionalString(5000),
+    notes: trimmedOptionalString(2000),
+    autoLiquidation: z.boolean().default(false),
+    retenueGarantiePct: z
+      .union([z.string(), z.number()])
+      .optional()
+      .nullable()
+      .transform((v, ctx) => {
+        if (v === null || v === undefined || v === '') return null;
+        const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
+        if (Number.isNaN(n) || n < 0 || n > 10) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Retenue garantie : 0 à 10 % maximum (usage CCAG).',
+          });
+          return z.NEVER;
+        }
+        return n.toFixed(2);
+      }),
+    lignes: z.array(ligneFactureSchema).min(1, 'Au moins une ligne requise.'),
+    /** Remise globale sur le total HT (en plus des remises par ligne).
+     *  Voir [[lib/remise-globale.ts]]. */
+    remiseGlobaleType: remiseGlobaleTypeField,
+    remiseGlobaleValeur: remiseGlobaleValeurField,
   })
   .superRefine(refineRemiseGlobale);
 
@@ -309,13 +307,7 @@ export type SituationTravauxInput = z.infer<typeof situationTravauxSchema>;
 // Statuts (libellés UI)
 // ─────────────────────────────────────────────────────────────
 
-export const STATUTS_FACTURE = [
-  'brouillon',
-  'emise',
-  'payee',
-  'en_retard',
-  'annulee',
-] as const;
+export const STATUTS_FACTURE = ['brouillon', 'emise', 'payee', 'en_retard', 'annulee'] as const;
 export type StatutFacture = (typeof STATUTS_FACTURE)[number];
 
 export const LIBELLES_STATUT_FACTURE: Record<StatutFacture, string> = {

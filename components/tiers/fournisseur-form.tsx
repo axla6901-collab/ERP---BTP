@@ -228,7 +228,12 @@ export function FournisseurForm({
                   <FormItem>
                     <FormLabel>SIRET (optionnel)</FormLabel>
                     <FormControl>
-                      <Input placeholder="14 chiffres" maxLength={14} {...field} value={field.value ?? ''} />
+                      <Input
+                        placeholder="14 chiffres"
+                        maxLength={14}
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
                     <FormDescription>14 chiffres sans espace.</FormDescription>
                     <FormMessage />

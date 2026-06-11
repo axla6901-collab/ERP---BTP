@@ -30,7 +30,12 @@ type Ligne = Parameters<typeof TierDocumentsList>[0]['lignes'][number];
 type DocItem = Parameters<typeof TierDocumentsList>[0]['documents'][number];
 
 const NATURES = [
-  { id: 'n-rc', code: 'RC', libelle: 'Assurance responsabilité civile', modeControle: 'date_fin_assurance' as const },
+  {
+    id: 'n-rc',
+    code: 'RC',
+    libelle: 'Assurance responsabilité civile',
+    modeControle: 'date_fin_assurance' as const,
+  },
   { id: 'n-kbis', code: 'KBIS', libelle: 'K-bis', modeControle: 'date_obtention' as const },
 ];
 
@@ -98,7 +103,13 @@ describe('TierDocumentsList — affichage en colonnes', () => {
     render(
       <TierDocumentsList
         tierId="t1"
-        lignes={[ligne({ libelle: 'Attestation sur l’honneur', dateFinValidite: null, statut: 'manquant' })]}
+        lignes={[
+          ligne({
+            libelle: 'Attestation sur l’honneur',
+            dateFinValidite: null,
+            statut: 'manquant',
+          }),
+        ]}
         documents={[]}
         natures={NATURES}
         peutEcrire={false}
@@ -185,13 +196,7 @@ describe('TierDocumentsList — affichage en colonnes', () => {
 
   it('affiche l’état vide quand aucun document n’est requis', () => {
     render(
-      <TierDocumentsList
-        tierId="t1"
-        lignes={[]}
-        documents={[]}
-        natures={NATURES}
-        peutEcrire
-      />,
+      <TierDocumentsList tierId="t1" lignes={[]} documents={[]} natures={NATURES} peutEcrire />,
     );
     expect(screen.getByText(/Aucun document requis/i)).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();

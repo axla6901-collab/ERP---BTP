@@ -47,7 +47,7 @@ function renderEditor(defaultValues: Partial<DevisInput>) {
   );
 }
 
-describe("DevisEditor — en-tête Affaire / Client", () => {
+describe('DevisEditor — en-tête Affaire / Client', () => {
   afterEach(cleanup);
 
   it("affiche l'adresse et l'e-mail du client sélectionné", () => {
@@ -65,9 +65,7 @@ describe("DevisEditor — en-tête Affaire / Client", () => {
   it("invite à choisir un client tant qu'aucun n'est sélectionné", () => {
     renderEditor({ clientId: '' });
 
-    expect(
-      screen.getByText(/Sélectionne un client pour afficher son adresse/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Sélectionne un client pour afficher son adresse/)).toBeInTheDocument();
     expect(screen.queryByText('Dupont Maçonnerie')).not.toBeInTheDocument();
   });
 

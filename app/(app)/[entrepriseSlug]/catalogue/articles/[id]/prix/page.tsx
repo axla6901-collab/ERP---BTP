@@ -33,13 +33,7 @@ function formatMontant(montant: string | null | undefined): string {
 }
 
 function libelleSource(
-  source:
-    | 'grille_prefere'
-    | 'prefere'
-    | 'reference'
-    | 'grille_mini'
-    | 'mini_fournisseur'
-    | null,
+  source: 'grille_prefere' | 'prefere' | 'reference' | 'grille_mini' | 'mini_fournisseur' | null,
 ): string {
   switch (source) {
     case 'grille_prefere':
@@ -79,9 +73,7 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
   const idsFournisseursAvecPrix = new Set(
     prixActifs.map((p) => p.fournisseurId).filter((x): x is string => !!x),
   );
-  const fournisseursDispoPrefere = fournisseursAll.filter((f) =>
-    idsFournisseursAvecPrix.has(f.id),
-  );
+  const fournisseursDispoPrefere = fournisseursAll.filter((f) => idsFournisseursAvecPrix.has(f.id));
 
   return (
     <div className="space-y-6">
@@ -134,13 +126,17 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Prix actifs ({prixActifs.length})</CardTitle>
-          <CardDescription>Un par fournisseur, plus optionnellement une référence générique.</CardDescription>
+          <CardDescription>
+            Un par fournisseur, plus optionnellement une référence générique.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {prixActifs.length === 0 ? (
             <Alert>
               <AlertTitle>Aucun prix renseigné</AlertTitle>
-              <AlertDescription>Saisis-en un ci-dessous pour pouvoir calculer le prix de revient.</AlertDescription>
+              <AlertDescription>
+                Saisis-en un ci-dessous pour pouvoir calculer le prix de revient.
+              </AlertDescription>
             </Alert>
           ) : (
             <Table>
@@ -165,13 +161,21 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
                           <span className="ml-2">{p.fournisseurNom}</span>
                         </>
                       ) : (
-                        <span className="text-xs italic text-muted-foreground">Référence générique</span>
+                        <span className="text-xs italic text-muted-foreground">
+                          Référence générique
+                        </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMontant(p.prixUnitaireHt)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMontant(p.prixUnitaireHt)}
+                    </TableCell>
                     <TableCell className="text-xs">{p.uniteSymbole ?? '—'}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{p.referenceFournisseur ?? '—'}</TableCell>
-                    <TableCell className="text-right text-xs tabular-nums">{p.quantiteMin ?? '—'}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {p.referenceFournisseur ?? '—'}
+                    </TableCell>
+                    <TableCell className="text-right text-xs tabular-nums">
+                      {p.quantiteMin ?? '—'}
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{p.validFrom}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{p.notes ?? ''}</TableCell>
                   </TableRow>
@@ -187,7 +191,8 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
           <CardHeader>
             <CardTitle className="text-base">Saisir un nouveau prix</CardTitle>
             <CardDescription>
-              Si un prix actif existe déjà pour le même fournisseur (ou la référence), il sera fermé automatiquement à la veille du nouveau valid_from.
+              Si un prix actif existe déjà pour le même fournisseur (ou la référence), il sera fermé
+              automatiquement à la veille du nouveau valid_from.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -207,7 +212,9 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
       {prixFermes.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Historique des prix antérieurs ({prixFermes.length})</CardTitle>
+            <CardTitle className="text-base">
+              Historique des prix antérieurs ({prixFermes.length})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -224,8 +231,12 @@ export default async function ArticlePrixPage({ params }: { params: Promise<{ id
                     <TableCell className="text-xs">
                       {p.fournisseurNom ?? <em>Référence générique</em>}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMontant(p.prixUnitaireHt)}</TableCell>
-                    <TableCell className="text-xs">{p.validFrom} → {p.validTo}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMontant(p.prixUnitaireHt)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {p.validFrom} → {p.validTo}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

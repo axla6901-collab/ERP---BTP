@@ -138,11 +138,11 @@ export function PointageTerrain({ initialRefs }: Props) {
         const results = await flushOutbox();
         await rafraichirOutbox();
         if (manuel) {
-          const ok = results.filter((r) => r.status === 'synced' || r.status === 'duplicate').length;
+          const ok = results.filter(
+            (r) => r.status === 'synced' || r.status === 'duplicate',
+          ).length;
           const ko = results.filter((r) => r.status === 'rejected').length;
-          toast.success(
-            `${ok} pointage(s) synchronisé(s)${ko > 0 ? `, ${ko} refusé(s)` : ''}.`,
-          );
+          toast.success(`${ok} pointage(s) synchronisé(s)${ko > 0 ? `, ${ko} refusé(s)` : ''}.`);
         } else {
           const { rejected } = await compterOutbox();
           if (rejected > 0) toast.error(`${rejected} pointage(s) refusé(s) — voir la liste.`);
@@ -187,7 +187,7 @@ export function PointageTerrain({ initialRefs }: Props) {
     try {
       await enqueuePointage(built.entry);
     } catch {
-      setErreur('Stockage local indisponible — impossible d\'enregistrer hors-ligne.');
+      setErreur("Stockage local indisponible — impossible d'enregistrer hors-ligne.");
       return;
     }
     await rafraichirOutbox();
@@ -357,7 +357,7 @@ export function PointageTerrain({ initialRefs }: Props) {
               placeholder="0"
               value={quantite}
               onChange={(e) => setQuantite(e.target.value)}
-              className="h-12 w-24 rounded-lg border border-input bg-background px-3 text-center text-lg tabular-nums outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+              className="focus-visible:ring-3 h-12 w-24 rounded-lg border border-input bg-background px-3 text-center text-lg tabular-nums outline-none focus-visible:border-ring focus-visible:ring-ring/40"
             />
             <div className="flex gap-2">
               {['4', '7', '7.5', '8'].map((h) => (

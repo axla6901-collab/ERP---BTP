@@ -4,7 +4,14 @@
  * partagé entre le Gantt mono-chantier éditable et la vue d'ensemble read-only.
  */
 
-import { HEAD_H, PX_PAR_JOUR, fromN, isoWeek, type Range, type Zoom } from '@/lib/planning/gantt-utils';
+import {
+  HEAD_H,
+  PX_PAR_JOUR,
+  fromN,
+  isoWeek,
+  type Range,
+  type Zoom,
+} from '@/lib/planning/gantt-utils';
 import { cn } from '@/lib/utils';
 
 export function GanttHeader({

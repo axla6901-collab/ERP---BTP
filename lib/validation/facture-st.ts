@@ -34,7 +34,10 @@ const retenueGarantiePct = z.preprocess(
   z.union([z.string(), z.number()]).transform((v, ctx) => {
     const n = typeof v === 'number' ? v : Number(String(v).replace(',', '.'));
     if (Number.isNaN(n) || n < 0 || n > 10) {
-      ctx.addIssue({ code: 'custom', message: 'Retenue de garantie : 0 à 10 % maximum (usage CCAG).' });
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Retenue de garantie : 0 à 10 % maximum (usage CCAG).',
+      });
       return z.NEVER;
     }
     return n.toFixed(2);
@@ -79,13 +82,7 @@ export type FactureStInput = z.infer<typeof factureStSchema>;
 
 // Statuts : identiques aux factures clientes (réutilise l'enum statut_facture_st
 // défini en miroir). Transitions identiques à TRANSITIONS_FACTURE.
-export const STATUTS_FACTURE_ST = [
-  'brouillon',
-  'emise',
-  'payee',
-  'en_retard',
-  'annulee',
-] as const;
+export const STATUTS_FACTURE_ST = ['brouillon', 'emise', 'payee', 'en_retard', 'annulee'] as const;
 export type StatutFactureSt = (typeof STATUTS_FACTURE_ST)[number];
 
 export const LIBELLES_STATUT_FACTURE_ST: Record<StatutFactureSt, string> = {

@@ -18,10 +18,7 @@ export default async function FournisseursPage() {
         title="Fournisseurs"
         actions={
           peutEcrire ? (
-            <Link
-              href="/tiers/fournisseurs/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/tiers/fournisseurs/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouveau fournisseur
             </Link>
           ) : null

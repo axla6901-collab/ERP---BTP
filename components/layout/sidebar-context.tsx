@@ -63,5 +63,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  return <SidebarContext.Provider value={{ collapsed, toggle }}>{children}</SidebarContext.Provider>;
+  return (
+    <SidebarContext.Provider value={{ collapsed, toggle }}>{children}</SidebarContext.Provider>
+  );
 }

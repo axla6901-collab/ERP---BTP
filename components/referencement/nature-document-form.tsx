@@ -194,7 +194,8 @@ export function NatureDocumentForm({ defaultValues, onSubmit, successRedirect, t
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Durée (jours), date de fin (assurance) + tolérance, case à cocher, ou date d’obtention.
+                  Durée (jours), date de fin (assurance) + tolérance, case à cocher, ou date
+                  d’obtention.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -102,20 +102,35 @@ export const tiers = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex('uq_tiers_code_active').on(t.code).where(sql`deleted_at IS NULL`),
+    uniqueIndex('uq_tiers_code_active')
+      .on(t.code)
+      .where(sql`deleted_at IS NULL`),
     uniqueIndex('uq_tiers_siret_active')
       .on(t.siret)
       .where(sql`deleted_at IS NULL AND siret IS NOT NULL`),
-    index('idx_tiers_actif').on(t.actif).where(sql`deleted_at IS NULL`),
-    index('idx_tiers_nature').on(t.natureTiers).where(sql`deleted_at IS NULL`),
-    index('idx_tiers_statut_agrement').on(t.statutAgrement).where(sql`deleted_at IS NULL`),
-    index('idx_tiers_cdt').on(t.cdtResponsableId).where(sql`deleted_at IS NULL`),
-    index('idx_tiers_ville').on(t.ville).where(sql`deleted_at IS NULL`),
+    index('idx_tiers_actif')
+      .on(t.actif)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tiers_nature')
+      .on(t.natureTiers)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tiers_statut_agrement')
+      .on(t.statutAgrement)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tiers_cdt')
+      .on(t.cdtResponsableId)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tiers_ville')
+      .on(t.ville)
+      .where(sql`deleted_at IS NULL`),
     index('idx_tiers_entreprise').on(t.entrepriseId),
     check('chk_tiers_code_format', sql`code ~ '^[A-Z0-9._-]{2,32}$'`),
     check('chk_tiers_nom_len', sql`char_length(nom) BETWEEN 2 AND 200`),
     check('chk_tiers_siret', sql`siret IS NULL OR siret ~ '^[0-9]{14}$'`),
-    check('chk_tiers_tva_intra', sql`n_tva_intra IS NULL OR n_tva_intra ~ '^[A-Z]{2}[A-Z0-9]{2,13}$'`),
+    check(
+      'chk_tiers_tva_intra',
+      sql`n_tva_intra IS NULL OR n_tva_intra ~ '^[A-Z]{2}[A-Z0-9]{2,13}$'`,
+    ),
     check('chk_tiers_cp', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
     check(
       'chk_tiers_actif_date',
@@ -222,10 +237,18 @@ export const tierDocuments = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    index('idx_tier_documents_tier').on(t.tierId).where(sql`deleted_at IS NULL`),
-    index('idx_tier_documents_nature').on(t.natureDocumentId).where(sql`deleted_at IS NULL`),
-    index('idx_tier_documents_validite').on(t.dateFinValidite).where(sql`deleted_at IS NULL`),
-    index('idx_tier_documents_statut').on(t.statut).where(sql`deleted_at IS NULL`),
+    index('idx_tier_documents_tier')
+      .on(t.tierId)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tier_documents_nature')
+      .on(t.natureDocumentId)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tier_documents_validite')
+      .on(t.dateFinValidite)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_tier_documents_statut')
+      .on(t.statut)
+      .where(sql`deleted_at IS NULL`),
     index('idx_tier_documents_tier_nature')
       .on(t.tierId, t.natureDocumentId)
       .where(sql`deleted_at IS NULL`),
@@ -260,8 +283,14 @@ export const tierAgrementRelances = pgTable(
     niveau: niveauRelanceAgrement('niveau').notNull(),
     envoyeLe: timestamp('envoye_le', { withTimezone: true }).notNull().defaultNow(),
     jourEnvoi: date('jour_envoi').notNull(),
-    destinataires: text('destinataires').array().notNull().default(sql`'{}'::text[]`),
-    cc: text('cc').array().notNull().default(sql`'{}'::text[]`),
+    destinataires: text('destinataires')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    cc: text('cc')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     sujet: text('sujet').notNull(),
     corps: text('corps').notNull(),
     referenceExterne: text('reference_externe'),

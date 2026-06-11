@@ -67,14 +67,18 @@ function parseKeyring(): Keyring {
     }
     const id = Number(trimmed.slice(0, sep));
     if (!Number.isInteger(id) || id < 0 || id > 255) {
-      throw new Error(`DATA_ENCRYPTION_KEYS : id de clé invalide « ${trimmed.slice(0, sep)} » (entier 0-255 attendu).`);
+      throw new Error(
+        `DATA_ENCRYPTION_KEYS : id de clé invalide « ${trimmed.slice(0, sep)} » (entier 0-255 attendu).`,
+      );
     }
     if (byId.has(id)) {
       throw new Error(`DATA_ENCRYPTION_KEYS : id de clé ${id} dupliqué.`);
     }
     const key = Buffer.from(trimmed.slice(sep + 1), 'base64');
     if (key.length !== KEY_BYTES) {
-      throw new Error(`DATA_ENCRYPTION_KEYS : la clé #${id} fait ${key.length} octets (32 attendus pour AES-256).`);
+      throw new Error(
+        `DATA_ENCRYPTION_KEYS : la clé #${id} fait ${key.length} octets (32 attendus pour AES-256).`,
+      );
     }
     byId.set(id, key);
   }
@@ -90,7 +94,9 @@ function parseKeyring(): Keyring {
   }
   const active = byId.get(activeId);
   if (!active) {
-    throw new Error(`DATA_ENCRYPTION_ACTIVE_KEY_ID = ${activeId} ne correspond à aucune clé de DATA_ENCRYPTION_KEYS.`);
+    throw new Error(
+      `DATA_ENCRYPTION_ACTIVE_KEY_ID = ${activeId} ne correspond à aucune clé de DATA_ENCRYPTION_KEYS.`,
+    );
   }
 
   return { activeId, active, byId };

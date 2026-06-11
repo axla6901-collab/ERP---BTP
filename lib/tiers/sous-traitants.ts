@@ -115,7 +115,11 @@ export async function creerSousTraitant(
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   const parsed = sousTraitantSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -181,7 +185,11 @@ export async function mettreAJourSousTraitant(
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   const parsed = sousTraitantSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -270,10 +278,7 @@ function messageBlocageCascadeST(err: unknown): string | null {
  * Bascule le statut actif/inactif d'un sous-traitant sans ouvrir le formulaire
  * complet. Idempotente. Réutilisée par la liste et le bandeau de la fiche.
  */
-export async function changerStatutSousTraitant(
-  id: string,
-  actif: boolean,
-): Promise<ActionResult> {
+export async function changerStatutSousTraitant(id: string, actif: boolean): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   try {
     await withTenant(ctx.entreprise.id, async (tx) => {

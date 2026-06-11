@@ -100,9 +100,8 @@ export default async function EntreprisePage() {
       <header className="space-y-1">
         <h2 className="text-xl font-medium">{ctx.entreprise.raisonSociale}</h2>
         <p className="text-sm text-muted-foreground">
-          Paramètres de la société : identité légale, logos affichés sur les documents,
-          Conditions Générales de Vente et d&apos;Achat versionnées, numérotation des
-          documents émis.
+          Paramètres de la société : identité légale, logos affichés sur les documents, Conditions
+          Générales de Vente et d&apos;Achat versionnées, numérotation des documents émis.
         </p>
       </header>
 
@@ -195,9 +194,7 @@ export default async function EntreprisePage() {
           onCreerVersion={async (input: ConditionNouvelleVersionInput) => {
             'use server';
             const result = await creerVersionConditions(input);
-            return result.ok
-              ? { ok: true, data: result.data }
-              : { ok: false, error: result.error };
+            return result.ok ? { ok: true, data: result.data } : { ok: false, error: result.error };
           }}
           onSupprimerVersion={async (id) => {
             'use server';
@@ -211,11 +208,10 @@ export default async function EntreprisePage() {
         <h3 className="text-lg font-medium">Numérotation des documents</h3>
         <Alert>
           <AlertDescription>
-            Chaque type de document (devis, facture, avoir, …) reçoit un numéro
-            généré automatiquement à la création. Tu peux personnaliser le format
-            avec un template et choisir explicitement la cadence de reset du
-            compteur (annuelle, mensuelle, quotidienne ou sans reset). Les
-            numéros déjà attribués restent intangibles (registre fiscal
+            Chaque type de document (devis, facture, avoir, …) reçoit un numéro généré
+            automatiquement à la création. Tu peux personnaliser le format avec un template et
+            choisir explicitement la cadence de reset du compteur (annuelle, mensuelle, quotidienne
+            ou sans reset). Les numéros déjà attribués restent intangibles (registre fiscal
             append-only).
           </AlertDescription>
         </Alert>

@@ -10,9 +10,7 @@ type Props = {
   devisId: string;
   action: (
     devisId: string,
-  ) => Promise<
-    { ok: true; data: { id: string; numero: string } } | { ok: false; error: string }
-  >;
+  ) => Promise<{ ok: true; data: { id: string; numero: string } } | { ok: false; error: string }>;
 };
 
 export function CreerDepuisDevisButton({ devisId, action }: Props) {

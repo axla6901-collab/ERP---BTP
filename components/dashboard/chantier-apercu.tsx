@@ -207,12 +207,19 @@ export function ChantierApercu({
               {marge.marge !== null ? (
                 <div className="mt-1 space-y-0.5">
                   {marge.margePct !== null && (
-                    <div className={cn('text-xs', marge.marge >= 0 ? 'text-emerald-600' : 'text-rose-600')}>
+                    <div
+                      className={cn(
+                        'text-xs',
+                        marge.marge >= 0 ? 'text-emerald-600' : 'text-rose-600',
+                      )}
+                    >
                       {marge.margePct >= 0 ? '+' : ''}
                       {marge.margePct}% vs prévision
                     </div>
                   )}
-                  <div className="text-[11px] text-muted-foreground">hors achats &amp; sous-traitance</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    hors achats &amp; sous-traitance
+                  </div>
                 </div>
               ) : (
                 <div className="mt-1 text-xs text-muted-foreground">budget non renseigné</div>
@@ -263,12 +270,16 @@ export function ChantierApercu({
               <ul className="divide-y text-sm">
                 {apercu.activite.map((a) => (
                   <li key={a.id} className="flex items-start gap-3 px-4 py-3">
-                    <span className={cn('mt-1.5 size-2 shrink-0 rounded-full', DOT_ACTIVITE[a.ton])} />
+                    <span
+                      className={cn('mt-1.5 size-2 shrink-0 rounded-full', DOT_ACTIVITE[a.ton])}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="truncate">
                         {a.acteur && <span className="font-medium">{a.acteur}</span>} {a.texte}
                       </div>
-                      <div className="text-xs text-muted-foreground">{tempsRelatif(a.timestamp)}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {tempsRelatif(a.timestamp)}
+                      </div>
                     </div>
                   </li>
                 ))}

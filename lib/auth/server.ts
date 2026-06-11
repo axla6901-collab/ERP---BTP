@@ -5,11 +5,18 @@ import { eq } from 'drizzle-orm';
 import { createTransport } from 'nodemailer';
 
 import { db } from '@/lib/db/client';
-import { account, session, twoFactor as twoFactorTable, user, verification } from '@/db/schema/auth';
+import {
+  account,
+  session,
+  twoFactor as twoFactorTable,
+  user,
+  verification,
+} from '@/db/schema/auth';
 import { roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 
 import { peutEnvoyerLienMagique } from './magic-link-policy';
+import { AUTH_RATE_LIMIT_RULES } from './rate-limit-rules';
 
 const transporter = createTransport({
   host: process.env.SMTP_HOST,
@@ -42,6 +49,22 @@ export const auth = betterAuth({
     'http://localhost:3001',
     'http://127.0.0.1:3001',
   ],
+  // Rate-limiting des endpoints /api/auth (audit sécurité B2). Actif en
+  // production uniquement (off en dev/test pour ne pas pénaliser la DX ni la
+  // suite e2e qui tourne sur `pnpm dev`). Stockage en mémoire par défaut
+  // (par instance, remis à zéro au redémarrage) : suffisant pour un déploiement
+  // mono-instance ; passer en `storage: 'database'` ou un secondaryStorage
+  // (Redis) pour du multi-instance. La protection anti-DoS de l'API applicative
+  // globale (hors /api/auth) relève du reverse-proxy (nginx/Caddy), pas d'ici.
+  rateLimit: {
+    enabled: process.env.NODE_ENV === 'production',
+    window: 60,
+    max: 100,
+    // Complète les règles par défaut de better-auth (qui couvrent déjà
+    // /sign-in*, /sign-up*, /forget-password*) par des limites strictes sur la
+    // vérification du second facteur — cf. lib/auth/rate-limit-rules.ts.
+    customRules: AUTH_RATE_LIMIT_RULES,
+  },
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: { user, session, account, verification, twoFactor: twoFactorTable },
@@ -57,6 +80,22 @@ export const auth = betterAuth({
     disableSignUp: true,
     requireEmailVerification: true,
     minPasswordLength: 12,
+    // Réinitialisation de mot de passe (audit sécurité B4). Le lien `url`
+    // pointe vers l'endpoint better-auth qui valide le token puis redirige vers
+    // /reset-password?token=…. AUCUN auto-sign-in n'est déclenché par le reset :
+    // l'utilisateur se reconnecte ensuite (mot de passe + TOTP si MFA) → le
+    // reset NE contourne PAS le second facteur (contrairement au lien magique,
+    // d'où l'intérêt de ce flow pour récupérer un compte MFA).
+    sendResetPassword: async ({ user, url }) => {
+      await sendMail(
+        user.email,
+        'Réinitialisation de votre mot de passe — ERP BTP',
+        `Bonjour,\n\nVous avez demandé la réinitialisation de votre mot de passe. ` +
+          `Cliquez sur ce lien (expire dans 1 heure) :\n${url}\n\n` +
+          `Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : ` +
+          `votre mot de passe reste inchangé.`,
+      );
+    },
   },
   emailVerification: {
     sendOnSignUp: true,

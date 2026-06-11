@@ -6,18 +6,18 @@ Outillage : [ADR-015](../adr/015-pwa-sw-manuel.md).
 
 ## Pièces du dispositif
 
-| Fichier | Rôle |
-|---|---|
-| `app/manifest.ts` | Manifest PWA (`/manifest.webmanifest`), installabilité. |
-| `public/icons/icon.svg`, `icon-maskable.svg` | Icônes (purpose `any` + `maskable`). |
-| `public/sw.js` | Service Worker (cache shell + Background Sync + outbox). |
-| `lib/pwa/sw-register.tsx` | Enregistrement SW (prod), bannière de MAJ, flush au retour réseau. Monté dans `app/layout.tsx`. |
-| `lib/pwa/outbox.ts` | Outbox IndexedDB côté client (`idb`). |
-| `lib/pwa/build-payload.ts`, `types.ts`, `use-online.ts` | Logique pure + types + hook réseau. |
-| `app/api/v1/pointages` (POST) | Sync idempotente (`ON CONFLICT (client_uuid)`). |
-| `app/api/v1/pointage-refs` (GET) | Référentiel (employés/chantiers/tâches) caché par le SW. |
-| `components/rh/pointage-terrain.tsx` | Écran de saisie terrain mobile-first. |
-| migration `0061` | Colonnes `client_uuid` + `server_received_at` + index unique. |
+| Fichier                                                 | Rôle                                                                                            |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `app/manifest.ts`                                       | Manifest PWA (`/manifest.webmanifest`), installabilité.                                         |
+| `public/icons/icon.svg`, `icon-maskable.svg`            | Icônes (purpose `any` + `maskable`).                                                            |
+| `public/sw.js`                                          | Service Worker (cache shell + Background Sync + outbox).                                        |
+| `lib/pwa/sw-register.tsx`                               | Enregistrement SW (prod), bannière de MAJ, flush au retour réseau. Monté dans `app/layout.tsx`. |
+| `lib/pwa/outbox.ts`                                     | Outbox IndexedDB côté client (`idb`).                                                           |
+| `lib/pwa/build-payload.ts`, `types.ts`, `use-online.ts` | Logique pure + types + hook réseau.                                                             |
+| `app/api/v1/pointages` (POST)                           | Sync idempotente (`ON CONFLICT (client_uuid)`).                                                 |
+| `app/api/v1/pointage-refs` (GET)                        | Référentiel (employés/chantiers/tâches) caché par le SW.                                        |
+| `components/rh/pointage-terrain.tsx`                    | Écran de saisie terrain mobile-first.                                                           |
+| migration `0061`                                        | Colonnes `client_uuid` + `server_received_at` + index unique.                                   |
 
 > **Contrat IndexedDB partagé** : DB `erp-pointage` v1, stores `outbox`
 > (keyPath `clientUuid`) et `refs` (keyPath `key`). Défini **deux fois** —
@@ -79,10 +79,10 @@ automatiquement (cf. ADR-004 : au-delà, remontée d'alerte RH — non implémen
 
 ## Dépannage
 
-| Symptôme | Piste |
-|---|---|
-| `/sw.js` ou `/manifest.webmanifest` redirige vers `/login` | Vérifier l'exclusion dans le `matcher` de `middleware.ts`. |
-| SW pas mis à jour | `CACHE_VERSION` non bumpé, ou onglet non rechargé. DevTools → Application → Service Workers → **Update on reload**. |
-| Pointages bloqués « En attente » en ligne | Vérifier `POST /api/v1/pointages` (401 = session expirée ; 403 = rôle hors `ROLES_POINTAGE_WRITE`). |
-| HMR cassé en dev | Un SW d'un build de prod précédent traîne : DevTools → Application → **Unregister** + vider le cache. |
-| Données de référence périmées hors-ligne | Le SW sert le dernier `/api/v1/pointage-refs` mis en cache ; se reconnecter pour rafraîchir. |
+| Symptôme                                                   | Piste                                                                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/sw.js` ou `/manifest.webmanifest` redirige vers `/login` | Vérifier l'exclusion dans le `matcher` de `middleware.ts`.                                                          |
+| SW pas mis à jour                                          | `CACHE_VERSION` non bumpé, ou onglet non rechargé. DevTools → Application → Service Workers → **Update on reload**. |
+| Pointages bloqués « En attente » en ligne                  | Vérifier `POST /api/v1/pointages` (401 = session expirée ; 403 = rôle hors `ROLES_POINTAGE_WRITE`).                 |
+| HMR cassé en dev                                           | Un SW d'un build de prod précédent traîne : DevTools → Application → **Unregister** + vider le cache.               |
+| Données de référence périmées hors-ligne                   | Le SW sert le dernier `/api/v1/pointage-refs` mis en cache ; se reconnecter pour rafraîchir.                        |

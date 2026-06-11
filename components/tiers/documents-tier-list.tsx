@@ -48,13 +48,12 @@ type Props = {
       filename: string,
       tailleBytes: number,
     ) => Promise<
-      | { ok: true; data: { uploadUrl: string; minioKey: string } }
-      | { ok: false; error: string }
+      { ok: true; data: { uploadUrl: string; minioKey: string } } | { ok: false; error: string }
     >;
     enregistrer: (input: DocumentTierInput) => Promise<ServerActionResult<{ id: string }>>;
-    getDownloadUrl: (id: string) => Promise<
-      { ok: true; url: string; libelle: string } | { ok: false; error: string }
-    >;
+    getDownloadUrl: (
+      id: string,
+    ) => Promise<{ ok: true; url: string; libelle: string } | { ok: false; error: string }>;
     supprimer: (id: string) => Promise<ServerActionResult<void>>;
   };
 };
@@ -93,9 +92,7 @@ function StatutValidite({ dateValidite, today }: { dateValidite: string; today: 
       </span>
     );
   }
-  return (
-    <span className="text-xs text-muted-foreground">valide jusqu&apos;au {dateValidite}</span>
-  );
+  return <span className="text-xs text-muted-foreground">valide jusqu&apos;au {dateValidite}</span>;
 }
 
 export function DocumentsTierList({ items, peutEcrire, today, actions }: Props) {
@@ -224,9 +221,7 @@ export function DocumentsTierList({ items, peutEcrire, today, actions }: Props) 
                   <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
                     {LIBELLES_TYPE_DOCUMENT_TIER[d.type]}
                   </span>
-                  {d.dateValidite && (
-                    <StatutValidite dateValidite={d.dateValidite} today={today} />
-                  )}
+                  {d.dateValidite && <StatutValidite dateValidite={d.dateValidite} today={today} />}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {d.mimeType} · {tailleHumaine(d.tailleBytes)}

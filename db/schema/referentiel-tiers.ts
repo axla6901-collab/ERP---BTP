@@ -67,8 +67,12 @@ export const corpsEtat = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex('uq_corps_etat_code_active').on(t.code).where(sql`deleted_at IS NULL`),
-    index('idx_corps_etat_actif').on(t.actif, t.ordreAffichage).where(sql`deleted_at IS NULL`),
+    uniqueIndex('uq_corps_etat_code_active')
+      .on(t.code)
+      .where(sql`deleted_at IS NULL`),
+    index('idx_corps_etat_actif')
+      .on(t.actif, t.ordreAffichage)
+      .where(sql`deleted_at IS NULL`),
     index('idx_corps_etat_entreprise').on(t.entrepriseId),
     check('chk_corps_etat_code_format', sql`code ~ '^[A-Z0-9._-]{2,32}$'`),
     check('chk_corps_etat_libelle_len', sql`char_length(libelle) BETWEEN 2 AND 200`),
@@ -105,7 +109,9 @@ export const naturesDocument = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
-    uniqueIndex('uq_natures_document_code_active').on(t.code).where(sql`deleted_at IS NULL`),
+    uniqueIndex('uq_natures_document_code_active')
+      .on(t.code)
+      .where(sql`deleted_at IS NULL`),
     index('idx_natures_document_actif')
       .on(t.actif, t.ordreAffichage)
       .where(sql`deleted_at IS NULL`),

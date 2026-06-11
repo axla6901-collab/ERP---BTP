@@ -17,7 +17,7 @@ services:
     volumes:
       - glitchtip_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U glitchtip"]
+      test: ['CMD-SHELL', 'pg_isready -U glitchtip']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
     container_name: erp-btp-glitchtip-redis
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -42,7 +42,7 @@ services:
       glitchtip-redis:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       DATABASE_URL: postgres://glitchtip:glitchtip_dev_password@glitchtip-postgres:5432/glitchtip
       SECRET_KEY: change_me_in_prod_64_chars_random_string_xxxxxxxxxxxxxxxxxxxxx
@@ -50,11 +50,11 @@ services:
       EMAIL_URL: consolemail://
       GLITCHTIP_DOMAIN: http://localhost:8000
       DEFAULT_FROM_EMAIL: noreply@glitchtip.local
-      CELERY_WORKER_AUTOSCALE: "1,3"
-      CELERY_WORKER_MAX_TASKS_PER_CHILD: "10000"
+      CELERY_WORKER_AUTOSCALE: '1,3'
+      CELERY_WORKER_MAX_TASKS_PER_CHILD: '10000'
       REDIS_URL: redis://glitchtip-redis:6379/0
       # Désactive la création publique de compte (un seul admin pour erp-btp)
-      ENABLE_USER_REGISTRATION: "True"
+      ENABLE_USER_REGISTRATION: 'True'
     volumes:
       - glitchtip_uploads:/code/uploads
 
@@ -74,8 +74,8 @@ services:
       EMAIL_URL: consolemail://
       GLITCHTIP_DOMAIN: http://localhost:8000
       DEFAULT_FROM_EMAIL: noreply@glitchtip.local
-      CELERY_WORKER_AUTOSCALE: "1,3"
-      CELERY_WORKER_MAX_TASKS_PER_CHILD: "10000"
+      CELERY_WORKER_AUTOSCALE: '1,3'
+      CELERY_WORKER_MAX_TASKS_PER_CHILD: '10000'
       REDIS_URL: redis://glitchtip-redis:6379/0
     volumes:
       - glitchtip_uploads:/code/uploads

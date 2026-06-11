@@ -51,7 +51,11 @@ export async function creerFamille(input: FamilleInput): Promise<ActionResult<{ 
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = familleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {
@@ -94,14 +98,15 @@ export async function creerFamille(input: FamilleInput): Promise<ActionResult<{ 
   }
 }
 
-export async function mettreAJourFamille(
-  id: string,
-  input: FamilleInput,
-): Promise<ActionResult> {
+export async function mettreAJourFamille(id: string, input: FamilleInput): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_CATALOGUE_WRITE);
   const parsed = familleSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
 
   try {

@@ -38,10 +38,7 @@ export function NouvelleGrilleChantierButton({ chantierId, fournisseurs }: Props
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Select
-        value={fournisseurId}
-        onValueChange={(v) => setFournisseurId(v ?? '')}
-      >
+      <Select value={fournisseurId} onValueChange={(v) => setFournisseurId(v ?? '')}>
         <SelectTrigger className="w-72">
           <SelectValue placeholder="Choisir un fournisseur…">
             {(value) => {

@@ -74,10 +74,7 @@ describe('GanttMultiChantier', () => {
   it('affiche une ligne (un bouton de dépliage) par chantier', () => {
     render(
       <GanttMultiChantier
-        chantiers={[
-          som({ id: 'a', libelle: 'Alpha' }),
-          som({ id: 'b', libelle: 'Beta' }),
-        ]}
+        chantiers={[som({ id: 'a', libelle: 'Alpha' }), som({ id: 'b', libelle: 'Beta' })]}
         entrepriseSlug="acme"
         today="2026-06-15"
         chargerTaches={vi.fn().mockResolvedValue([])}
@@ -90,7 +87,12 @@ describe('GanttMultiChantier', () => {
     const chargerTaches = vi
       .fn()
       .mockResolvedValue([
-        tache({ id: 't1', libelle: 'Fondations', dateDebutPrevue: '2026-05-03', dateFinPrevue: '2026-05-09' }),
+        tache({
+          id: 't1',
+          libelle: 'Fondations',
+          dateDebutPrevue: '2026-05-03',
+          dateFinPrevue: '2026-05-09',
+        }),
       ]);
     render(
       <GanttMultiChantier
@@ -111,8 +113,12 @@ describe('GanttMultiChantier', () => {
     const d = deferred<PlanningTacheRow[]>();
     const chargerTaches = vi.fn().mockReturnValue(d.promise);
     render(
-      <GanttMultiChantier chantiers={[som()]} entrepriseSlug="acme"
-        today="2026-06-15" chargerTaches={chargerTaches} />,
+      <GanttMultiChantier
+        chantiers={[som()]}
+        entrepriseSlug="acme"
+        today="2026-06-15"
+        chargerTaches={chargerTaches}
+      />,
     );
 
     fireEvent.click(screen.getByRole('button', { name: /(Déplier|Replier) Villa Dubois/ }));
@@ -140,11 +146,20 @@ describe('GanttMultiChantier', () => {
     const chargerTaches = vi
       .fn()
       .mockResolvedValue([
-        tache({ id: 't1', libelle: 'Fondations', dateDebutPrevue: '2026-05-03', dateFinPrevue: '2026-05-09' }),
+        tache({
+          id: 't1',
+          libelle: 'Fondations',
+          dateDebutPrevue: '2026-05-03',
+          dateFinPrevue: '2026-05-09',
+        }),
       ]);
     render(
-      <GanttMultiChantier chantiers={[som()]} entrepriseSlug="acme"
-        today="2026-06-15" chargerTaches={chargerTaches} />,
+      <GanttMultiChantier
+        chantiers={[som()]}
+        entrepriseSlug="acme"
+        today="2026-06-15"
+        chargerTaches={chargerTaches}
+      />,
     );
     const btn = () => screen.getByRole('button', { name: /(Déplier|Replier) Villa Dubois/ });
 
@@ -159,8 +174,12 @@ describe('GanttMultiChantier', () => {
 
   it('lien drill-down vers le planning complet du chantier', () => {
     render(
-      <GanttMultiChantier chantiers={[som()]} entrepriseSlug="acme"
-        today="2026-06-15" chargerTaches={vi.fn()} />,
+      <GanttMultiChantier
+        chantiers={[som()]}
+        entrepriseSlug="acme"
+        today="2026-06-15"
+        chargerTaches={vi.fn()}
+      />,
     );
     expect(screen.getByTitle('Ouvrir le planning de Villa Dubois')).toHaveAttribute(
       'href',
@@ -169,21 +188,23 @@ describe('GanttMultiChantier', () => {
   });
 
   it('rend un jalon en losange (rotate 45) plutôt qu’une barre', async () => {
-    const chargerTaches = vi
-      .fn()
-      .mockResolvedValue([
-        tache({
-          id: 'j1',
-          libelle: 'Jalon',
-          estJalon: true,
-          avancementPourcent: 100,
-          dateDebutPrevue: '2026-05-10',
-          dateFinPrevue: '2026-05-10',
-        }),
-      ]);
+    const chargerTaches = vi.fn().mockResolvedValue([
+      tache({
+        id: 'j1',
+        libelle: 'Jalon',
+        estJalon: true,
+        avancementPourcent: 100,
+        dateDebutPrevue: '2026-05-10',
+        dateFinPrevue: '2026-05-10',
+      }),
+    ]);
     render(
-      <GanttMultiChantier chantiers={[som()]} entrepriseSlug="acme"
-        today="2026-06-15" chargerTaches={chargerTaches} />,
+      <GanttMultiChantier
+        chantiers={[som()]}
+        entrepriseSlug="acme"
+        today="2026-06-15"
+        chargerTaches={chargerTaches}
+      />,
     );
     fireEvent.click(screen.getByRole('button', { name: /(Déplier|Replier) Villa Dubois/ }));
     const losange = await screen.findByTitle('Jalon — 100%');
@@ -192,8 +213,12 @@ describe('GanttMultiChantier', () => {
 
   it('le zoom recalcule la largeur des barres', () => {
     render(
-      <GanttMultiChantier chantiers={[som()]} entrepriseSlug="acme"
-        today="2026-06-15" chargerTaches={vi.fn()} />,
+      <GanttMultiChantier
+        chantiers={[som()]}
+        entrepriseSlug="acme"
+        today="2026-06-15"
+        chargerTaches={vi.fn()}
+      />,
     );
     const largeurMois = parseFloat(screen.getByTitle('Villa Dubois — 68%').style.width);
     fireEvent.click(screen.getByRole('button', { name: 'Jour' }));

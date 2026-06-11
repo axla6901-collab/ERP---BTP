@@ -1,9 +1,15 @@
 'use server';
 
-import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
-import { contratsSt, facturesSt, lignesFactureSt, type FactureSt, type LigneFactureSt } from '@/db/schema/sous-traitance';
+import {
+  contratsSt,
+  facturesSt,
+  lignesFactureSt,
+  type FactureSt,
+  type LigneFactureSt,
+} from '@/db/schema/sous-traitance';
 import { sousTraitants } from '@/db/schema/tiers';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
@@ -11,7 +17,11 @@ import type { ActionResult } from '@/lib/common/action-result';
 import { withTenant } from '@/lib/db/with-tenant';
 import { appliquerRemiseGlobale } from '@/lib/remise-globale';
 import { generateNumero } from '@/lib/numbering/generate';
-import { calculerMontantLigneFacture, calculerMontantRetenue, calculerTotauxFacture } from '@/lib/facturation/calculs';
+import {
+  calculerMontantLigneFacture,
+  calculerMontantRetenue,
+  calculerTotauxFacture,
+} from '@/lib/facturation/calculs';
 import {
   factureStSchema,
   paiementStSchema,
@@ -135,7 +145,11 @@ export async function creerFactureSt(
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURE_ST_WRITE);
   const parsed = factureStSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
   }
   const d = parsed.data;
   const { totaux, montantRetenue, montantNet } = totauxFactureSt(d);
@@ -189,11 +203,18 @@ export async function creerFactureSt(
   }
 }
 
-export async function mettreAJourFactureSt(id: string, input: FactureStInput): Promise<ActionResult> {
+export async function mettreAJourFactureSt(
+  id: string,
+  input: FactureStInput,
+): Promise<ActionResult> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURE_ST_WRITE);
   const parsed = factureStSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
   }
   const d = parsed.data;
   const { totaux, montantRetenue, montantNet } = totauxFactureSt(d);
@@ -232,13 +253,20 @@ export async function mettreAJourFactureSt(id: string, input: FactureStInput): P
         .where(eq(facturesSt.id, id));
       await tx.delete(lignesFactureSt).where(eq(lignesFactureSt.factureStId, id));
       await tx.insert(lignesFactureSt).values(valuesLignes(d, ctx.entreprise.id, id));
-      await auditLogIn(tx, { action: 'update', tableName: 'factures_st', rowId: id, before, after: d });
+      await auditLogIn(tx, {
+        action: 'update',
+        tableName: 'factures_st',
+        rowId: id,
+        before,
+        after: d,
+      });
     });
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures-st`);
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures-st/${id}`);
     return { ok: true, data: undefined };
   } catch (err) {
-    if (err instanceof Error && err.message === 'NOT_FOUND') return { ok: false, error: 'Facture ST introuvable.' };
+    if (err instanceof Error && err.message === 'NOT_FOUND')
+      return { ok: false, error: 'Facture ST introuvable.' };
     if (err instanceof Error && err.message === 'NON_MODIFIABLE') {
       return { ok: false, error: 'Seules les factures ST en brouillon sont éditables.' };
     }
@@ -284,7 +312,8 @@ export async function changerStatutFactureSt(
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures-st/${id}`);
     return { ok: true, data: undefined };
   } catch (err) {
-    if (err instanceof Error && err.message === 'NOT_FOUND') return { ok: false, error: 'Facture ST introuvable.' };
+    if (err instanceof Error && err.message === 'NOT_FOUND')
+      return { ok: false, error: 'Facture ST introuvable.' };
     if (err instanceof Error && err.message === 'TRANSITION_INVALIDE') {
       return { ok: false, error: 'Transition de statut non autorisée.' };
     }
@@ -303,7 +332,11 @@ export async function enregistrerPaiementSt(
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURE_ST_WRITE);
   const parsed = paiementStSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: 'Données invalides.', fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      ok: false,
+      error: 'Données invalides.',
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   const d = parsed.data;
   try {
@@ -313,7 +346,8 @@ export async function enregistrerPaiementSt(
         .from(facturesSt)
         .where(and(eq(facturesSt.id, id), isNull(facturesSt.deletedAt)));
       if (!before) throw new Error('NOT_FOUND');
-      if (before.statut === 'brouillon' || before.statut === 'annulee') throw new Error('NON_PAYABLE');
+      if (before.statut === 'brouillon' || before.statut === 'annulee')
+        throw new Error('NON_PAYABLE');
 
       const cumul = Number(before.cumulPayeTtc) + Number(d.montant);
       const net = Number(before.montantNet);
@@ -334,16 +368,24 @@ export async function enregistrerPaiementSt(
         tableName: 'factures_st',
         rowId: id,
         before: { cumulPayeTtc: before.cumulPayeTtc, statut: before.statut },
-        after: { cumulPayeTtc: cumul.toFixed(2), statut: solde ? 'payee' : before.statut, paiement: d },
+        after: {
+          cumulPayeTtc: cumul.toFixed(2),
+          statut: solde ? 'payee' : before.statut,
+          paiement: d,
+        },
       });
     });
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures-st`);
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures-st/${id}`);
     return { ok: true, data: undefined };
   } catch (err) {
-    if (err instanceof Error && err.message === 'NOT_FOUND') return { ok: false, error: 'Facture ST introuvable.' };
+    if (err instanceof Error && err.message === 'NOT_FOUND')
+      return { ok: false, error: 'Facture ST introuvable.' };
     if (err instanceof Error && err.message === 'NON_PAYABLE') {
-      return { ok: false, error: 'Seules les factures ST émises ou en retard acceptent un paiement.' };
+      return {
+        ok: false,
+        error: 'Seules les factures ST émises ou en retard acceptent un paiement.',
+      };
     }
     throw err;
   }

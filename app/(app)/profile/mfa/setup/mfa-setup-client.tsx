@@ -44,8 +44,8 @@ export function MfaSetupClient() {
       const msg =
         error?.code === 'INVALID_PASSWORD' || error?.message?.match(/password/i)
           ? 'Mot de passe incorrect.'
-          : error?.message ??
-            (error?.code ? `Activation impossible (${error.code}).` : 'Activation impossible.');
+          : (error?.message ??
+            (error?.code ? `Activation impossible (${error.code}).` : 'Activation impossible.'));
       setErreur(msg);
       return;
     }

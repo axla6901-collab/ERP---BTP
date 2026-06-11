@@ -28,7 +28,13 @@ const nextConfig = {
   //   - @react-pdf/renderer → fontkit lit les .ttf embarqués via fs.readFileSync ;
   //   - node-zugferd → pdf-lib + profil ICC sRGB lus depuis le disque.
   // Les bundler casse ces lectures (`__dirname` figé). Cf. mémoire « Turbopack & fs ».
-  serverExternalPackages: ['isomorphic-dompurify', 'jsdom', '@react-pdf/renderer', 'node-zugferd'],
+  serverExternalPackages: [
+    'isomorphic-dompurify',
+    'jsdom',
+    '@react-pdf/renderer',
+    'node-zugferd',
+    'exceljs',
+  ],
 
   // Lint & typecheck ne sont PAS rejoués pendant `next build` : ils tournent déjà
   // en étapes dédiées (lefthook pre-commit=eslint / pre-push=typecheck, + job CI
@@ -59,9 +65,7 @@ const nextConfig = {
       // Assets fingerprintés Next : immutables, jamais re-téléchargés par le navigateur.
       {
         source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
     ];
   },
@@ -81,7 +85,6 @@ const nextConfig = {
       '@sentry/nextjs',
       'date-fns',
       'recharts',
-      'xlsx',
       'zod',
     ],
   },

@@ -1,14 +1,7 @@
 'use client';
 
 import { ChevronDownIcon, ChevronRightIcon, XIcon } from 'lucide-react';
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -31,10 +24,7 @@ type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
 type Props = {
   /** Server action étape 1 : ouvre le fichier et renvoie aperçu + suggestion. */
-  analyserAction: (
-    base64: string,
-    nomFichier: string,
-  ) => Promise<ActionResult<DpgfAnalyse>>;
+  analyserAction: (base64: string, nomFichier: string) => Promise<ActionResult<DpgfAnalyse>>;
   /** Server action étape 2 : applique un mapping et renvoie la preview. */
   importerAction: (
     base64: string,
@@ -108,9 +98,7 @@ export const DpgfImportZone = forwardRef<DpgfImportZoneHandle, Props>(function D
 
   const feuilleCourante = analyse?.feuilles.find((f) => f.nom === mapping?.feuille) ?? null;
   const headers =
-    feuilleCourante && mapping
-      ? feuilleCourante.apercu[mapping.headerRow] ?? []
-      : [];
+    feuilleCourante && mapping ? (feuilleCourante.apercu[mapping.headerRow] ?? []) : [];
 
   const sectionsAvecEnfants = useMemo(() => {
     const set = new Set<string>();
@@ -288,7 +276,7 @@ export const DpgfImportZone = forwardRef<DpgfImportZoneHandle, Props>(function D
       <input
         ref={fileInputRef}
         type="file"
-        accept=".xlsx,.xls"
+        accept=".xlsx"
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
@@ -319,317 +307,307 @@ export const DpgfImportZone = forwardRef<DpgfImportZoneHandle, Props>(function D
             </Button>
           </div>
           <div className="space-y-3">
-          {chargement && !preview && (
-            <p className="text-xs text-muted-foreground">
-              {fichier ? `Analyse de « ${fichier.nom} »…` : 'Analyse du fichier…'}
-            </p>
-          )}
+            {chargement && !preview && (
+              <p className="text-xs text-muted-foreground">
+                {fichier ? `Analyse de « ${fichier.nom} »…` : 'Analyse du fichier…'}
+              </p>
+            )}
 
-          {analyse && mapping && feuilleCourante && (
-            <div className="min-w-0 space-y-3 rounded-md border bg-background p-3">
-              {(() => {
-                const sourceDetectee = analyse.suggestion !== null && !modifierSource;
-                const plusieursFeuilles = analyse.feuilles.length > 1;
-                const apercuTitres = headers
-                  .map((v) => (v === null || v === undefined ? '' : String(v).trim()))
-                  .filter((s) => s !== '')
-                  .slice(0, 4)
-                  .join(' · ');
+            {analyse && mapping && feuilleCourante && (
+              <div className="min-w-0 space-y-3 rounded-md border bg-background p-3">
+                {(() => {
+                  const sourceDetectee = analyse.suggestion !== null && !modifierSource;
+                  const plusieursFeuilles = analyse.feuilles.length > 1;
+                  const apercuTitres = headers
+                    .map((v) => (v === null || v === undefined ? '' : String(v).trim()))
+                    .filter((s) => s !== '')
+                    .slice(0, 4)
+                    .join(' · ');
 
-                if (sourceDetectee) {
+                  if (sourceDetectee) {
+                    return (
+                      <div className="flex flex-wrap items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs">
+                        <span>
+                          <span className="text-muted-foreground">Source détectée :</span>{' '}
+                          {plusieursFeuilles && (
+                            <>
+                              onglet <strong>« {mapping.feuille} »</strong>,{' '}
+                            </>
+                          )}
+                          titres en ligne <strong>{mapping.headerRow + 1}</strong>
+                          {apercuTitres && (
+                            <span className="text-muted-foreground"> ({apercuTitres})</span>
+                          )}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="ml-auto h-7 px-2 text-xs"
+                          onClick={() => setModifierSource(true)}
+                        >
+                          Changer
+                        </Button>
+                      </div>
+                    );
+                  }
+
                   return (
-                    <div className="flex flex-wrap items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs">
-                      <span>
-                        <span className="text-muted-foreground">Source détectée :</span>{' '}
-                        {plusieursFeuilles && (
-                          <>
-                            onglet <strong>« {mapping.feuille} »</strong>,{' '}
-                          </>
-                        )}
-                        titres en ligne <strong>{mapping.headerRow + 1}</strong>
-                        {apercuTitres && (
-                          <span className="text-muted-foreground"> ({apercuTitres})</span>
-                        )}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="ml-auto h-7 px-2 text-xs"
-                        onClick={() => setModifierSource(true)}
+                    <>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        1. Où sont les titres de colonnes dans le fichier ?
+                      </h4>
+                      <div
+                        className={`grid grid-cols-1 gap-2 ${plusieursFeuilles ? 'md:grid-cols-2' : ''}`}
                       >
-                        Changer
-                      </Button>
-                    </div>
-                  );
-                }
-
-                return (
-                  <>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      1. Où sont les titres de colonnes dans le fichier ?
-                    </h4>
-                    <div
-                      className={`grid grid-cols-1 gap-2 ${plusieursFeuilles ? 'md:grid-cols-2' : ''}`}
-                    >
-                      {plusieursFeuilles && (
+                        {plusieursFeuilles && (
+                          <label className="flex flex-col gap-1">
+                            <span className="text-xs">Onglet Excel</span>
+                            <Select
+                              value={mapping.feuille}
+                              onValueChange={(v) => v && changerMapping({ feuille: v })}
+                            >
+                              <SelectTrigger className="h-9">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {analyse.feuilles.map((f) => (
+                                  <SelectItem key={f.nom} value={f.nom}>
+                                    {f.nom} ({f.nbLignes} lignes)
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <span className="text-[10px] text-muted-foreground">
+                              L’onglet du classeur qui contient le DPGF.
+                            </span>
+                          </label>
+                        )}
                         <label className="flex flex-col gap-1">
-                          <span className="text-xs">Onglet Excel</span>
+                          <span className="text-xs">Ligne des titres de colonnes</span>
                           <Select
-                            value={mapping.feuille}
-                            onValueChange={(v) => v && changerMapping({ feuille: v })}
+                            value={String(mapping.headerRow)}
+                            onValueChange={(v) => v && changerMapping({ headerRow: Number(v) })}
                           >
                             <SelectTrigger className="h-9">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {analyse.feuilles.map((f) => (
-                                <SelectItem key={f.nom} value={f.nom}>
-                                  {f.nom} ({f.nbLignes} lignes)
-                                </SelectItem>
-                              ))}
+                              {feuilleCourante.apercu.map((row, i) => {
+                                const aperçu = row
+                                  .map((v) => previewCellule(v))
+                                  .filter((s) => s !== '')
+                                  .slice(0, 4)
+                                  .join(' · ');
+                                return (
+                                  <SelectItem key={i} value={String(i)}>
+                                    Ligne {i + 1}
+                                    {aperçu ? ` — ${aperçu}` : ''}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                           <span className="text-[10px] text-muted-foreground">
-                            L’onglet du classeur qui contient le DPGF.
+                            La ligne contenant « Désignation », « Unité », « Quantité »…
                           </span>
                         </label>
-                      )}
-                      <label className="flex flex-col gap-1">
-                        <span className="text-xs">Ligne des titres de colonnes</span>
-                        <Select
-                          value={String(mapping.headerRow)}
-                          onValueChange={(v) =>
-                            v && changerMapping({ headerRow: Number(v) })
-                          }
-                        >
-                          <SelectTrigger className="h-9">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {feuilleCourante.apercu.map((row, i) => {
-                              const aperçu = row
-                                .map((v) => previewCellule(v))
-                                .filter((s) => s !== '')
-                                .slice(0, 4)
-                                .join(' · ');
-                              return (
-                                <SelectItem key={i} value={String(i)}>
-                                  Ligne {i + 1}
-                                  {aperçu ? ` — ${aperçu}` : ''}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        <span className="text-[10px] text-muted-foreground">
-                          La ligne contenant « Désignation », « Unité », « Quantité »…
-                        </span>
-                      </label>
-                    </div>
-                  </>
-                );
-              })()}
-
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                2. Colonnes
-              </h4>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
-                <ColonneSelector
-                  label="Position"
-                  optionnel
-                  nbColonnes={feuilleCourante.nbColonnes}
-                  headers={headers}
-                  valeur={mapping.idxPosition}
-                  onChange={(idx) => changerMapping({ idxPosition: idx })}
-                />
-                <ColonneSelector
-                  label="Désignation *"
-                  nbColonnes={feuilleCourante.nbColonnes}
-                  headers={headers}
-                  valeur={mapping.idxDesignation}
-                  onChange={(idx) =>
-                    idx !== null && changerMapping({ idxDesignation: idx })
-                  }
-                />
-                <ColonneSelector
-                  label="Unité"
-                  optionnel
-                  nbColonnes={feuilleCourante.nbColonnes}
-                  headers={headers}
-                  valeur={mapping.idxUnite}
-                  onChange={(idx) => changerMapping({ idxUnite: idx })}
-                />
-                <ColonneSelector
-                  label="Quantité"
-                  optionnel
-                  nbColonnes={feuilleCourante.nbColonnes}
-                  headers={headers}
-                  valeur={mapping.idxQuantite}
-                  onChange={(idx) => changerMapping({ idxQuantite: idx })}
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={chargement}
-                  onClick={() => void rafraichirApercu(mapping)}
-                >
-                  {chargement ? 'Aperçu…' : 'Mettre à jour l’aperçu'}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  Astuce : sans unité ou quantité, la ligne devient une section. Vous
-                  pourrez la transformer en article catalogue ou libre depuis l’éditeur.
-                </p>
-              </div>
-
-              {preview && (
-                <div className="space-y-2 border-t pt-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    3. Aperçu ({preview.lignes.length} lignes)
-                  </h4>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-xs">
-                      <strong>{preview.nbSections}</strong> section
-                      {preview.nbSections > 1 ? 's' : ''} ·{' '}
-                      <strong>{preview.nbArticles}</strong> article
-                      {preview.nbArticles > 1 ? 's' : ''}
-                      {preview.nbErreurs > 0 && (
-                        <>
-                          {' · '}
-                          <span className="text-destructive">
-                            {preview.nbErreurs} en erreur
-                          </span>
-                        </>
-                      )}
-                    </p>
-                    {sectionsAvecEnfants.size > 0 && (
-                      <div className="ml-auto flex gap-2 text-[10px]">
-                        <button
-                          type="button"
-                          className="text-muted-foreground underline-offset-2 hover:underline"
-                          onClick={toutDeplier}
-                        >
-                          Tout déplier
-                        </button>
-                        <span className="text-muted-foreground">·</span>
-                        <button
-                          type="button"
-                          className="text-muted-foreground underline-offset-2 hover:underline"
-                          onClick={toutReplier}
-                        >
-                          Tout replier
-                        </button>
                       </div>
-                    )}
-                  </div>
-                  <div className="max-h-64 overflow-auto rounded border">
-                    <table className="w-full text-xs">
-                      <thead className="bg-muted/40">
-                        <tr>
-                          <th className="px-2 py-1 text-left">Pos.</th>
-                          <th className="px-2 py-1 text-left">Désignation</th>
-                          <th className="px-2 py-1">Type</th>
-                          <th className="px-2 py-1 text-right">Qté</th>
-                          <th className="px-2 py-1">U</th>
-                          <th className="px-2 py-1">Erreurs</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {lignesVisibles.slice(0, 200).map((l) => {
-                          const profondeur = profondeurPosition(l.position);
-                          const aEnfants =
-                            l.type === 'section' && sectionsAvecEnfants.has(l.position);
-                          const replie = aEnfants && sectionsRepliees.has(l.position);
-                          return (
-                            <tr
-                              key={`${l.ordre}-${l.position}`}
-                              className={l.erreurs.length > 0 ? 'bg-destructive/5' : ''}
-                            >
-                              <td className="px-2 py-1 font-mono text-[10px]">
-                                {l.position}
-                              </td>
-                              <td className="px-2 py-1">
-                                <div
-                                  className="flex items-start gap-1"
-                                  style={{ paddingLeft: `${(profondeur - 1) * 12}px` }}
-                                >
-                                  {aEnfants ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => basculerSection(l.position)}
-                                      className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
-                                      aria-label={replie ? 'Déplier' : 'Replier'}
-                                    >
-                                      {replie ? (
-                                        <ChevronRightIcon className="size-3" />
-                                      ) : (
-                                        <ChevronDownIcon className="size-3" />
-                                      )}
-                                    </button>
-                                  ) : (
-                                    <span className="inline-block size-4 shrink-0" />
-                                  )}
-                                  <span
-                                    className={cn(
-                                      'min-w-0 break-words',
-                                      l.type === 'section' && 'font-medium',
-                                    )}
-                                  >
-                                    {l.designation}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-2 py-1">
-                                {l.type === 'section' ? 'Section' : 'Article'}
-                              </td>
-                              <td className="px-2 py-1 text-right tabular-nums">
-                                {l.type === 'libre' ? l.quantite : '—'}
-                              </td>
-                              <td className="px-2 py-1">
-                                {l.type === 'libre' ? l.unite : '—'}
-                              </td>
-                              <td className="px-2 py-1 text-destructive">
-                                {l.erreurs.join('; ') || '—'}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    {lignesVisibles.length > 200 && (
-                      <p className="px-2 py-1 text-[10px] text-muted-foreground">
-                        Affichage des 200 premières lignes visibles (sur{' '}
-                        {lignesVisibles.length} ; {preview.lignes.length} au total).
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button type="button" size="sm" onClick={() => confirmer('remplacer')}>
-                      Remplacer toutes les lignes
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => confirmer('ajouter')}
-                    >
-                      Ajouter au tableau existant
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                    </>
+                  );
+                })()}
 
-          {fichier && !analyse && !chargement && (
-            <p className="text-xs text-destructive">
-              Fichier illisible. Vérifiez qu’il s’agit bien d’un xlsx valide.
-            </p>
-          )}
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  2. Colonnes
+                </h4>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-4">
+                  <ColonneSelector
+                    label="Position"
+                    optionnel
+                    nbColonnes={feuilleCourante.nbColonnes}
+                    headers={headers}
+                    valeur={mapping.idxPosition}
+                    onChange={(idx) => changerMapping({ idxPosition: idx })}
+                  />
+                  <ColonneSelector
+                    label="Désignation *"
+                    nbColonnes={feuilleCourante.nbColonnes}
+                    headers={headers}
+                    valeur={mapping.idxDesignation}
+                    onChange={(idx) => idx !== null && changerMapping({ idxDesignation: idx })}
+                  />
+                  <ColonneSelector
+                    label="Unité"
+                    optionnel
+                    nbColonnes={feuilleCourante.nbColonnes}
+                    headers={headers}
+                    valeur={mapping.idxUnite}
+                    onChange={(idx) => changerMapping({ idxUnite: idx })}
+                  />
+                  <ColonneSelector
+                    label="Quantité"
+                    optionnel
+                    nbColonnes={feuilleCourante.nbColonnes}
+                    headers={headers}
+                    valeur={mapping.idxQuantite}
+                    onChange={(idx) => changerMapping({ idxQuantite: idx })}
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={chargement}
+                    onClick={() => void rafraichirApercu(mapping)}
+                  >
+                    {chargement ? 'Aperçu…' : 'Mettre à jour l’aperçu'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Astuce : sans unité ou quantité, la ligne devient une section. Vous pourrez la
+                    transformer en article catalogue ou libre depuis l’éditeur.
+                  </p>
+                </div>
+
+                {preview && (
+                  <div className="space-y-2 border-t pt-3">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      3. Aperçu ({preview.lignes.length} lignes)
+                    </h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs">
+                        <strong>{preview.nbSections}</strong> section
+                        {preview.nbSections > 1 ? 's' : ''} · <strong>{preview.nbArticles}</strong>{' '}
+                        article
+                        {preview.nbArticles > 1 ? 's' : ''}
+                        {preview.nbErreurs > 0 && (
+                          <>
+                            {' · '}
+                            <span className="text-destructive">{preview.nbErreurs} en erreur</span>
+                          </>
+                        )}
+                      </p>
+                      {sectionsAvecEnfants.size > 0 && (
+                        <div className="ml-auto flex gap-2 text-[10px]">
+                          <button
+                            type="button"
+                            className="text-muted-foreground underline-offset-2 hover:underline"
+                            onClick={toutDeplier}
+                          >
+                            Tout déplier
+                          </button>
+                          <span className="text-muted-foreground">·</span>
+                          <button
+                            type="button"
+                            className="text-muted-foreground underline-offset-2 hover:underline"
+                            onClick={toutReplier}
+                          >
+                            Tout replier
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="max-h-64 overflow-auto rounded border">
+                      <table className="w-full text-xs">
+                        <thead className="bg-muted/40">
+                          <tr>
+                            <th className="px-2 py-1 text-left">Pos.</th>
+                            <th className="px-2 py-1 text-left">Désignation</th>
+                            <th className="px-2 py-1">Type</th>
+                            <th className="px-2 py-1 text-right">Qté</th>
+                            <th className="px-2 py-1">U</th>
+                            <th className="px-2 py-1">Erreurs</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lignesVisibles.slice(0, 200).map((l) => {
+                            const profondeur = profondeurPosition(l.position);
+                            const aEnfants =
+                              l.type === 'section' && sectionsAvecEnfants.has(l.position);
+                            const replie = aEnfants && sectionsRepliees.has(l.position);
+                            return (
+                              <tr
+                                key={`${l.ordre}-${l.position}`}
+                                className={l.erreurs.length > 0 ? 'bg-destructive/5' : ''}
+                              >
+                                <td className="px-2 py-1 font-mono text-[10px]">{l.position}</td>
+                                <td className="px-2 py-1">
+                                  <div
+                                    className="flex items-start gap-1"
+                                    style={{ paddingLeft: `${(profondeur - 1) * 12}px` }}
+                                  >
+                                    {aEnfants ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => basculerSection(l.position)}
+                                        className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                                        aria-label={replie ? 'Déplier' : 'Replier'}
+                                      >
+                                        {replie ? (
+                                          <ChevronRightIcon className="size-3" />
+                                        ) : (
+                                          <ChevronDownIcon className="size-3" />
+                                        )}
+                                      </button>
+                                    ) : (
+                                      <span className="inline-block size-4 shrink-0" />
+                                    )}
+                                    <span
+                                      className={cn(
+                                        'min-w-0 break-words',
+                                        l.type === 'section' && 'font-medium',
+                                      )}
+                                    >
+                                      {l.designation}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-2 py-1">
+                                  {l.type === 'section' ? 'Section' : 'Article'}
+                                </td>
+                                <td className="px-2 py-1 text-right tabular-nums">
+                                  {l.type === 'libre' ? l.quantite : '—'}
+                                </td>
+                                <td className="px-2 py-1">{l.type === 'libre' ? l.unite : '—'}</td>
+                                <td className="px-2 py-1 text-destructive">
+                                  {l.erreurs.join('; ') || '—'}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                      {lignesVisibles.length > 200 && (
+                        <p className="px-2 py-1 text-[10px] text-muted-foreground">
+                          Affichage des 200 premières lignes visibles (sur {lignesVisibles.length} ;{' '}
+                          {preview.lignes.length} au total).
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="button" size="sm" onClick={() => confirmer('remplacer')}>
+                        Remplacer toutes les lignes
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => confirmer('ajouter')}
+                      >
+                        Ajouter au tableau existant
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {fichier && !analyse && !chargement && (
+              <p className="text-xs text-destructive">
+                Fichier illisible. Vérifiez qu’il s’agit bien d’un xlsx valide.
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -667,9 +645,7 @@ function ColonneSelector({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {optionnel && (
-            <SelectItem value={SENTINEL_VIDE}>— Aucune —</SelectItem>
-          )}
+          {optionnel && <SelectItem value={SENTINEL_VIDE}>— Aucune —</SelectItem>}
           {Array.from({ length: nbColonnes }, (_, i) => (
             <SelectItem key={i} value={String(i)}>
               {libelleColonne(i, headers)}

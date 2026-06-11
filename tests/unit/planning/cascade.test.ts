@@ -13,12 +13,18 @@ function t(
 
 describe('cascadeDelta', () => {
   it('renvoie un tableau vide si delta = 0', () => {
-    const taches = [t('a', null, '2024-01-01', '2024-01-05'), t('b', 'a', '2024-01-06', '2024-01-10')];
+    const taches = [
+      t('a', null, '2024-01-01', '2024-01-05'),
+      t('b', 'a', '2024-01-06', '2024-01-10'),
+    ];
     expect(cascadeDelta(taches, 'a', 0)).toEqual([]);
   });
 
   it('décale un successeur direct du même delta', () => {
-    const taches = [t('a', null, '2024-01-01', '2024-01-05'), t('b', 'a', '2024-01-06', '2024-01-10')];
+    const taches = [
+      t('a', null, '2024-01-01', '2024-01-05'),
+      t('b', 'a', '2024-01-06', '2024-01-10'),
+    ];
     expect(cascadeDelta(taches, 'a', 3)).toEqual([
       { id: 'b', dateDebutPrevue: '2024-01-09', dateFinPrevue: '2024-01-13' },
     ]);
@@ -55,7 +61,10 @@ describe('cascadeDelta', () => {
   });
 
   it('décale en négatif (vers le passé)', () => {
-    const taches = [t('a', null, '2024-01-10', '2024-01-15'), t('b', 'a', '2024-01-16', '2024-01-20')];
+    const taches = [
+      t('a', null, '2024-01-10', '2024-01-15'),
+      t('b', 'a', '2024-01-16', '2024-01-20'),
+    ];
     expect(cascadeDelta(taches, 'a', -3)).toEqual([
       { id: 'b', dateDebutPrevue: '2024-01-13', dateFinPrevue: '2024-01-17' },
     ]);
@@ -89,12 +98,7 @@ describe('cascadeDelta', () => {
 });
 
 describe('detecterCycle', () => {
-  const chain = [
-    t('a', null),
-    t('b', 'a'),
-    t('c', 'b'),
-    t('d', 'c'),
-  ];
+  const chain = [t('a', null), t('b', 'a'), t('c', 'b'), t('d', 'c')];
 
   it('refuse de prendre soi-même comme prédécesseur', () => {
     expect(detecterCycle(chain, 'a', 'a')).toBe(true);

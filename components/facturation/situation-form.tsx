@@ -10,7 +10,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -36,14 +36,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
-import {
-  calculerLigneSituation,
-  calculerTotauxSituation,
-} from '@/lib/facturation/calculs';
-import {
-  calculerMontantRemiseGlobale,
-  libelleRemiseGlobale,
-} from '@/lib/remise-globale';
+import { calculerLigneSituation, calculerTotauxSituation } from '@/lib/facturation/calculs';
+import { calculerMontantRemiseGlobale, libelleRemiseGlobale } from '@/lib/remise-globale';
 import type { LignePreview } from '@/lib/facturation/import-situation';
 import type {
   ChantierAvecAvancement,
@@ -87,13 +81,13 @@ type Props = {
   parserFichierAction: (
     fichierBase64: string,
     nomFichier: string,
-  ) => Promise<ServerActionResult<{ lignes: LignePreview[]; nbLignesValides: number; nbLignesErreurs: number }>>;
+  ) => Promise<
+    ServerActionResult<{ lignes: LignePreview[]; nbLignesValides: number; nbLignesErreurs: number }>
+  >;
   /** Server action : liste les devis acceptés du chantier sélectionné. */
   listerDevisFacturablesAction: (chantierId: string) => Promise<DevisFacturable[]>;
   /** Server action : charge les lignes d'un devis comme lignes de situation. */
-  chargerLignesDevisAction: (
-    devisId: string,
-  ) => Promise<{
+  chargerLignesDevisAction: (devisId: string) => Promise<{
     lignes: LigneDevisPourSituation[];
     devisNumero: string;
     remiseGlobale: RemiseReprise;
@@ -153,7 +147,7 @@ export function SituationForm({
   const [cumulesPrecedents, setCumulesPrecedents] = useState<Map<string, string>>(new Map());
 
   const chantierFige = chantierFigeId
-    ? chantiers.find((c) => c.id === chantierFigeId) ?? null
+    ? (chantiers.find((c) => c.id === chantierFigeId) ?? null)
     : null;
 
   const form = useForm<SituationTravauxInput>({
@@ -370,7 +364,9 @@ export function SituationForm({
     }
     setImportPreview(null);
     setImportOuvert(false);
-    toast.success(`${nouvelles.length} ligne${nouvelles.length > 1 ? 's' : ''} importée${nouvelles.length > 1 ? 's' : ''}`);
+    toast.success(
+      `${nouvelles.length} ligne${nouvelles.length > 1 ? 's' : ''} importée${nouvelles.length > 1 ? 's' : ''}`,
+    );
   }
 
   function appliquerArticle(idx: number, articleId: string) {
@@ -420,119 +416,117 @@ export function SituationForm({
         )}
 
         {/* En-tête */}
-        <FormSection
-          number={1}
-          title="Chantier et devis"
-          storageKey="situation:chantier"
-        >
+        <FormSection number={1} title="Chantier et devis" storageKey="situation:chantier">
           <div className="grid gap-4">
-          <FormField
-            control={form.control}
-            name="chantierId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Chantier</FormLabel>
-                {chantierFige ? (
-                  <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {chantierFige.numero}
-                    </span>{' '}
-                    {chantierFige.libelle} —{' '}
-                    <span className="text-xs text-muted-foreground">
-                      {chantierFige.clientNom}
-                    </span>
-                  </div>
-                ) : (
-                  <Select value={field.value} onValueChange={(v) => v && field.onChange(v)}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choisir un chantier">
-                          {(v) => {
-                            if (!v) return 'Choisir un chantier';
-                            const c = chantiers.find((x) => x.id === v);
-                            return c ? `${c.numero} — ${c.libelle}` : String(v);
-                          }}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {chantiers.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.numero} — {c.libelle}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                {chantierChoisi && (
-                  <FormDescription>
-                    Prochaine situation : <strong>n°{chantierChoisi.prochainNumero}</strong> · cumulé
-                    précédent : {formatMontant(chantierChoisi.dernierMontantCumuleHt)} € (
-                    {Number(chantierChoisi.dernierPctCumule).toFixed(2).replace(/\.?0+$/, '')} %)
-                  </FormDescription>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {chantierId && (
             <FormField
               control={form.control}
-              name="devisId"
+              name="chantierId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Devis source (optionnel)</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    <Select
-                      value={field.value ?? '__none__'}
-                      onValueChange={(v) =>
-                        field.onChange(v === '__none__' ? null : v)
-                      }
-                    >
+                  <FormLabel>Chantier</FormLabel>
+                  {chantierFige ? (
+                    <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm">
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {chantierFige.numero}
+                      </span>{' '}
+                      {chantierFige.libelle} —{' '}
+                      <span className="text-xs text-muted-foreground">
+                        {chantierFige.clientNom}
+                      </span>
+                    </div>
+                  ) : (
+                    <Select value={field.value} onValueChange={(v) => v && field.onChange(v)}>
                       <FormControl>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Aucun devis lié">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choisir un chantier">
                             {(v) => {
-                              if (!v || v === '__none__') return 'Aucun devis lié';
-                              const d = devisFacturables.find((x) => x.id === v);
-                              return d
-                                ? `${d.numero} — ${d.dateDevis} (${Number(d.totalHt).toLocaleString('fr-FR')} € HT)`
-                                : String(v);
+                              if (!v) return 'Choisir un chantier';
+                              const c = chantiers.find((x) => x.id === v);
+                              return c ? `${c.numero} — ${c.libelle}` : String(v);
                             }}
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="__none__">Aucun devis lié</SelectItem>
-                        {devisFacturables.map((d) => (
-                          <SelectItem key={d.id} value={d.id}>
-                            {d.numero} — {d.dateDevis} (
-                            {Number(d.totalHt).toLocaleString('fr-FR')} € HT)
+                        {chantiers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.numero} — {c.libelle}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {field.value && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={chargerDevisEnCours}
-                        onClick={() => chargerDepuisDevis(field.value!, true)}
-                      >
-                        <FileTextIcon className="size-4" />
-                        Charger lignes
-                      </Button>
-                    )}
-                  </div>
-                  <FormDescription>
-                    Seuls les devis acceptés du client de ce chantier apparaissent. Cliquez sur « Charger lignes » pour pré-remplir les postes.
-                  </FormDescription>
+                  )}
+                  {chantierChoisi && (
+                    <FormDescription>
+                      Prochaine situation : <strong>n°{chantierChoisi.prochainNumero}</strong> ·
+                      cumulé précédent : {formatMontant(chantierChoisi.dernierMontantCumuleHt)} € (
+                      {Number(chantierChoisi.dernierPctCumule)
+                        .toFixed(2)
+                        .replace(/\.?0+$/, '')}{' '}
+                      %)
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
-          )}
+            {chantierId && (
+              <FormField
+                control={form.control}
+                name="devisId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Devis source (optionnel)</FormLabel>
+                    <div className="flex flex-wrap gap-2">
+                      <Select
+                        value={field.value ?? '__none__'}
+                        onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Aucun devis lié">
+                              {(v) => {
+                                if (!v || v === '__none__') return 'Aucun devis lié';
+                                const d = devisFacturables.find((x) => x.id === v);
+                                return d
+                                  ? `${d.numero} — ${d.dateDevis} (${Number(d.totalHt).toLocaleString('fr-FR')} € HT)`
+                                  : String(v);
+                              }}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__none__">Aucun devis lié</SelectItem>
+                          {devisFacturables.map((d) => (
+                            <SelectItem key={d.id} value={d.id}>
+                              {d.numero} — {d.dateDevis} (
+                              {Number(d.totalHt).toLocaleString('fr-FR')} € HT)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {field.value && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={chargerDevisEnCours}
+                          onClick={() => chargerDepuisDevis(field.value!, true)}
+                        >
+                          <FileTextIcon className="size-4" />
+                          Charger lignes
+                        </Button>
+                      )}
+                    </div>
+                    <FormDescription>
+                      Seuls les devis acceptés du client de ce chantier apparaissent. Cliquez sur «
+                      Charger lignes » pour pré-remplir les postes.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         </FormSection>
 
@@ -619,9 +613,7 @@ export function SituationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {remiseGlobaleType === 'montant'
-                      ? 'Montant de la remise (€)'
-                      : 'Remise (%)'}
+                    {remiseGlobaleType === 'montant' ? 'Montant de la remise (€)' : 'Remise (%)'}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -665,12 +657,7 @@ export function SituationForm({
               <UploadIcon className="size-4" />
               Importer Excel/CSV
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => append(ligneVide())}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => append(ligneVide())}>
               + Ligne
             </Button>
           </div>
@@ -694,22 +681,20 @@ export function SituationForm({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Formats acceptés : <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>.
-              Colonnes reconnues : Désignation, Quantité, Unité, PU HT, Montant HT, % avancement,
-              Notes (insensible à la casse et aux accents).
+              Formats acceptés : <strong>.xlsx</strong>, <strong>.csv</strong>. Colonnes reconnues :
+              Désignation, Quantité, Unité, PU HT, Montant HT, % avancement, Notes (insensible à la
+              casse et aux accents).
             </p>
             <Input
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".xlsx,.csv"
               disabled={importEnCours}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) void importerFichier(file);
               }}
             />
-            {importEnCours && (
-              <p className="text-xs text-muted-foreground">Analyse du fichier…</p>
-            )}
+            {importEnCours && <p className="text-xs text-muted-foreground">Analyse du fichier…</p>}
             {importPreview && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
@@ -743,12 +728,7 @@ export function SituationForm({
                     </thead>
                     <tbody>
                       {importPreview.lignes.map((l, i) => (
-                        <tr
-                          key={i}
-                          className={
-                            l.erreurs.length > 0 ? 'bg-destructive/5' : ''
-                          }
-                        >
+                        <tr key={i} className={l.erreurs.length > 0 ? 'bg-destructive/5' : ''}>
                           <td className="px-2 py-1">{l.designation}</td>
                           <td className="px-2 py-1 text-right tabular-nums">{l.quantite ?? '—'}</td>
                           <td className="px-2 py-1">{l.unite ?? '—'}</td>
@@ -807,85 +787,89 @@ export function SituationForm({
             ) : undefined
           }
         >
-        <div className="space-y-3">
-          {fields.map((field, idx) => {
-            const ligne = lignesLive[idx]!;
-            const apercu = apercus[idx] ?? null;
-            const articleSel = ligne.articleId
-              ? articles.find((a) => a.id === ligne.articleId)
-              : null;
-            const aPrecedent = !!ligne.lignePrecedenteId;
-            return (
-              <LigneRow
-                key={field.id}
-                idx={idx}
-                form={form}
-                ligne={ligne}
-                apercu={apercu}
-                articles={articles}
-                articleSel={articleSel}
-                aPrecedent={aPrecedent}
-                onRemove={() => remove(idx)}
-                onChangerArticle={(aid) => appliquerArticle(idx, aid)}
-                disableRemove={fields.length <= 1}
-              />
-            );
-          })}
-        </div>
+          <div className="space-y-3">
+            {fields.map((field, idx) => {
+              const ligne = lignesLive[idx]!;
+              const apercu = apercus[idx] ?? null;
+              const articleSel = ligne.articleId
+                ? articles.find((a) => a.id === ligne.articleId)
+                : null;
+              const aPrecedent = !!ligne.lignePrecedenteId;
+              return (
+                <LigneRow
+                  key={field.id}
+                  idx={idx}
+                  form={form}
+                  ligne={ligne}
+                  apercu={apercu}
+                  articles={articles}
+                  articleSel={articleSel}
+                  aPrecedent={aPrecedent}
+                  onRemove={() => remove(idx)}
+                  onChangerArticle={(aid) => appliquerArticle(idx, aid)}
+                  disableRemove={fields.length <= 1}
+                />
+              );
+            })}
+          </div>
         </FormSection>
 
         {/* Totaux récap */}
         {totauxApercu && (
-          <FormSection
-            number={4}
-            title="Récapitulatif"
-            storageKey="situation:recap"
-          >
-          <div className="grid gap-1 text-sm">
-            <div className="flex justify-between">
-              <span>Total marché HT</span>
-              <span className="tabular-nums">{formatMontant(totauxApercu.montantMarcheHt)} €</span>
+          <FormSection number={4} title="Récapitulatif" storageKey="situation:recap">
+            <div className="grid gap-1 text-sm">
+              <div className="flex justify-between">
+                <span>Total marché HT</span>
+                <span className="tabular-nums">
+                  {formatMontant(totauxApercu.montantMarcheHt)} €
+                </span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>
+                  Cumulé HT (
+                  {Number(totauxApercu.pctAvancementCumule)
+                    .toFixed(2)
+                    .replace(/\.?0+$/, '')}{' '}
+                  %)
+                </span>
+                <span className="tabular-nums">
+                  {formatMontant(totauxApercu.montantCumuleHt)} €
+                </span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Cumulé précédent</span>
+                <span className="tabular-nums">
+                  − {formatMontant(totauxApercu.montantSituationPrecedenteHt)} €
+                </span>
+              </div>
+              <div className="flex justify-between border-t pt-1 text-base font-semibold">
+                <span>À facturer HT{aRemiseSituation ? ' brut' : ''}</span>
+                <span className="tabular-nums">
+                  {formatMontant(totauxApercu.montantAFacturerHt)} €
+                </span>
+              </div>
+              {aRemiseSituation && (
+                <>
+                  <div className="flex justify-between text-destructive">
+                    <span>
+                      Remise globale (
+                      {libelleRemiseGlobale({
+                        type: remiseGlobaleType,
+                        valeur: remiseGlobaleValeur,
+                      })}
+                      )
+                    </span>
+                    <span className="tabular-nums">
+                      − {formatMontant(montantRemiseSituation.toFixed(2))} €
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base font-semibold">
+                    <span>À facturer net HT</span>
+                    <span className="tabular-nums">{formatMontant(aFacturerNet)} €</span>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>
-                Cumulé HT ({Number(totauxApercu.pctAvancementCumule).toFixed(2).replace(/\.?0+$/, '')} %)
-              </span>
-              <span className="tabular-nums">{formatMontant(totauxApercu.montantCumuleHt)} €</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Cumulé précédent</span>
-              <span className="tabular-nums">
-                − {formatMontant(totauxApercu.montantSituationPrecedenteHt)} €
-              </span>
-            </div>
-            <div className="flex justify-between border-t pt-1 text-base font-semibold">
-              <span>À facturer HT{aRemiseSituation ? ' brut' : ''}</span>
-              <span className="tabular-nums">
-                {formatMontant(totauxApercu.montantAFacturerHt)} €
-              </span>
-            </div>
-            {aRemiseSituation && (
-              <>
-                <div className="flex justify-between text-destructive">
-                  <span>
-                    Remise globale (
-                    {libelleRemiseGlobale({
-                      type: remiseGlobaleType,
-                      valeur: remiseGlobaleValeur,
-                    })}
-                    )
-                  </span>
-                  <span className="tabular-nums">
-                    − {formatMontant(montantRemiseSituation.toFixed(2))} €
-                  </span>
-                </div>
-                <div className="flex justify-between text-base font-semibold">
-                  <span>À facturer net HT</span>
-                  <span className="tabular-nums">{formatMontant(aFacturerNet)} €</span>
-                </div>
-              </>
-            )}
-          </div>
           </FormSection>
         )}
 
@@ -1023,9 +1007,7 @@ function LigneRow({
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={SENTINEL_NO_ARTICLE}>
-                      Aucun article catalogue
-                    </SelectItem>
+                    <SelectItem value={SENTINEL_NO_ARTICLE}>Aucun article catalogue</SelectItem>
                     {articles.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
                         {a.code} — {a.libelle}
@@ -1068,8 +1050,8 @@ function LigneRow({
                 />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Saisir soit « Quantité + PU », soit « Montant HT » directement. Si les deux,
-                le montant direct prime.
+                Saisir soit « Quantité + PU », soit « Montant HT » directement. Si les deux, le
+                montant direct prime.
               </p>
               <Input
                 placeholder="Notes (optionnel)"
@@ -1091,9 +1073,7 @@ function LigneRow({
                 <div className="tabular-nums">{formatMontant(apercu.montantCumuleHt)} €</div>
               </div>
               <div className="rounded bg-muted/30 p-2">
-                <div className="text-muted-foreground">
-                  Précédent{aPrecedent ? '' : ' (—)'}
-                </div>
+                <div className="text-muted-foreground">Précédent{aPrecedent ? '' : ' (—)'}</div>
                 <div className="tabular-nums">
                   − {formatMontant(apercu.montantSituationPrecedenteHt)} €
                 </div>

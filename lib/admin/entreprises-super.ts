@@ -10,11 +10,7 @@ import { auditLogEvent } from '@/lib/audit/log';
 import type { ActionResult } from '@/lib/common/action-result';
 import { getDbAdmin } from '@/lib/db/client';
 import { user } from '@/db/schema/auth';
-import {
-  entrepriseLogos,
-  entreprises,
-  utilisateurEntreprises,
-} from '@/db/schema/entreprises';
+import { entrepriseLogos, entreprises, utilisateurEntreprises } from '@/db/schema/entreprises';
 import { roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import {
@@ -319,7 +315,10 @@ export async function creerEntreprise(
   } catch (err) {
     if (err instanceof Error) {
       if (/duplicate key|unique/i.test(err.message)) {
-        return { ok: false, error: `Une entreprise avec le slug "${parsed.data.slug}" existe déjà.` };
+        return {
+          ok: false,
+          error: `Une entreprise avec le slug "${parsed.data.slug}" existe déjà.`,
+        };
       }
       if (/chk_entreprises_slug/i.test(err.message)) {
         return { ok: false, error: 'Format de slug invalide.' };
@@ -461,9 +460,7 @@ export async function listerLogosSuper(entrepriseId: string): Promise<LogoSuperR
       createdAt: entrepriseLogos.createdAt,
     })
     .from(entrepriseLogos)
-    .where(
-      and(eq(entrepriseLogos.entrepriseId, entrepriseId), isNull(entrepriseLogos.deletedAt)),
-    )
+    .where(and(eq(entrepriseLogos.entrepriseId, entrepriseId), isNull(entrepriseLogos.deletedAt)))
     .orderBy(entrepriseLogos.type, entrepriseLogos.ordre);
 }
 
@@ -641,10 +638,7 @@ export async function renommerLogoSuper(
   return { ok: true, data: undefined };
 }
 
-export async function supprimerLogoSuper(
-  entrepriseId: string,
-  id: string,
-): Promise<ActionResult> {
+export async function supprimerLogoSuper(entrepriseId: string, id: string): Promise<ActionResult> {
   const superAdmin = await requireSuperAdmin();
 
   const db = getDbAdmin();

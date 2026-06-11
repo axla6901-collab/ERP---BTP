@@ -115,10 +115,7 @@ export function SousTraitantsTable({ items, rightActions, peutEcrire, onChangerS
       id: 'contacts',
       header: 'Contacts',
       cell: (s) => (
-        <span
-          className="text-xs"
-          title={`${s.contactsActifs} actif(s) sur ${s.contactsTotal}`}
-        >
+        <span className="text-xs" title={`${s.contactsActifs} actif(s) sur ${s.contactsTotal}`}>
           {s.contactsTotal === 0 ? (
             <span className="text-muted-foreground">—</span>
           ) : (

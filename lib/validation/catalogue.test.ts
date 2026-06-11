@@ -27,7 +27,13 @@ describe('uniteSchema', () => {
 
   it('refuse un type inconnu', () => {
     expect(() =>
-      uniteSchema.parse({ code: 'XX', libelle: 'X', symbole: 'x', type: 'autre_chose', actif: true }),
+      uniteSchema.parse({
+        code: 'XX',
+        libelle: 'X',
+        symbole: 'x',
+        type: 'autre_chose',
+        actif: true,
+      }),
     ).toThrow();
   });
 });

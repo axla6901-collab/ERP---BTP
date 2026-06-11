@@ -10,7 +10,14 @@ import { PageToolbar } from '@/components/layout/page-toolbar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import {
   lireArticle,
@@ -23,10 +30,7 @@ import { calculerPrixRevient, chargerArbreBom } from '@/lib/catalogue/bom';
 import { listerFamilles } from '@/lib/catalogue/familles';
 import { lireNomenclatureCourante } from '@/lib/catalogue/nomenclatures';
 import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
-import {
-  enregistrerPrixReference,
-  lirePrixReferenceCourant,
-} from '@/lib/catalogue/prix-articles';
+import { enregistrerPrixReference, lirePrixReferenceCourant } from '@/lib/catalogue/prix-articles';
 import { listerUnites } from '@/lib/catalogue/unites';
 import { cn } from '@/lib/utils';
 import { LIBELLES_ARTICLE_TYPE } from '@/lib/validation/catalogue';
@@ -38,11 +42,7 @@ function formatMontant(n: number | string | null | undefined): string {
   return v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export default async function ArticleDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const article = await lireArticle(id);
@@ -137,7 +137,12 @@ export default async function ArticleDetailPage({
           </>
         }
         familles={familles.map((f) => ({ id: f.id, code: f.code, libelle: f.libelle }))}
-        unites={unites.map((u) => ({ id: u.id, code: u.code, libelle: u.libelle, symbole: u.symbole }))}
+        unites={unites.map((u) => ({
+          id: u.id,
+          code: u.code,
+          libelle: u.libelle,
+          symbole: u.symbole,
+        }))}
         defaultValues={{
           code: article.code,
           libelle: article.libelle,
@@ -166,8 +171,9 @@ export default async function ArticleDetailPage({
           <CardHeader>
             <CardTitle className="text-base">Prix de référence</CardTitle>
             <CardDescription>
-              Prix catalogue interne faisant foi. Dès qu&apos;il est renseigné, c&apos;est le prix retenu pour le
-              calcul de revient — il prime sur les prix fournisseurs (grilles, préféré, moins-disant).{' '}
+              Prix catalogue interne faisant foi. Dès qu&apos;il est renseigné, c&apos;est le prix
+              retenu pour le calcul de revient — il prime sur les prix fournisseurs (grilles,
+              préféré, moins-disant).{' '}
               <Link
                 href={`/catalogue/articles/${id}/prix`}
                 className="underline underline-offset-4"
@@ -194,9 +200,7 @@ export default async function ArticleDetailPage({
       {estCompose && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">
-              Composition — prix de référence calculé
-            </CardTitle>
+            <CardTitle className="text-base">Composition — prix de référence calculé</CardTitle>
             <CardDescription>
               {nomenclature
                 ? `Version courante : v${nomenclature.version} — ${nomenclature.lignes.length} composant${nomenclature.lignes.length > 1 ? 's' : ''}. Le prix de référence d'un article composé est dérivé de sa composition (récursive) — il n'est donc pas saisissable directement.`
@@ -213,14 +217,16 @@ export default async function ArticleDetailPage({
                   {formatMontant(prixRevient.total)} €
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Calculé via le prix retenu de chaque composant (prix de référence prioritaire, sinon prix fournisseurs).
+                  Calculé via le prix retenu de chaque composant (prix de référence prioritaire,
+                  sinon prix fournisseurs).
                 </p>
               </div>
 
               {!prixRevient.ok && prixRevient.missingCount > 0 && (
                 <Alert variant="destructive">
                   <AlertTitle>
-                    {prixRevient.missingCount} composant{prixRevient.missingCount > 1 ? 's' : ''} sans prix
+                    {prixRevient.missingCount} composant{prixRevient.missingCount > 1 ? 's' : ''}{' '}
+                    sans prix
                   </AlertTitle>
                   <AlertDescription>
                     Le total n&apos;est pas représentatif. Saisis un prix pour ces articles :
@@ -264,7 +270,7 @@ export default async function ArticleDetailPage({
         </Card>
       )}
 
-      <div className="border-t pt-6 max-w-2xl">
+      <div className="max-w-2xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer cet article"

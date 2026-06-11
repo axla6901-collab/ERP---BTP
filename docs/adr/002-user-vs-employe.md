@@ -27,11 +27,11 @@ Maintenir **deux tables distinctes** dans le schéma public :
 
 **Lien** : champ `employe_id UUID NULL UNIQUE REFERENCES employes(id)` sur `utilisateurs`. Trois configurations possibles :
 
-| Cas | `utilisateurs` | `employes` | Lien |
-|---|---|---|---|
-| Utilisateur externe (comptable, auditeur) | ✅ | ❌ | `employe_id = NULL` |
-| Employé sans accès app (ouvrier non-connecté, intérimaire) | ❌ | ✅ | — |
-| Employé avec compte (chef de chantier, admin RH) | ✅ | ✅ | `utilisateurs.employe_id = employes.id` |
+| Cas                                                        | `utilisateurs` | `employes` | Lien                                    |
+| ---------------------------------------------------------- | -------------- | ---------- | --------------------------------------- |
+| Utilisateur externe (comptable, auditeur)                  | ✅             | ❌         | `employe_id = NULL`                     |
+| Employé sans accès app (ouvrier non-connecté, intérimaire) | ❌             | ✅         | —                                       |
+| Employé avec compte (chef de chantier, admin RH)           | ✅             | ✅         | `utilisateurs.employe_id = employes.id` |
 
 ### Table `utilisateurs` (schéma public, étend `user` de Better Auth)
 
@@ -92,14 +92,14 @@ CREATE TABLE employes (
 
 Les FK du MCD qui pointaient vers `EMPLOYE` sont analysées :
 
-| FK d'origine | Redirigée vers | Raison |
-|---|---|---|
-| `CHANTIER.responsable_id` | `employes(id)` | Rôle métier, pas un compte |
-| `POINTAGE.employe_id` | `employes(id)` | Donnée RH |
-| `HISTORIQUE_DOCUMENT.employe_id` → renommée **`utilisateur_id`** | `utilisateurs(id)` | Trace applicative (qui a fait l'action) |
-| `ALERTE_DOCUMENT.destinataire_id` → renommée **`destinataire_utilisateur_id`** | `utilisateurs(id)` | Destinataire d'une notif = compte |
-| `DOCUMENT_ADMIN.verifie_par_id` | `utilisateurs(id)` | Qui a validé → action applicative |
-| `created_by`, `updated_by` (toutes tables) | `utilisateurs(id)` | Audit technique |
+| FK d'origine                                                                   | Redirigée vers     | Raison                                  |
+| ------------------------------------------------------------------------------ | ------------------ | --------------------------------------- |
+| `CHANTIER.responsable_id`                                                      | `employes(id)`     | Rôle métier, pas un compte              |
+| `POINTAGE.employe_id`                                                          | `employes(id)`     | Donnée RH                               |
+| `HISTORIQUE_DOCUMENT.employe_id` → renommée **`utilisateur_id`**               | `utilisateurs(id)` | Trace applicative (qui a fait l'action) |
+| `ALERTE_DOCUMENT.destinataire_id` → renommée **`destinataire_utilisateur_id`** | `utilisateurs(id)` | Destinataire d'une notif = compte       |
+| `DOCUMENT_ADMIN.verifie_par_id`                                                | `utilisateurs(id)` | Qui a validé → action applicative       |
+| `created_by`, `updated_by` (toutes tables)                                     | `utilisateurs(id)` | Audit technique                         |
 
 ### Synchronisation `user` (Better Auth) ↔ `utilisateurs`
 
@@ -136,5 +136,6 @@ Hook `databaseHooks.user.update.after` qui propage les changements d'email. Si B
 ## Révision
 
 À revisiter si :
+
 - Plus jamais d'utilisateurs externes (tous les comptes = employés) → simplification possible en fusionnant.
 - Introduction de profils multiples (un utilisateur = plusieurs employés dans différentes entités juridiques) → évolution vers une table de jonction `utilisateur_employe`.

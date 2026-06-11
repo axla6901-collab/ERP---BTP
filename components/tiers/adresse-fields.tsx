@@ -2,13 +2,7 @@
 
 import { type Control, type FieldValues, type Path } from 'react-hook-form';
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 type Props<T extends FieldValues> = {
@@ -106,11 +100,7 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
           <FormItem>
             <FormLabel>Pays</FormLabel>
             <FormControl>
-              <Input
-                maxLength={100}
-                {...field}
-                value={(field.value as string) ?? 'France'}
-              />
+              <Input maxLength={100} {...field} value={(field.value as string) ?? 'France'} />
             </FormControl>
             <FormMessage />
           </FormItem>

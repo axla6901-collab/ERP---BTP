@@ -12,7 +12,7 @@ export default function Loading() {
       </div>
 
       <div className="grid gap-4 rounded-md border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2 space-y-1">
+        <div className="space-y-1 lg:col-span-2">
           <div className="h-3 w-20 animate-pulse rounded bg-muted/60" />
           <div className="h-9 w-full animate-pulse rounded bg-muted/40" />
         </div>

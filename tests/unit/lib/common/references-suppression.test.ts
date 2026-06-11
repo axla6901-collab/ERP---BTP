@@ -45,9 +45,7 @@ describe('messageBlocageSuppression', () => {
 
   it('aucune référence → null (suppression autorisée)', () => {
     expect(messageBlocageSuppression('ce client', [])).toBeNull();
-    expect(
-      messageBlocageSuppression('ce client', [devis(0), facture(0), chantier(0)]),
-    ).toBeNull();
+    expect(messageBlocageSuppression('ce client', [devis(0), facture(0), chantier(0)])).toBeNull();
   });
 
   it('une seule référence singulière', () => {
@@ -66,9 +64,7 @@ describe('messageBlocageSuppression', () => {
   });
 
   it('ignore les compteurs nuls et énumère les non-nuls', () => {
-    expect(
-      messageBlocageSuppression('ce client', [devis(3), facture(0), chantier(2)]),
-    ).toBe(
+    expect(messageBlocageSuppression('ce client', [devis(3), facture(0), chantier(2)])).toBe(
       "Suppression impossible : ce client est référencé par 3 devis et 2 chantiers. Désactivez-le plutôt si vous ne l'utilisez plus.",
     );
   });

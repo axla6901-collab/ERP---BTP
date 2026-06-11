@@ -22,18 +22,11 @@ import {
 } from '@/components/ui/table';
 import { permissions, rolePermissions, roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
-import {
-  basculerActif,
-  dupliquerRole,
-  enregistrerMatrice,
-  supprimerRole,
-} from '@/lib/admin/roles';
+import { basculerActif, dupliquerRole, enregistrerMatrice, supprimerRole } from '@/lib/admin/roles';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (RBAC, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
 
-function grouperPermissions(
-  perms: (typeof permissions.$inferSelect)[],
-): GroupePermissions[] {
+function grouperPermissions(perms: (typeof permissions.$inferSelect)[]): GroupePermissions[] {
   const parModule = new Map<string, Map<string | null, typeof perms>>();
   for (const p of perms) {
     if (!parModule.has(p.module)) parModule.set(p.module, new Map());
@@ -96,10 +89,7 @@ export default async function RolesPage() {
         title="Rôles applicatifs"
         subtitle={`${rolesRows.length} rôle(s)`}
         actions={
-          <Link
-            href="/administration/roles/nouveau"
-            className={buttonVariants({ size: 'sm' })}
-          >
+          <Link href="/administration/roles/nouveau" className={buttonVariants({ size: 'sm' })}>
             + Ajouter
           </Link>
         }

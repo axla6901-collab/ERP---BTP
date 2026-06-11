@@ -50,10 +50,7 @@ export default async function PlanningListePage({
 
   // Droit d'accès à la vue d'ensemble multi-chantier (matrice RBAC, migr. 0055).
   // Sans ce droit, l'utilisateur ne dispose que de la vue « Liste ».
-  const peutVueEnsemble = await aPermission(
-    ctx.utilisateur.roleId,
-    PERM_PLANNING_VUE_ENSEMBLE,
-  );
+  const peutVueEnsemble = await aPermission(ctx.utilisateur.roleId, PERM_PLANNING_VUE_ENSEMBLE);
 
   return (
     <div className="space-y-6">
@@ -89,8 +86,8 @@ export default async function PlanningListePage({
       ) : chantiersAvecPlanning.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Aucun chantier n&apos;a encore de planning. Cliquez sur «&nbsp;Créer un
-            planning&nbsp;» pour démarrer le diagramme de Gantt d&apos;un chantier.
+            Aucun chantier n&apos;a encore de planning. Cliquez sur «&nbsp;Créer un planning&nbsp;»
+            pour démarrer le diagramme de Gantt d&apos;un chantier.
           </CardContent>
         </Card>
       ) : (

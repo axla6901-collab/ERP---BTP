@@ -9,10 +9,7 @@ import { user } from '@/db/schema/auth';
 import { roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import { getCurrentUtilisateur } from '@/lib/auth/guards';
-import {
-  mettreAJourUtilisateur,
-  supprimerUtilisateur,
-} from '@/lib/admin/utilisateurs';
+import { mettreAJourUtilisateur, supprimerUtilisateur } from '@/lib/admin/utilisateurs';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (utilisateurs/roles, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
 
@@ -115,7 +112,7 @@ export default async function EditionUtilisateurPage({
       </div>
 
       {peutSupprimer && (
-        <div className="border-t pt-6 max-w-xl">
+        <div className="max-w-xl border-t pt-6">
           <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
           <DeleteButton
             label="Supprimer cet utilisateur"

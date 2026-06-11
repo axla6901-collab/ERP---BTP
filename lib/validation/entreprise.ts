@@ -168,9 +168,7 @@ export const conditionNouvelleVersionSchema = z.object({
       `Contenu trop volumineux (max ${CONDITION_HTML_TAILLE_MAX} caractères HTML).`,
     ),
   contenuJson: z.unknown().optional().nullable(),
-  dateEffet: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date d’effet invalide (format YYYY-MM-DD).'),
+  dateEffet: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date d’effet invalide (format YYYY-MM-DD).'),
   commentaire: z
     .string()
     .trim()

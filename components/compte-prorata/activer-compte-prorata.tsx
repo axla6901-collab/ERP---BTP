@@ -48,9 +48,9 @@ export function ActiverCompteProrata({ peutEcrire, onOuvrir }: Props) {
           Compte prorata
         </CardTitle>
         <CardDescription>
-          Mutualisez les dépenses communes de ce chantier (nettoyage, gardiennage, énergie,
-          bennes, base-vie…) et répartissez-les entre les intervenants au prorata de leur marché.
-          Le compte gestionnaire (votre société) est créé automatiquement.
+          Mutualisez les dépenses communes de ce chantier (nettoyage, gardiennage, énergie, bennes,
+          base-vie…) et répartissez-les entre les intervenants au prorata de leur marché. Le compte
+          gestionnaire (votre société) est créé automatiquement.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -32,7 +32,12 @@ export default async function NouvelArticlePage() {
       <ArticleForm
         titre="Nouvel article"
         familles={familles.map((f) => ({ id: f.id, code: f.code, libelle: f.libelle }))}
-        unites={unites.map((u) => ({ id: u.id, code: u.code, libelle: u.libelle, symbole: u.symbole }))}
+        unites={unites.map((u) => ({
+          id: u.id,
+          code: u.code,
+          libelle: u.libelle,
+          symbole: u.symbole,
+        }))}
         onSubmit={async (values) => {
           'use server';
           return creerArticle(values);

@@ -18,10 +18,7 @@ export default async function UnitesPage() {
         title="Unités"
         actions={
           peutEcrire ? (
-            <Link
-              href="/administration/unites/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/administration/unites/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouvelle unité
             </Link>
           ) : null

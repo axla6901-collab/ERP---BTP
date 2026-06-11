@@ -8,11 +8,7 @@ import { peutAdministrer } from '@/lib/admin/permissions';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { lireUnite, mettreAJourUnite, supprimerUnite } from '@/lib/catalogue/unites';
 
-export default async function UniteDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function UniteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const unite = await lireUnite(id);
@@ -63,7 +59,7 @@ export default async function UniteDetailPage({
         successRedirect="/administration/unites"
       />
 
-      <div className="border-t pt-6 max-w-xl">
+      <div className="max-w-xl border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer cette unité"

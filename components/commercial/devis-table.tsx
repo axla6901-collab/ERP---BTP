@@ -109,7 +109,9 @@ export function DevisTable({
       id: 'statut',
       header: 'Statut',
       cell: (d) => (
-        <span className={`rounded-full px-2 py-0.5 text-xs ${classesPill(d.statut as StatutDevis)}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs ${classesPill(d.statut as StatutDevis)}`}
+        >
           {LIBELLES_STATUT_DEVIS[d.statut as StatutDevis]}
         </span>
       ),

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
-import { useGuardedRouter, useUnsavedChangesGuard } from "@/lib/hooks/navigation-guard";
+import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { useState } from 'react';
 import { useForm, type DefaultValues } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -103,7 +103,11 @@ export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) 
 
   return (
     <Form {...form}>
-      <form method="post" onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4 max-w-3xl">
+      <form
+        method="post"
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="grid max-w-3xl gap-4"
+      >
         {erreur && (
           <Alert variant="destructive">
             <AlertTitle>Erreur</AlertTitle>
@@ -185,7 +189,12 @@ export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) 
                     <FormItem>
                       <FormLabel>SIRET (optionnel)</FormLabel>
                       <FormControl>
-                        <Input maxLength={14} placeholder="14 chiffres" {...field} value={field.value ?? ''} />
+                        <Input
+                          maxLength={14}
+                          placeholder="14 chiffres"
+                          {...field}
+                          value={field.value ?? ''}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -359,7 +368,12 @@ export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) 
         </FormSection>
 
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" type="button" onClick={() => guardedRouter.back()} disabled={isSubmitting}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => guardedRouter.back()}
+            disabled={isSubmitting}
+          >
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>

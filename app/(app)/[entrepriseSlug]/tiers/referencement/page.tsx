@@ -6,10 +6,7 @@ import { ReferencementListe } from '@/components/referencement/referencement-lis
 import { buttonVariants } from '@/components/ui/button';
 import { StatCard, StatGrid } from '@/components/ui/stat-card';
 import { requireTenantContext } from '@/lib/auth/tenant-guards';
-import {
-  peutEcrireDocumentsTiers,
-  peutEcrireRegistreTiers,
-} from '@/lib/referencement/permissions';
+import { peutEcrireDocumentsTiers, peutEcrireRegistreTiers } from '@/lib/referencement/permissions';
 import { listerTiersAvecConformite } from '@/lib/referencement/registre';
 
 export default async function ReferencementTiersPage() {

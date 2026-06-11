@@ -269,152 +269,152 @@ export function TierDocumentsList({ tierId, lignes, documents, natures, peutEcri
                 const estOuvert = historiqueOuvert.has(ligne.natureDocumentId);
                 return (
                   <Fragment key={ligne.natureDocumentId}>
-                  <TableRow>
-                    <TableCell className="whitespace-normal">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium">{ligne.libelle}</span>
-                        {ligne.estBloquant && (
-                          <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-medium text-rose-700">
-                            bloquant
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {doc?.nomFichierOrigine ?? 'Aucun fichier'}
-                        {doc?.motifRefus && <> · refus : {doc.motifRefus}</>}
-                      </div>
-                      {historique.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => basculerHistorique(ligne.natureDocumentId)}
-                          aria-expanded={estOuvert}
-                          className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-                        >
-                          {estOuvert ? (
-                            <ChevronDownIcon className="size-3" />
-                          ) : (
-                            <ChevronRightIcon className="size-3" />
+                    <TableRow>
+                      <TableCell className="whitespace-normal">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium">{ligne.libelle}</span>
+                          {ligne.estBloquant && (
+                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-medium text-rose-700">
+                              bloquant
+                            </span>
                           )}
-                          {historique.length} version{historique.length > 1 ? 's' : ''} précédente
-                          {historique.length > 1 ? 's' : ''}
-                        </button>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm tabular-nums text-muted-foreground">
-                      {ligne.dateFinValidite ?? '—'}
-                    </TableCell>
-                    <TableCell>
-                      <StatutDocumentPastille statut={ligne.statut} />
-                    </TableCell>
-                    {peutEcrire && (
-                      <TableCell className="text-right">
-                        <div className="flex shrink-0 items-center justify-end gap-1">
-                          {doc && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                disabled={isPending}
-                                title="Télécharger"
-                                onClick={() => telecharger(doc.id)}
-                              >
-                                <DownloadIcon className="size-3.5" />
-                              </Button>
-                              {doc.statut === 'en_attente_validation' && (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 w-7 p-0 text-emerald-700"
-                                    disabled={isPending}
-                                    title="Valider"
-                                    onClick={() => valider(doc.id)}
-                                  >
-                                    <CheckIcon className="size-3.5" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 w-7 p-0 text-rose-700"
-                                    disabled={isPending}
-                                    title="Refuser"
-                                    onClick={() => refuser(doc.id)}
-                                  >
-                                    <XIcon className="size-3.5" />
-                                  </Button>
-                                </>
-                              )}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-destructive"
-                                disabled={isPending}
-                                title="Supprimer"
-                                onClick={() => supprimer(doc.id)}
-                              >
-                                <Trash2Icon className="size-3.5" />
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            disabled={isPending}
-                            onClick={() => ouvrirAjout(ligne.natureDocumentId)}
-                          >
-                            {doc ? 'Remplacer' : 'Ajouter'}
-                          </Button>
                         </div>
+                        <div className="text-xs text-muted-foreground">
+                          {doc?.nomFichierOrigine ?? 'Aucun fichier'}
+                          {doc?.motifRefus && <> · refus : {doc.motifRefus}</>}
+                        </div>
+                        {historique.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => basculerHistorique(ligne.natureDocumentId)}
+                            aria-expanded={estOuvert}
+                            className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                          >
+                            {estOuvert ? (
+                              <ChevronDownIcon className="size-3" />
+                            ) : (
+                              <ChevronRightIcon className="size-3" />
+                            )}
+                            {historique.length} version{historique.length > 1 ? 's' : ''} précédente
+                            {historique.length > 1 ? 's' : ''}
+                          </button>
+                        )}
                       </TableCell>
-                    )}
-                  </TableRow>
-                  {estOuvert &&
-                    historique.map((v) => (
-                      <TableRow key={v.id} className="bg-muted/30">
-                        <TableCell className="whitespace-normal pl-6">
-                          <div className="text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground/70">
-                              {v.nomFichierOrigine ?? 'Sans nom'}
-                            </span>{' '}
-                            · version du {formatDateFr(v.createdAt)}
-                            {v.motifRefus && <> · refus : {v.motifRefus}</>}
+                      <TableCell className="text-sm tabular-nums text-muted-foreground">
+                        {ligne.dateFinValidite ?? '—'}
+                      </TableCell>
+                      <TableCell>
+                        <StatutDocumentPastille statut={ligne.statut} />
+                      </TableCell>
+                      {peutEcrire && (
+                        <TableCell className="text-right">
+                          <div className="flex shrink-0 items-center justify-end gap-1">
+                            {doc && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  disabled={isPending}
+                                  title="Télécharger"
+                                  onClick={() => telecharger(doc.id)}
+                                >
+                                  <DownloadIcon className="size-3.5" />
+                                </Button>
+                                {doc.statut === 'en_attente_validation' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-emerald-700"
+                                      disabled={isPending}
+                                      title="Valider"
+                                      onClick={() => valider(doc.id)}
+                                    >
+                                      <CheckIcon className="size-3.5" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-rose-700"
+                                      disabled={isPending}
+                                      title="Refuser"
+                                      onClick={() => refuser(doc.id)}
+                                    >
+                                      <XIcon className="size-3.5" />
+                                    </Button>
+                                  </>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-destructive"
+                                  disabled={isPending}
+                                  title="Supprimer"
+                                  onClick={() => supprimer(doc.id)}
+                                >
+                                  <Trash2Icon className="size-3.5" />
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              disabled={isPending}
+                              onClick={() => ouvrirAjout(ligne.natureDocumentId)}
+                            >
+                              {doc ? 'Remplacer' : 'Ajouter'}
+                            </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm tabular-nums text-muted-foreground">
-                          {v.dateFinValidite ?? '—'}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {LIBELLE_STATUT_DOC[v.statut]}
-                        </TableCell>
-                        {peutEcrire && (
-                          <TableCell className="text-right">
-                            <div className="flex shrink-0 items-center justify-end gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                disabled={isPending}
-                                title="Télécharger cette version"
-                                onClick={() => telecharger(v.id)}
-                              >
-                                <DownloadIcon className="size-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0 text-destructive"
-                                disabled={isPending}
-                                title="Supprimer cette version"
-                                onClick={() => supprimer(v.id)}
-                              >
-                                <Trash2Icon className="size-3.5" />
-                              </Button>
+                      )}
+                    </TableRow>
+                    {estOuvert &&
+                      historique.map((v) => (
+                        <TableRow key={v.id} className="bg-muted/30">
+                          <TableCell className="whitespace-normal pl-6">
+                            <div className="text-xs text-muted-foreground">
+                              <span className="font-medium text-foreground/70">
+                                {v.nomFichierOrigine ?? 'Sans nom'}
+                              </span>{' '}
+                              · version du {formatDateFr(v.createdAt)}
+                              {v.motifRefus && <> · refus : {v.motifRefus}</>}
                             </div>
                           </TableCell>
-                        )}
-                      </TableRow>
-                    ))}
+                          <TableCell className="text-sm tabular-nums text-muted-foreground">
+                            {v.dateFinValidite ?? '—'}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {LIBELLE_STATUT_DOC[v.statut]}
+                          </TableCell>
+                          {peutEcrire && (
+                            <TableCell className="text-right">
+                              <div className="flex shrink-0 items-center justify-end gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0"
+                                  disabled={isPending}
+                                  title="Télécharger cette version"
+                                  onClick={() => telecharger(v.id)}
+                                >
+                                  <DownloadIcon className="size-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-destructive"
+                                  disabled={isPending}
+                                  title="Supprimer cette version"
+                                  onClick={() => supprimer(v.id)}
+                                >
+                                  <Trash2Icon className="size-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
                   </Fragment>
                 );
               })}

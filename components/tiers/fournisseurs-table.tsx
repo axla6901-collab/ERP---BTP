@@ -58,9 +58,7 @@ export function FournisseursTable({ items, rightActions, peutEcrire, onChangerSt
       id: 'contact',
       header: 'Contact',
       cell: (f) => (
-        <span className="text-xs text-muted-foreground">
-          {f.email ?? f.telephone ?? '—'}
-        </span>
+        <span className="text-xs text-muted-foreground">{f.email ?? f.telephone ?? '—'}</span>
       ),
       sortAccessor: (f) => f.email ?? f.telephone,
       searchAccessor: (f) => `${f.email ?? ''} ${f.telephone ?? ''}`,
@@ -69,10 +67,7 @@ export function FournisseursTable({ items, rightActions, peutEcrire, onChangerSt
       id: 'contacts',
       header: 'Contacts',
       cell: (f) => (
-        <span
-          className="text-xs"
-          title={`${f.contactsActifs} actif(s) sur ${f.contactsTotal}`}
-        >
+        <span className="text-xs" title={`${f.contactsActifs} actif(s) sur ${f.contactsTotal}`}>
           {f.contactsTotal === 0 ? (
             <span className="text-muted-foreground">—</span>
           ) : (

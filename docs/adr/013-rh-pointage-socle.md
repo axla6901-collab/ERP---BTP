@@ -9,6 +9,7 @@
 M1-M4 ont produit un ERP commercial + chantiers fonctionnel. Le module RH est le prochain pilier : sans la capacité de saisir des heures par employé/chantier, il est impossible de calculer la marge réelle d'un chantier ni de produire les exports paie.
 
 Référence d'inspiration : projet `C:\Users\aacosta\Downloads\Claude\Pointage` (React/Vite/Electron) déjà en usage par l'utilisateur. Il propose :
+
 - Saisie matrice mensuelle (collaborateur × jours)
 - Multi-type de pointage : heures, kg acier, m³ béton (pour comparaison budget vs réel)
 - Indemnités BTP : panier, grand panier, nuit
@@ -22,6 +23,7 @@ erp-btp normalise ce modèle en tables relationnelles avec FK vers `chantiers` e
 ### Modèle employes
 
 Table normalisée avec **les attributs réels nécessaires en PME BTP** :
+
 - Identité : nom, prénom, email, téléphone
 - Contrat : `type_contrat` enum (CDI/CDD/INT/ALT/STAGE), `societe_interim` (obligatoire si INT via CHECK SQL), date_entree, date_sortie
 - Métier : qualification (texte libre — maçon, chef d'équipe, conducteur…), zone_deplacement_defaut
@@ -36,6 +38,7 @@ Table normalisée avec **les attributs réels nécessaires en PME BTP** :
 Une ligne = un fait métier unitaire : « tel employé, tel jour, telle ligne dans la matrice ».
 
 Champs essentiels :
+
 - `employe_id` FK NOT NULL
 - `chantier_id` FK NULL — NULL pour les absences (CHECK SQL force la cohérence)
 - `chantier_tache_id` FK NULL — optionnel (pointage sur une tâche précise quand pertinent)
@@ -47,6 +50,7 @@ Champs essentiels :
 - 3 booleans indemnités : `panier`, `grand_panier`, `nuit_panier_soir`
 
 **CHECK SQL clés** :
+
 - `type='absence' ↔ chantier_id IS NULL ET motif_absence IS NOT NULL` (cohérence absence/chantier/motif)
 - `quantite > 0`
 
@@ -55,12 +59,14 @@ Champs essentiels :
 ### Saisie matrice mensuelle
 
 Inspirée directement de `Pointage.jsx` mais persistée. Une saisie = `saisirMatricePointages({ annee, mois, lignes })` où chaque ligne porte :
+
 - couple `(employe_id, chantier_id, type, motif_absence?)`
 - map `jours: { '1': h, '2': h, ... }` — clé = jour, valeur = quantité
 
 **Sémantique du save** : pour chaque ligne, on **soft-delete** tous les pointages existants du mois sur ce couple (employe, chantier, type), puis on **INSERT** les nouvelles entrées (jours avec quantité > 0 uniquement). Le tout dans une seule transaction.
 
 **Conséquences** :
+
 - ✅ Idempotent : refaire la sauvegarde produit le même état
 - ✅ UI simple : pas de diff client/serveur à calculer
 - ⚠️ Si un pointage hors matrice (saisie unitaire ailleurs) existe pour ce couple/mois, il sera écrasé. Acceptable car la matrice est la source de vérité.
@@ -81,6 +87,7 @@ Inspirée directement de `Pointage.jsx` mais persistée. Une saisie = `saisirMat
 ## Conséquences
 
 ### Positives
+
 - **Continuité** : tout ce qui se faisait dans Pointage est réutilisable, en plus structuré
 - **Audit trail complet** : chaque pointage tracé, contrairement au JSON flat de Pointage
 - **Pas de duplication** : un employé = une ligne dans `employes`, plus de format "Nom - Type - Société"
@@ -88,6 +95,7 @@ Inspirée directement de `Pointage.jsx` mais persistée. Une saisie = `saisirMat
 - **Cohérence métier garantie** : CHECK SQL bloque les absences-avec-chantier, les pointages-sans-motif, etc.
 
 ### Négatives / Risques
+
 - **Migration de données Pointage → erp-btp** : non couverte en M5.2 (l'utilisateur peut soit ressaisir, soit attendre M5.3 import). Cohérent avec la nature exploratoire de l'application erp-btp en M0.
 - **Pas de Budget Pro** : reporté M5.4 (comparaison budget vs réel par chantier).
 - **Pas d'export Excel** : reporté M5.3.
@@ -105,6 +113,7 @@ Inspirée directement de `Pointage.jsx` mais persistée. Une saisie = `saisirMat
 ## Révision
 
 À revisiter quand :
+
 - M5.3 livrera l'import Excel — il faudra mapper l'ancien format Pointage (string encodée) vers les vraies entités
 - M5.4 ajoutera le Budget Pro — utilisera les types `kg_acier_*` et `m3_beton_*` déjà dans l'enum `type_pointage`
 - M5.5 attaquera la PWA / offline / IndexedDB — gros morceau (cf. ADR-004)

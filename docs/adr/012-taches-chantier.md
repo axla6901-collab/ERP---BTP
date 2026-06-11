@@ -13,6 +13,7 @@ M4.1 a livré le chantier comme entité racine (libellé, client, statut). Mais 
 ### Modèle data
 
 **Table `chantier_taches`** :
+
 - `chantier_id` FK ON DELETE CASCADE (si on supprime un chantier hard, les tâches partent)
 - `ordre` INT : position dans la liste (non unique — l'unicité serait gênante au déplacement)
 - `libelle` TEXT NOT NULL
@@ -29,14 +30,17 @@ M4.1 a livré le chantier comme entité racine (libellé, client, statut). Mais 
 ### Statut + avancement
 
 On garde **les deux** :
+
 - L'enum pour les transitions discrètes (« bloqué » a un sens fort qu'un % ne capte pas)
 - Le % pour la finesse (on peut être à 60 % d'une tâche `en_cours`)
 
 **Cohérence forcée** :
+
 - Passage à `termine` → `avancement_pourcent = 100` (auto)
 - Passage à `en_cours` → `date_debut_reelle = today` si vide (auto)
 
 **Transitions** :
+
 ```
 a_faire   → en_cours | annule
 en_cours  → bloque | termine | annule
@@ -58,12 +62,14 @@ L'édition se fait par expansion de ligne (mode édition inline) plutôt que par
 ## Conséquences
 
 ### Positives
+
 - **Suivi opérationnel concret** : on peut enfin dire « 4 tâches sur 10 terminées » sur un chantier
 - **Indicateur d'avancement chantier** : moyenne pondérée des tâches (calculée côté UI pour M4.2, à matérialiser en M4.4+ si besoin)
 - **Audit complet** : chaque changement de statut + chaque mise à jour tracée
 - **Transitions guardées** : pas de saut illogique (a_faire → termine est interdit, doit passer par en_cours)
 
 ### Négatives / Risques
+
 - **Pas de dépendances entre tâches** : on ne peut pas exprimer « T2 commence après T1 ». Acceptable pour M4.2 (le BTP en petite structure ne fait pas de Gantt formel). M10 reconsidérera.
 - **Pas de drag&drop** : l'ergonomie est moindre pour réordonner > 10 tâches. Boutons ↑/↓ restent fonctionnels.
 - **Ordre non unique** : deux tâches peuvent avoir le même `ordre` après un cas de concurrence. L'ordre secondaire est `created_at` (déterministe). Pas de bug fonctionnel.
@@ -80,6 +86,7 @@ L'édition se fait par expansion de ligne (mode édition inline) plutôt que par
 ## Révision
 
 À revisiter quand :
+
 - Plus de 50 tâches/chantier devient régulier → pagination ou regroupement par phase
 - Besoin de dépendances temporelles → Gantt léger (M10)
 - M5 introduit `employes` → migration `responsable_id` → `employe_responsable_id`

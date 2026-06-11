@@ -18,10 +18,7 @@ export default async function FamillesPage() {
         title="Familles"
         actions={
           peutEcrire ? (
-            <Link
-              href="/catalogue/familles/nouveau"
-              className={buttonVariants({ size: 'sm' })}
-            >
+            <Link href="/catalogue/familles/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouvelle famille
             </Link>
           ) : null

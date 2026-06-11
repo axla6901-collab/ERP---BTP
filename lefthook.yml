@@ -11,21 +11,21 @@ pre-commit:
   parallel: true
   jobs:
     - name: prettier
-      glob: "*.{ts,tsx,js,jsx,json,md,yml,yaml,css}"
+      glob: '*.{ts,tsx,js,jsx,json,md,yml,yaml,css}'
       run: pnpm exec prettier --check {staged_files}
-      fail_text: "Format non conforme. Corrige avec : pnpm exec prettier --write {staged_files}"
+      fail_text: 'Format non conforme. Corrige avec : pnpm exec prettier --write {staged_files}'
 
     - name: eslint
-      glob: "*.{ts,tsx,js,jsx}"
+      glob: '*.{ts,tsx,js,jsx}'
       run: pnpm exec next lint --file {staged_files}
-      fail_text: "Erreurs ESLint à corriger avant commit."
+      fail_text: 'Erreurs ESLint à corriger avant commit.'
 
 pre-push:
   jobs:
     - name: typecheck
       run: pnpm typecheck
-      fail_text: "Erreurs TypeScript à corriger avant push."
+      fail_text: 'Erreurs TypeScript à corriger avant push.'
 
     - name: tests
       run: pnpm test
-      fail_text: "Tests Vitest en échec."
+      fail_text: 'Tests Vitest en échec.'

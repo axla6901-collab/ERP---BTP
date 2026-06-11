@@ -28,9 +28,7 @@ const SEGMENT_PAR_TYPE = {
 } as const;
 
 function colonneProprietaire(p: ProprietaireDocument) {
-  return p.type === 'sous_traitant'
-    ? documentsTiers.sousTraitantId
-    : documentsTiers.fournisseurId;
+  return p.type === 'sous_traitant' ? documentsTiers.sousTraitantId : documentsTiers.fournisseurId;
 }
 
 /** Recharge l'UI de la fiche du tiers propriétaire après mutation. */
@@ -66,8 +64,7 @@ export async function preparerUploadDocumentTier(
   filename: string,
   tailleBytes: number,
 ): Promise<
-  | { ok: true; data: { uploadUrl: string; minioKey: string } }
-  | { ok: false; error: string }
+  { ok: true; data: { uploadUrl: string; minioKey: string } } | { ok: false; error: string }
 > {
   await requireTenantContextWithMfa(ROLES_TIERS_WRITE);
   if (!contentType || contentType.length > 200) {

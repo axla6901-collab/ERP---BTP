@@ -40,9 +40,7 @@ export function EmployesTable({ items, rightActions, peutEcrire }: Props) {
     {
       id: 'qualification',
       header: 'Qualification',
-      cell: (e) => (
-        <span className="text-xs text-muted-foreground">{e.qualification ?? '—'}</span>
-      ),
+      cell: (e) => <span className="text-xs text-muted-foreground">{e.qualification ?? '—'}</span>,
       sortAccessor: (e) => e.qualification,
       searchAccessor: (e) => e.qualification ?? '',
     },
@@ -58,9 +56,7 @@ export function EmployesTable({ items, rightActions, peutEcrire }: Props) {
     {
       id: 'societe',
       header: 'Société intérim',
-      cell: (e) => (
-        <span className="text-xs text-muted-foreground">{e.societeInterim ?? '—'}</span>
-      ),
+      cell: (e) => <span className="text-xs text-muted-foreground">{e.societeInterim ?? '—'}</span>,
       sortAccessor: (e) => e.societeInterim,
       searchAccessor: (e) => e.societeInterim ?? '',
     },
@@ -68,9 +64,7 @@ export function EmployesTable({ items, rightActions, peutEcrire }: Props) {
       id: 'heures',
       header: 'Heures/sem.',
       align: 'right',
-      cell: (e) => (
-        <span className="text-xs tabular-nums">{e.heuresHebdoContractuelles}</span>
-      ),
+      cell: (e) => <span className="text-xs tabular-nums">{e.heuresHebdoContractuelles}</span>,
       sortAccessor: (e) => Number(e.heuresHebdoContractuelles),
     },
     {
@@ -107,9 +101,7 @@ export function EmployesTable({ items, rightActions, peutEcrire }: Props) {
       rowHref={(e) => `/rh/employes/${e.id}`}
       searchPlaceholder="Rechercher un employé…"
       emptyMessage={
-        peutEcrire
-          ? 'Aucun employé. Crée le premier via le bouton ci-dessus.'
-          : 'Aucun employé.'
+        peutEcrire ? 'Aucun employé. Crée le premier via le bouton ci-dessus.' : 'Aucun employé.'
       }
       rightActions={rightActions}
       defaultSort={{ id: 'nom', dir: 'asc' }}

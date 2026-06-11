@@ -59,10 +59,7 @@ describe('PlanningListeTable', () => {
 
   it('affiche « — » quand l’avancement est nul', () => {
     render(
-      <PlanningListeTable
-        chantiers={[som({ avancementPourcent: null })]}
-        entrepriseSlug="acme"
-      />,
+      <PlanningListeTable chantiers={[som({ avancementPourcent: null })]} entrepriseSlug="acme" />,
     );
     expect(screen.getByText('—')).toBeInTheDocument();
   });

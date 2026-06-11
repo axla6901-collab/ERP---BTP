@@ -33,8 +33,8 @@ export default async function NouvelleSituationPage({
     <div className="space-y-4">
       <h2 className="text-xl font-medium">Nouvelle situation d&apos;avancement</h2>
       <p className="text-sm text-muted-foreground">
-        Source des postes : devis accepté du chantier, ou saisie manuelle / import Excel/CSV.
-        Chaque ligne peut être enrichie d&apos;un article du catalogue.
+        Source des postes : devis accepté du chantier, ou saisie manuelle / import Excel/CSV. Chaque
+        ligne peut être enrichie d&apos;un article du catalogue.
       </p>
       <SituationForm
         chantiers={chantiers}

@@ -7,15 +7,12 @@ import { and, asc, eq, gte, isNull, lte, type SQL } from 'drizzle-orm';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
+import { lireClasseurBytes, ClasseurFormatError } from '@/lib/import/classeur';
 import { chantiers } from '@/db/schema/chantiers';
 import { clients } from '@/db/schema/commercial';
 import { employes } from '@/db/schema/employes';
 import { pointages } from '@/db/schema/pointages';
-import type {
-  MotifAbsence,
-  TypePointage,
-  TypeContrat,
-} from '@/lib/validation/rh';
+import type { MotifAbsence, TypePointage, TypeContrat } from '@/lib/validation/rh';
 
 import { ROLES_RH_WRITE } from './permissions';
 import type { FiltresExport, ImportStats } from './import-export-types';
@@ -78,7 +75,10 @@ function parseCollab(raw: string): {
   typeContrat: TypeContrat;
   societe: string;
 } {
-  const parts = raw.split('-').map((s) => s.trim()).filter(Boolean);
+  const parts = raw
+    .split('-')
+    .map((s) => s.trim())
+    .filter(Boolean);
   let typeRaw = '';
   let societe = '';
   let identite = raw;
@@ -106,7 +106,10 @@ function parseCollab(raw: string): {
 }
 
 function parseChantier(raw: string): { libelle: string; ville: string | null } {
-  const parts = raw.split('-').map((s) => s.trim()).filter(Boolean);
+  const parts = raw
+    .split('-')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length >= 3) {
     const zoneRaw = parts[parts.length - 1]!.toUpperCase();
     const isZone = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'GD', 'GE'].includes(zoneRaw);
@@ -151,9 +154,7 @@ type SourceData = {
 // Import JSON Pointage
 // ─────────────────────────────────────────────────────────────
 
-export async function importerJsonPointage(
-  jsonText: string,
-): Promise<ActionResult<ImportStats>> {
+export async function importerJsonPointage(jsonText: string): Promise<ActionResult<ImportStats>> {
   const ctx = await requireTenantContextWithMfa(ROLES_RH_WRITE);
 
   let parsed: SourceData;
@@ -505,7 +506,7 @@ const EXCEL_HEADER_MAP: Record<string, keyof SourcePointage> = {
   collaborateur: 'collaborateur',
   date: 'date',
   'nbr heures / kg': 'nbr_heures_kg',
-  'nbr_heures_kg': 'nbr_heures_kg',
+  nbr_heures_kg: 'nbr_heures_kg',
   heures: 'nbr_heures_kg',
   quantite: 'nbr_heures_kg',
   'type de document': 'type_document',
@@ -535,7 +536,9 @@ const EXCEL_HEADER_MAP: Record<string, keyof SourcePointage> = {
 function rowsExcelToJson(rows: unknown[][]): SourcePointage[] {
   if (rows.length < 2) return [];
   const headers = (rows[0] ?? []).map((h) =>
-    String(h ?? '').toLowerCase().trim(),
+    String(h ?? '')
+      .toLowerCase()
+      .trim(),
   );
   const out: SourcePointage[] = [];
   for (const row of rows.slice(1)) {
@@ -596,12 +599,12 @@ export async function importerExcelPointage(
   await requireTenantContextWithMfa(ROLES_RH_WRITE);
   let rows: unknown[][];
   try {
-    const XLSX = await import('xlsx');
-    const wb = XLSX.read(buffer, { type: 'array' });
-    const sheet = wb.Sheets[wb.SheetNames[0]!];
-    if (!sheet) return { ok: false, error: 'Pas de feuille dans le classeur.' };
-    rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: false }) as unknown[][];
+    const classeur = await lireClasseurBytes(buffer);
+    const sheetName = classeur.sheetNames[0];
+    if (!sheetName) return { ok: false, error: 'Pas de feuille dans le classeur.' };
+    rows = classeur.feuille(sheetName);
   } catch (err) {
+    if (err instanceof ClasseurFormatError) return { ok: false, error: err.message };
     return {
       ok: false,
       error: 'Lecture Excel impossible : ' + (err instanceof Error ? err.message : 'erreur'),

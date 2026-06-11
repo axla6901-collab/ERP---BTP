@@ -5,10 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 import { peutAdministrer, ROLES_ADMINISTRATION } from '@/lib/admin/permissions';
 import { auditLogIn } from '@/lib/audit/log';
-import {
-  requireTenantContextWithMfa,
-  type TenantContext,
-} from '@/lib/auth/tenant-guards';
+import { requireTenantContextWithMfa, type TenantContext } from '@/lib/auth/tenant-guards';
 import { db } from '@/lib/db/client';
 import { withTenant } from '@/lib/db/with-tenant';
 import { rolePermissions, roles } from '@/db/schema/rbac';
@@ -88,10 +85,7 @@ export async function creerRole(input: RoleCreateInput): Promise<ActionResult<{ 
   }
 }
 
-export async function mettreAJourRole(
-  id: string,
-  input: RoleUpdateInput,
-): Promise<ActionResult> {
+export async function mettreAJourRole(id: string, input: RoleUpdateInput): Promise<ActionResult> {
   const ctx = await requireAdmin();
   const parsed = roleUpdateSchema.safeParse(input);
   if (!parsed.success) {
@@ -228,10 +222,7 @@ export async function basculerActif(id: string, actif: boolean): Promise<ActionR
   await withTenant(ctx.entreprise.id, async (tx) => {
     const [before] = await tx.select().from(roles).where(eq(roles.id, id)).limit(1);
     if (!before) throw new Error('Rôle introuvable.');
-    await tx
-      .update(roles)
-      .set({ actif, updatedAt: new Date() })
-      .where(eq(roles.id, id));
+    await tx.update(roles).set({ actif, updatedAt: new Date() }).where(eq(roles.id, id));
     await auditLogIn(tx, {
       action: 'update',
       tableName: 'roles',
