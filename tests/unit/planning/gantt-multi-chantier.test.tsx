@@ -84,16 +84,14 @@ describe('GanttMultiChantier', () => {
   });
 
   it("la largeur de la frise ne change pas au dépliage (pas de saut d'axe)", async () => {
-    const chargerTaches = vi
-      .fn()
-      .mockResolvedValue([
-        tache({
-          id: 't1',
-          libelle: 'Fondations',
-          dateDebutPrevue: '2026-05-03',
-          dateFinPrevue: '2026-05-09',
-        }),
-      ]);
+    const chargerTaches = vi.fn().mockResolvedValue([
+      tache({
+        id: 't1',
+        libelle: 'Fondations',
+        dateDebutPrevue: '2026-05-03',
+        dateFinPrevue: '2026-05-09',
+      }),
+    ]);
     render(
       <GanttMultiChantier
         chantiers={[som()]}
@@ -143,16 +141,14 @@ describe('GanttMultiChantier', () => {
   });
 
   it('replie puis redéplie : utilise le cache (pas de second chargement)', async () => {
-    const chargerTaches = vi
-      .fn()
-      .mockResolvedValue([
-        tache({
-          id: 't1',
-          libelle: 'Fondations',
-          dateDebutPrevue: '2026-05-03',
-          dateFinPrevue: '2026-05-09',
-        }),
-      ]);
+    const chargerTaches = vi.fn().mockResolvedValue([
+      tache({
+        id: 't1',
+        libelle: 'Fondations',
+        dateDebutPrevue: '2026-05-03',
+        dateFinPrevue: '2026-05-09',
+      }),
+    ]);
     render(
       <GanttMultiChantier
         chantiers={[som()]}

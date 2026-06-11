@@ -10,15 +10,21 @@
 pre-commit:
   parallel: true
   jobs:
+    # On ne passe PAS {staged_files} en argument : sous Windows, un gros commit
+    # (refacto large, reformatage du repo, grosse MAJ de deps) dépasse la limite
+    # de longueur de ligne de commande → « La ligne de commande est trop longue »,
+    # ce qui forçait le --no-verify. On lance donc prettier/eslint sur TOUT le repo
+    # avec cache (réexécutions rapides). Le `glob` ne sert plus qu'à activer le job
+    # quand au moins un fichier du type concerné est stagé.
     - name: prettier
       glob: '*.{ts,tsx,js,jsx,json,md,yml,yaml,css}'
-      run: pnpm exec prettier --check {staged_files}
-      fail_text: 'Format non conforme. Corrige avec : pnpm exec prettier --write {staged_files}'
+      run: pnpm exec prettier --check --cache .
+      fail_text: 'Format non conforme. Lance : pnpm format'
 
     - name: eslint
       glob: '*.{ts,tsx,js,jsx}'
-      run: pnpm exec next lint --file {staged_files}
-      fail_text: 'Erreurs ESLint à corriger avant commit.'
+      run: pnpm exec next lint
+      fail_text: 'Erreurs ESLint à corriger avant commit (détail : pnpm lint).'
 
 pre-push:
   jobs:

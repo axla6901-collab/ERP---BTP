@@ -380,16 +380,14 @@ async function remplacerLiens(
   await tx.delete(tierCorpsEtat).where(eq(tierCorpsEtat.tierId, tierId));
   await tx.delete(tierSocietesAutorisees).where(eq(tierSocietesAutorisees.tierId, tierId));
   if (corpsEtatIds.length > 0) {
-    await tx
-      .insert(tierCorpsEtat)
-      .values(
-        corpsEtatIds.map((corpsEtatId) => ({
-          tierId,
-          corpsEtatId,
-          entrepriseId,
-          createdBy: userId,
-        })),
-      );
+    await tx.insert(tierCorpsEtat).values(
+      corpsEtatIds.map((corpsEtatId) => ({
+        tierId,
+        corpsEtatId,
+        entrepriseId,
+        createdBy: userId,
+      })),
+    );
   }
   if (societeIds.length > 0) {
     await tx
