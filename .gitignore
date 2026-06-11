@@ -45,6 +45,7 @@ playwright/.cache/
 # Cache
 .turbo/
 .eslintcache
+tsconfig.tsbuildinfo
 
 # Sentry
 .sentryclirc

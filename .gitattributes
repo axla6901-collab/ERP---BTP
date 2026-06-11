@@ -1,0 +1,28 @@
+# Normalisation des fins de ligne.
+#
+# `text=auto` : Git détecte automatiquement les fichiers texte.
+# `eol=lf`     : ils sont stockés ET extraits en LF, y compris sous Windows.
+# Objectif : éliminer le bruit « LF will be replaced by CRLF » et aligner sur
+# Prettier (endOfLine: 'lf' par défaut) — plus de fichiers « modifiés » fantômes.
+* text=auto eol=lf
+
+# Scripts shell : LF obligatoire (sinon ils cassent sous Linux/CI).
+*.sh text eol=lf
+
+# Fichiers binaires : aucune conversion de fins de ligne.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.svg  text
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.otf   binary
+*.pdf  binary
+*.xlsx binary
+*.xls  binary
+*.zip  binary
