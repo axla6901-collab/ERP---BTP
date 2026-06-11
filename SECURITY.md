@@ -43,14 +43,38 @@ Réponse sous 72h ouvrées.
 
 ### En-têtes HTTP
 
-Configurés dans `next.config.mjs` :
+Configurés dans `next.config.mjs` (statiques) :
 
 - `Strict-Transport-Security` (HSTS preload)
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy` minimal
-- **CSP stricte** à ajouter en M1 (nonces pour scripts, pas de `unsafe-inline`)
+
+**Content-Security-Policy** (chantier B3 — `lib/security/csp.ts`, posée par requête
+dans `middleware.ts`) :
+
+- **Nonce par requête** sur `script-src` en production (`'nonce-…' 'strict-dynamic'`,
+  sans `'unsafe-inline'` ni `'unsafe-eval'`) — aucun script inline applicatif ;
+  Next nonce ses propres scripts de bootstrap RSC.
+- `style-src 'self' 'unsafe-inline'` assumé : recharts, le Gantt, sonner et
+  next/font posent des styles inline non nonçables (le nonce ne durcit que les
+  scripts).
+- `connect-src` / `img-src` incluent l'origine MinIO (uploads PUT presignés +
+  logos) dérivée de `S3_ENDPOINT`, et l'origine Sentry/GlitchTip si
+  `NEXT_PUBLIC_SENTRY_DSN` est défini.
+- `script-src-attr 'none'` : aucun gestionnaire d'événement inline (`onclick=…`)
+  autorisé (verrou de défense en profondeur — le nonce ne couvre pas les attributs).
+- `frame-ancestors`/`frame-src`/`object-src 'none'`, `base-uri`/`form-action 'self'`,
+  `worker-src 'self'` (PWA), `upgrade-insecure-requests` en prod — **sauf** si MinIO/S3
+  est servi en `http://` (l'upgrade casserait la signature presignée).
+- **Dette acceptée** : `style-src 'unsafe-inline'` (recharts/Gantt/sonner/next-font
+  posent du style inline non nonçable). Conforme à B3 qui exige l'absence
+  d'`unsafe-inline` sur les _scripts_, pas sur les styles.
+- En **dev**, la CSP est relâchée (`'unsafe-eval'` + `ws:`) pour Turbopack/HMR.
+- Violations collectées sur `POST /api/csp-report` (directives `report-uri` / `report-to` et en-tête `Reporting-Endpoints`), loguées côté serveur + Sentry.
+- Bascule d'observation : `CSP_REPORT_ONLY=true` ⇒ en-tête
+  `Content-Security-Policy-Report-Only` (validation sans blocage, reporting actif).
 
 ### Fichiers (documents chantier et administratifs)
 

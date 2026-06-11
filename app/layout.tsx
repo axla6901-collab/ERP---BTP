@@ -10,6 +10,15 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
+// CSP à nonce (cf. `middleware.ts` + `lib/security/csp.ts`) : le nonce est
+// régénéré à CHAQUE requête. Une page prégénérée en statique servirait un HTML
+// figé sans ce nonce runtime → ses <script> seraient bloqués par
+// `script-src 'nonce-…' 'strict-dynamic'`. On force donc le rendu dynamique de
+// toutes les pages (l'app est entièrement derrière auth : aucune ne bénéficie
+// du prérendu statique). Sans ça, /login, /reset-password, etc. (statiques)
+// casseraient en production.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'ERP BTP',
   description: 'ERP Bâtiment — PME BTP France',
