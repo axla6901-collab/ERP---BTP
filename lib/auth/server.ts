@@ -15,6 +15,7 @@ import {
 import { roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 
+import { logAuthEvent } from './audit';
 import { peutEnvoyerLienMagique } from './magic-link-policy';
 import { AUTH_RATE_LIMIT_RULES } from './rate-limit-rules';
 
@@ -96,6 +97,15 @@ export const auth = betterAuth({
           `votre mot de passe reste inchangé.`,
       );
     },
+    // Audit B5 : réinitialisation de mot de passe effective.
+    onPasswordReset: async ({ user }) => {
+      await logAuthEvent({
+        event: 'password_reset',
+        success: true,
+        utilisateurId: user.id,
+        email: user.email,
+      });
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -168,6 +178,15 @@ export const auth = betterAuth({
             .update(utilisateurs)
             .set({ derniereConnexionAt: new Date() })
             .where(eq(utilisateurs.id, newSession.userId));
+          // Audit B5 : toute création de session = connexion réussie (mot de
+          // passe, lien magique, ou post-TOTP). IP/UA portés par la session.
+          await logAuthEvent({
+            event: 'login_success',
+            success: true,
+            utilisateurId: newSession.userId,
+            ipAddress: newSession.ipAddress ?? null,
+            userAgent: newSession.userAgent ?? null,
+          });
         },
       },
     },
