@@ -5,24 +5,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (RBAC/registre, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
 import { unites } from '@/db/schema/catalogue';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { permissions, roles } from '@/db/schema/rbac';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import { requireTenantContext } from '@/lib/auth/tenant-guards';
+import { withTenant } from '@/lib/db/with-tenant';
 
-async function compter() {
-  const [[u], [r], [p], [un]] = await Promise.all([
+async function compter(entrepriseId: string) {
+  const [[u], [r], [p], [un], rs] = await Promise.all([
     db.select({ n: count() }).from(utilisateurs).where(isNull(utilisateurs.deletedAt)),
     db.select({ n: count() }).from(roles),
     db.select({ n: count() }).from(permissions),
     // `unites` est un référentiel GLOBAL (sans entreprise_id, pas de RLS tenant) :
     // lecture directe via `db`, comme `listerUnites`.
     db.select({ n: count() }).from(unites).where(isNull(unites.deletedAt)),
+    // `raisons_sociales` est tenant-scopé (RLS) : comptage via withTenant.
+    withTenant(entrepriseId, (tx) =>
+      tx.select({ n: count() }).from(raisonsSociales).where(isNull(raisonsSociales.deletedAt)),
+    ),
   ]);
   return {
     utilisateurs: u?.n ?? 0,
     roles: r?.n ?? 0,
     permissions: p?.n ?? 0,
     unites: un?.n ?? 0,
+    raisonsSociales: rs[0]?.n ?? 0,
   };
 }
 
@@ -48,6 +55,13 @@ const TUILES = [
     cleCompteur: 'unites' as const,
   },
   {
+    titre: 'Raisons sociales',
+    description:
+      'Référentiel central des raisons sociales. Source unique partagée par les clients (professionnels), fournisseurs, sous-traitants et sociétés du groupe.',
+    href: '/administration/raisons-sociales',
+    cleCompteur: 'raisonsSociales' as const,
+  },
+  {
     titre: 'Ma société',
     description:
       "Identité légale, logos (principal + RGE/certifications), Conditions Générales de Vente et d'Achat versionnées, numérotation des documents.",
@@ -57,7 +71,8 @@ const TUILES = [
 ];
 
 export default async function AdministrationDashboard() {
-  const [{ entreprise }, compteurs] = await Promise.all([requireTenantContext(), compter()]);
+  const { entreprise } = await requireTenantContext();
+  const compteurs = await compter(entreprise.id);
   const prefixe = `/${entreprise.slug}`;
 
   return (

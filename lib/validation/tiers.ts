@@ -248,6 +248,21 @@ const tauxRetenueGarantie = z.preprocess(
 export const sousTraitantSchema = z.object({
   code: codeMetier,
   nom: nomMetier,
+  // Gérant / mandataire social (identification du dirigeant), optionnel.
+  gerantNom: z
+    .string()
+    .trim()
+    .max(100, 'Nom du gérant trop long (max 100 caractères).')
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.length > 0 ? v : null)),
+  gerantPrenom: z
+    .string()
+    .trim()
+    .max(100, 'Prénom du gérant trop long (max 100 caractères).')
+    .optional()
+    .nullable()
+    .transform((v) => (v && v.length > 0 ? v : null)),
   parentStId: parentStIdOptionnel,
   siret: siretOptionnel,
   nTvaIntra,

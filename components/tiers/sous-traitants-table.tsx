@@ -94,6 +94,20 @@ export function SousTraitantsTable({ items, rightActions, peutEcrire, onChangerS
       searchAccessor: (s) => s.nom,
     },
     {
+      id: 'gerant',
+      header: 'Gérant',
+      cell: (s) => {
+        const gerant = [s.gerantPrenom, s.gerantNom].filter(Boolean).join(' ');
+        return gerant ? (
+          <span className="text-xs">{gerant}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        );
+      },
+      sortAccessor: (s) => [s.gerantNom, s.gerantPrenom].filter(Boolean).join(' '),
+      searchAccessor: (s) => [s.gerantPrenom, s.gerantNom].filter(Boolean).join(' '),
+    },
+    {
       id: 'ville',
       header: 'Ville',
       cell: (s) => (

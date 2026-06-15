@@ -16,8 +16,10 @@ import * as commercial from '@/db/schema/commercial';
 import * as employes from '@/db/schema/employes';
 import * as entreprises from '@/db/schema/entreprises';
 import * as facturation from '@/db/schema/facturation';
+import * as geo from '@/db/schema/geo';
 import * as numerotation from '@/db/schema/numerotation';
 import * as pointages from '@/db/schema/pointages';
+import * as raisonsSociales from '@/db/schema/raisons-sociales';
 import * as rbac from '@/db/schema/rbac';
 import * as referentielTiers from '@/db/schema/referentiel-tiers';
 import * as societes from '@/db/schema/societes';
@@ -89,6 +91,7 @@ const SCHEMAS_PAR_MODULE: Partial<Record<McdModuleId, Record<string, unknown>>> 
   entreprises,
   audit,
   numerotation,
+  geo,
   catalogue,
   commercial,
   chantiers,
@@ -97,7 +100,7 @@ const SCHEMAS_PAR_MODULE: Partial<Record<McdModuleId, Record<string, unknown>>> 
   pointages,
   // Module Tiers : ancien modèle (tiers.ts) + registre/agrément (0028-0033).
   // On fusionne les namespaces : toutes ces tables sont rattachées au module `tiers`.
-  tiers: { ...tiers, ...societes, ...referentielTiers, ...tiersRegistre },
+  tiers: { ...tiers, ...societes, ...referentielTiers, ...tiersRegistre, ...raisonsSociales },
   facturation,
   'sous-traitance': sousTraitance,
 };

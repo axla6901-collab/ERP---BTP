@@ -13,6 +13,7 @@ import {
   unites,
   type PrixArticle,
 } from '@/db/schema/catalogue';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { prixArticleSchema, type PrixArticleInput } from '@/lib/validation/catalogue';
 
 import { ROLES_CATALOGUE_WRITE } from './permissions';
@@ -31,12 +32,13 @@ export async function listerPrixArticle(articleId: string): Promise<PrixHydrate[
       .select({
         prix: prixArticles,
         uniteSymbole: unites.symbole,
-        fournisseurNom: fournisseurs.nom,
+        fournisseurNom: raisonsSociales.raisonSociale,
         fournisseurCode: fournisseurs.code,
       })
       .from(prixArticles)
       .leftJoin(unites, eq(prixArticles.uniteId, unites.id))
       .leftJoin(fournisseurs, eq(prixArticles.fournisseurId, fournisseurs.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .where(eq(prixArticles.articleId, articleId))
       .orderBy(desc(prixArticles.validFrom)),
   );

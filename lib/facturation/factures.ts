@@ -16,6 +16,7 @@ import {
   type LigneFacture,
 } from '@/db/schema/facturation';
 import { clients } from '@/db/schema/commercial';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import {
   factureSchema,
   TRANSITIONS_FACTURE,
@@ -65,13 +66,14 @@ export async function listerFactures(): Promise<FactureAvecClient[]> {
         client: {
           type: clients.type,
           code: clients.code,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
       })
       .from(factures)
       .leftJoin(clients, eq(factures.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(isNull(factures.deletedAt))
       .orderBy(desc(factures.dateFacture), desc(factures.numero)),
   );
@@ -79,7 +81,7 @@ export async function listerFactures(): Promise<FactureAvecClient[]> {
   return rows.map((r) => ({
     ...r.facture,
     clientCode: r.client?.code ?? '',
-    clientNom: r.client ? libelleClient(r.client) : '',
+    clientNom: r.client ? libelleClient({ ...r.client, raisonSociale: r.clientRaisonSociale }) : '',
   }));
 }
 
@@ -93,13 +95,14 @@ export async function lireFacture(id: string): Promise<FactureHydrate | null> {
           id: clients.id,
           code: clients.code,
           type: clients.type,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
       })
       .from(factures)
       .leftJoin(clients, eq(factures.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(and(eq(factures.id, id), isNull(factures.deletedAt)))
       .limit(1);
     if (!row || !row.client) return null;
@@ -115,7 +118,7 @@ export async function lireFacture(id: string): Promise<FactureHydrate | null> {
       client: {
         id: row.client.id,
         code: row.client.code,
-        nom: libelleClient(row.client),
+        nom: libelleClient({ ...row.client, raisonSociale: row.clientRaisonSociale }),
       },
       lignes,
     };

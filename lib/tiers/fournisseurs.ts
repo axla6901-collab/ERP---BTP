@@ -1,6 +1,6 @@
 'use server';
 
-import { and, asc, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import {
@@ -12,16 +12,25 @@ import {
   type Fournisseur,
   type FournisseurContact,
 } from '@/db/schema/catalogue';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
+import { getOrCreateRaisonSocialeId } from '@/lib/referencement/raison-sociale-resolver';
 import { fournisseurSchema, type FournisseurInput } from '@/lib/validation/tiers';
 
 import { ROLES_TIERS_WRITE } from './permissions';
 import type { ActionResult } from './types';
 
-export type FournisseurAvecCompteurs = Fournisseur & {
+/**
+ * Le nom du fournisseur (ancienne colonne `nom`) vit désormais dans le
+ * référentiel central `raisons_sociales`. Il est lu via jointure et exposé
+ * sous `nom` (alias) pour rester compatible avec l'affichage existant.
+ */
+export type FournisseurAvecNom = Fournisseur & { nom: string };
+
+export type FournisseurAvecCompteurs = FournisseurAvecNom & {
   contactsActifs: number;
   contactsTotal: number;
 };
@@ -35,7 +44,8 @@ export async function listerFournisseurs(): Promise<FournisseurAvecCompteurs[]> 
         id: fournisseurs.id,
         entrepriseId: fournisseurs.entrepriseId,
         code: fournisseurs.code,
-        nom: fournisseurs.nom,
+        raisonSocialeId: fournisseurs.raisonSocialeId,
+        nom: raisonsSociales.raisonSociale,
         siret: fournisseurs.siret,
         email: fournisseurs.email,
         telephone: fournisseurs.telephone,
@@ -64,18 +74,20 @@ export async function listerFournisseurs(): Promise<FournisseurAvecCompteurs[]> 
         `,
       })
       .from(fournisseurs)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .where(isNull(fournisseurs.deletedAt))
-      .orderBy(asc(fournisseurs.nom)),
+      .orderBy(asc(raisonsSociales.raisonSociale)),
   );
   return rows;
 }
 
-export async function lireFournisseur(id: string): Promise<Fournisseur | null> {
+export async function lireFournisseur(id: string): Promise<FournisseurAvecNom | null> {
   const ctx = await requireTenantContextWithMfa();
   const [row] = await withTenant(ctx.entreprise.id, (tx) =>
     tx
-      .select()
+      .select({ ...getTableColumns(fournisseurs), nom: raisonsSociales.raisonSociale })
       .from(fournisseurs)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .where(and(eq(fournisseurs.id, id), isNull(fournisseurs.deletedAt)))
       .limit(1),
   );
@@ -118,12 +130,18 @@ export async function creerFournisseur(
 
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.nom,
+        ctx.utilisateur.id,
+      );
       const [inserted] = await tx
         .insert(fournisseurs)
         .values({
           entrepriseId: ctx.entreprise.id,
           code: parsed.data.code,
-          nom: parsed.data.nom,
+          raisonSocialeId,
           siret: parsed.data.siret,
           email: parsed.data.email,
           telephone: parsed.data.telephone,
@@ -183,11 +201,18 @@ export async function mettreAJourFournisseur(
         .where(and(eq(fournisseurs.id, id), isNull(fournisseurs.deletedAt)));
       if (!before) throw new Error('NOT_FOUND');
 
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.nom,
+        ctx.utilisateur.id,
+      );
+
       await tx
         .update(fournisseurs)
         .set({
           code: parsed.data.code,
-          nom: parsed.data.nom,
+          raisonSocialeId,
           siret: parsed.data.siret,
           email: parsed.data.email,
           telephone: parsed.data.telephone,

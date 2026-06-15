@@ -44,6 +44,8 @@ type Props = {
   defaultValues?: Partial<FournisseurInput>;
   onSubmit: (values: FournisseurInput) => Promise<ServerActionResult>;
   successRedirect: string;
+  /** Raisons sociales déjà connues du référentiel (autocomplétion + anti-doublon). */
+  raisonsSocialesConnues?: string[];
   /** Titre affiché à gauche de la barre d'actions (ex. nom du fournisseur). */
   titre: string;
   /** Identité du fournisseur existant — active les actions catalogue (import / nouvelle grille). */
@@ -66,6 +68,7 @@ export function FournisseurForm({
   defaultValues,
   onSubmit,
   successRedirect,
+  raisonsSocialesConnues = [],
   titre,
   fournisseurId,
   fournisseurNom,
@@ -215,8 +218,15 @@ export function FournisseurForm({
                   <FormItem>
                     <FormLabel>Nom</FormLabel>
                     <FormControl>
-                      <Input maxLength={200} {...field} />
+                      <Input maxLength={200} list="raisons-sociales-connues" {...field} />
                     </FormControl>
+                    {raisonsSocialesConnues.length > 0 && (
+                      <datalist id="raisons-sociales-connues">
+                        {raisonsSocialesConnues.map((rs) => (
+                          <option key={rs} value={rs} />
+                        ))}
+                      </datalist>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

@@ -7,6 +7,7 @@ import { and, asc, eq, gte, isNull, lte, type SQL } from 'drizzle-orm';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
+import { getOrCreateRaisonSocialeId } from '@/lib/referencement/raison-sociale-resolver';
 import { lireClasseurBytes, ClasseurFormatError } from '@/lib/import/classeur';
 import { chantiers } from '@/db/schema/chantiers';
 import { clients } from '@/db/schema/commercial';
@@ -177,13 +178,19 @@ export async function importerJsonPointage(jsonText: string): Promise<ActionResu
     if (existingClient) {
       clientId = existingClient.id;
     } else {
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        'Historique Pointage',
+        ctx.utilisateur.id,
+      );
       const [inserted] = await tx
         .insert(clients)
         .values({
           entrepriseId: ctx.entreprise.id,
           code: 'PTG-HIST',
           type: 'professionnel',
-          raisonSociale: 'Historique Pointage',
+          raisonSocialeId,
           adresseLigne1: 'Adresse non renseignée',
           codePostal: '00000',
           ville: 'Non renseignée',

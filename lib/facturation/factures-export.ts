@@ -2,7 +2,7 @@
 
 import { createHash } from 'node:crypto';
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { auditLogIn } from '@/lib/audit/log';
@@ -16,6 +16,7 @@ import { deleteObject, getDownloadUrl, putObject } from '@/lib/storage/s3';
 import { clients } from '@/db/schema/commercial';
 import { entreprises } from '@/db/schema/entreprises';
 import { factureDocuments, factures, lignesFacture } from '@/db/schema/facturation';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 
 type ActionResult<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -34,7 +35,7 @@ type DetailsTva = Record<string, { base: string; tva: string }> | null;
 function construireModele(
   facture: typeof factures.$inferSelect,
   lignes: (typeof lignesFacture.$inferSelect)[],
-  client: typeof clients.$inferSelect,
+  client: typeof clients.$inferSelect & { raisonSociale: string | null },
   emetteur: typeof entreprises.$inferSelect,
 ): FacturXModel {
   const lignesModele = lignes.map((l) => ({
@@ -151,8 +152,9 @@ export async function genererFacturX(factureId: string): Promise<ActionResult<{ 
     if (!facture) return null;
 
     const [client] = await tx
-      .select()
+      .select({ ...getTableColumns(clients), raisonSociale: raisonsSociales.raisonSociale })
       .from(clients)
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(eq(clients.id, facture.clientId))
       .limit(1);
     if (!client) return null;

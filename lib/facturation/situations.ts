@@ -742,7 +742,7 @@ export async function listerChantiersFacturables(): Promise<ChantierAvecAvanceme
       SELECT
         c.id, c.numero, c.libelle, c.montant_previsionnel_ht,
         cl.type AS client_type,
-        cl.raison_sociale AS client_raison_sociale,
+        rs.raison_sociale AS client_raison_sociale,
         cl.nom AS client_nom,
         cl.prenom AS client_prenom,
         derniere.pct_avancement_cumule AS dernier_pct,
@@ -750,6 +750,7 @@ export async function listerChantiersFacturables(): Promise<ChantierAvecAvanceme
         derniere.numero AS dernier_numero
       FROM chantiers c
       LEFT JOIN clients cl ON cl.id = c.client_id
+      LEFT JOIN raisons_sociales rs ON rs.id = cl.raison_sociale_id
       LEFT JOIN LATERAL (
         SELECT s.pct_avancement_cumule, s.montant_cumule_ht, s.numero
           FROM situations_travaux s

@@ -18,6 +18,7 @@ import { sql } from 'drizzle-orm';
 
 import { fournisseurs } from './catalogue';
 import { entreprises } from './entreprises';
+import { raisonsSociales } from './raisons-sociales';
 import { utilisateurs } from './utilisateurs';
 
 /**
@@ -56,7 +57,10 @@ export const sousTraitants = pgTable(
       .notNull()
       .references(() => entreprises.id, { onDelete: 'restrict' }),
     code: text('code').notNull(),
-    nom: text('nom').notNull(),
+    /** FK vers le référentiel central des raisons sociales (remplace l'ancien `nom`). */
+    raisonSocialeId: uuid('raison_sociale_id')
+      .notNull()
+      .references(() => raisonsSociales.id, { onDelete: 'restrict' }),
     // Cascade de sous-traitance (loi 75-1334) : le « parent » est le donneur
     // d'ordre interne. Profondeur ≤ 3 et absence de cycle garanties par le
     // trigger trg_st_anti_cycle (migration 0061). ON DELETE RESTRICT : on ne
@@ -71,6 +75,10 @@ export const sousTraitants = pgTable(
      * Sert au blocage de conformité documentaire des contrats ST (M8.2).
      */
     tierId: uuid('tier_id'),
+    // Gérant / mandataire social de la société sous-traitante (identification du
+    // dirigeant). Distinct des contacts opérationnels (sous_traitant_contacts).
+    gerantNom: text('gerant_nom'),
+    gerantPrenom: text('gerant_prenom'),
     siret: text('siret'),
     nTvaIntra: text('n_tva_intra'),
     email: text('email'),
@@ -105,6 +113,7 @@ export const sousTraitants = pgTable(
     index('idx_sous_traitants_ville').on(t.ville),
     index('idx_sous_traitants_statut').on(t.statut),
     index('idx_sous_traitants_parent').on(t.parentStId),
+    index('idx_sous_traitants_raison_sociale').on(t.raisonSocialeId),
     check('chk_sous_traitants_cp', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
     check(
       'chk_sous_traitants_taux_retenue',

@@ -2,6 +2,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import { fournisseurContacts, fournisseurs } from '@/db/schema/catalogue';
 import { clients } from '@/db/schema/commercial';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { sousTraitantContacts, sousTraitants } from '@/db/schema/tiers';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
@@ -31,13 +32,14 @@ export async function listerTousLesContacts(): Promise<ContactUnifie[]> {
         principal: fournisseurContacts.principal,
         actif: fournisseurContacts.actif,
         tiersId: fournisseurs.id,
-        tiersNom: fournisseurs.nom,
+        tiersNom: raisonsSociales.raisonSociale,
       })
       .from(fournisseurContacts)
       .innerJoin(
         fournisseurs,
         and(eq(fournisseurs.id, fournisseurContacts.fournisseurId), isNull(fournisseurs.deletedAt)),
       )
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .where(isNull(fournisseurContacts.deletedAt));
 
     const contactsSousTraitants = await tx
@@ -52,7 +54,7 @@ export async function listerTousLesContacts(): Promise<ContactUnifie[]> {
         principal: sousTraitantContacts.principal,
         actif: sousTraitantContacts.actif,
         tiersId: sousTraitants.id,
-        tiersNom: sousTraitants.nom,
+        tiersNom: raisonsSociales.raisonSociale,
       })
       .from(sousTraitantContacts)
       .innerJoin(
@@ -62,13 +64,14 @@ export async function listerTousLesContacts(): Promise<ContactUnifie[]> {
           isNull(sousTraitants.deletedAt),
         ),
       )
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(isNull(sousTraitantContacts.deletedAt));
 
     const clientsRows = await tx
       .select({
         id: clients.id,
         type: clients.type,
-        raisonSociale: clients.raisonSociale,
+        raisonSociale: raisonsSociales.raisonSociale,
         nom: clients.nom,
         prenom: clients.prenom,
         email: clients.email,
@@ -76,6 +79,7 @@ export async function listerTousLesContacts(): Promise<ContactUnifie[]> {
         actif: clients.actif,
       })
       .from(clients)
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(isNull(clients.deletedAt));
 
     return construireAnnuaireContacts({

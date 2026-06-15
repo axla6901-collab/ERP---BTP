@@ -30,6 +30,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx db/seeds/index.ts",
+    "db:seed:codes-postaux": "tsx scripts/generate-codes-postaux-seed.ts",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts"
   },
   "dependencies": {

@@ -66,6 +66,27 @@ describe('SousTraitantForm — bandeau d’actions', () => {
     expect(getByText("Statut d'agrément")).toBeInTheDocument();
   });
 
+  it('expose les champs « Prénom du gérant » et « Nom du gérant »', () => {
+    const { getByText } = render(
+      <SousTraitantForm titre="Nouveau sous-traitant" onSubmit={onSubmit} successRedirect="/x" />,
+    );
+    expect(getByText('Prénom du gérant')).toBeInTheDocument();
+    expect(getByText('Nom du gérant')).toBeInTheDocument();
+  });
+
+  it('préremplit le gérant depuis les defaultValues', () => {
+    const { getByDisplayValue } = render(
+      <SousTraitantForm
+        titre="Maçonnerie Sud"
+        defaultValues={{ gerantPrenom: 'Jean', gerantNom: 'Durand' }}
+        onSubmit={onSubmit}
+        successRedirect="/x"
+      />,
+    );
+    expect(getByDisplayValue('Jean')).toBeInTheDocument();
+    expect(getByDisplayValue('Durand')).toBeInTheDocument();
+  });
+
   it('affiche le badge d’agrément « Agréé » d’après les defaultValues', () => {
     const { getAllByText } = render(
       <SousTraitantForm

@@ -68,6 +68,8 @@ type Props = {
   onChangerStatut?: (actif: boolean) => Promise<ServerActionResult>;
   /** Action(s) contacts à afficher dans le bandeau (ex. « Créer un contact »). */
   actionContacts?: ReactNode;
+  /** Raisons sociales déjà connues du référentiel (autocomplétion + anti-doublon). */
+  raisonsSocialesConnues?: string[];
 };
 
 /** Valeur sentinelle du select parent pour « Aucun » (pas de FK SelectItem vide). */
@@ -81,6 +83,7 @@ export function SousTraitantForm({
   onChangerStatut,
   actionContacts,
   parentsPossibles = [],
+  raisonsSocialesConnues = [],
 }: Props) {
   const router = useRouter();
   const guardedRouter = useGuardedRouter();
@@ -93,6 +96,8 @@ export function SousTraitantForm({
     defaultValues: {
       code: defaultValues?.code ?? '',
       nom: defaultValues?.nom ?? '',
+      gerantNom: defaultValues?.gerantNom ?? '',
+      gerantPrenom: defaultValues?.gerantPrenom ?? '',
       parentStId: defaultValues?.parentStId ?? null,
       tauxRetenueGarantie: defaultValues?.tauxRetenueGarantie ?? '0',
       siret: defaultValues?.siret ?? '',
@@ -232,12 +237,50 @@ export function SousTraitantForm({
                 <FormItem>
                   <FormLabel>Raison sociale</FormLabel>
                   <FormControl>
-                    <Input maxLength={200} {...field} />
+                    <Input maxLength={200} list="raisons-sociales-connues" {...field} />
                   </FormControl>
+                  {raisonsSocialesConnues.length > 0 && (
+                    <datalist id="raisons-sociales-connues">
+                      {raisonsSocialesConnues.map((rs) => (
+                        <option key={rs} value={rs} />
+                      ))}
+                    </datalist>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="gerantPrenom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prénom du gérant</FormLabel>
+                    <FormControl>
+                      <Input maxLength={100} {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gerantNom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom du gérant</FormLabel>
+                    <FormControl>
+                      <Input maxLength={100} {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormDescription>
+                      Mandataire social de la société sous-traitante.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="statut"

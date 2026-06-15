@@ -32,6 +32,7 @@ import {
   mettreAJourFournisseur,
   supprimerFournisseur,
 } from '@/lib/tiers/fournisseurs';
+import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
 import type { TypeDocumentTier } from '@/lib/validation/tiers';
 
@@ -42,13 +43,15 @@ export default async function FournisseurDetailPage({
 }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
-  const [fournisseur, grilles, contacts, documents, peutImporterCatalogue] = await Promise.all([
-    lireFournisseur(id),
-    listerGrillesFournisseur(id),
-    listerFournisseurContacts(id),
-    listerDocumentsTier({ type: 'fournisseur', id }),
-    aPermission(utilisateur.roleId, 'CATALOGUE_IMPORT_FOURNISSEUR'),
-  ]);
+  const [fournisseur, grilles, contacts, documents, peutImporterCatalogue, raisonsSocialesConnues] =
+    await Promise.all([
+      lireFournisseur(id),
+      listerGrillesFournisseur(id),
+      listerFournisseurContacts(id),
+      listerDocumentsTier({ type: 'fournisseur', id }),
+      aPermission(utilisateur.roleId, 'CATALOGUE_IMPORT_FOURNISSEUR'),
+      listerRaisonsSocialesActives(),
+    ]);
   if (!fournisseur) notFound();
 
   const peutEcrire = peutEcrireTiers(utilisateur.role);
@@ -138,6 +141,7 @@ export default async function FournisseurDetailPage({
         titre={fournisseur.nom}
         fournisseurId={id}
         fournisseurNom={fournisseur.nom}
+        raisonsSocialesConnues={raisonsSocialesConnues}
         peutImporterCatalogue={peutImporter}
         nouvelleGrilleHref={`/tiers/fournisseurs/${id}/grilles/nouveau`}
         defaultValues={{

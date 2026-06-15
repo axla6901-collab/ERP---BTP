@@ -14,6 +14,7 @@ import {
   supprimerDocumentTier,
   urlTelechargementDocumentTier,
 } from '@/lib/tiers/documents';
+import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
 import {
   changerStatutSousTraitant,
@@ -39,12 +40,14 @@ export default async function SousTraitantDetailPage({
 }) {
   const { id } = await params;
   const utilisateur = await requireAuthWithMfa();
-  const [sousTraitant, contacts, documents, tousSousTraitants] = await Promise.all([
-    lireSousTraitant(id),
-    listerSousTraitantContacts(id),
-    listerDocumentsTier({ type: 'sous_traitant', id }),
-    listerSousTraitants(),
-  ]);
+  const [sousTraitant, contacts, documents, tousSousTraitants, raisonsSocialesConnues] =
+    await Promise.all([
+      lireSousTraitant(id),
+      listerSousTraitantContacts(id),
+      listerDocumentsTier({ type: 'sous_traitant', id }),
+      listerSousTraitants(),
+      listerRaisonsSocialesActives(),
+    ]);
   if (!sousTraitant) notFound();
 
   const peutEcrire = peutEcrireTiers(utilisateur.role);
@@ -113,6 +116,11 @@ export default async function SousTraitantDetailPage({
             <dl className="grid grid-cols-[auto_1fr] gap-2 text-sm">
               <dt className="text-muted-foreground">Code</dt>
               <dd className="font-mono">{sousTraitant.code}</dd>
+              <dt className="text-muted-foreground">Gérant</dt>
+              <dd>
+                {[sousTraitant.gerantPrenom, sousTraitant.gerantNom].filter(Boolean).join(' ') ||
+                  '—'}
+              </dd>
               <dt className="text-muted-foreground">SIRET</dt>
               <dd className="font-mono">{sousTraitant.siret ?? '—'}</dd>
               <dt className="text-muted-foreground">N° TVA intracom</dt>
@@ -153,9 +161,12 @@ export default async function SousTraitantDetailPage({
       <SousTraitantForm
         titre={sousTraitant.nom}
         parentsPossibles={parentsPossibles}
+        raisonsSocialesConnues={raisonsSocialesConnues}
         defaultValues={{
           code: sousTraitant.code,
           nom: sousTraitant.nom,
+          gerantNom: sousTraitant.gerantNom,
+          gerantPrenom: sousTraitant.gerantPrenom,
           parentStId: sousTraitant.parentStId,
           tauxRetenueGarantie: sousTraitant.tauxRetenueGarantie,
           siret: sousTraitant.siret,

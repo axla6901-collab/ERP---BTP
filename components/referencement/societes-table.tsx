@@ -6,14 +6,17 @@ import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { Societe } from '@/db/schema/societes';
 
+/** Raison sociale jointe depuis le référentiel central (alias `raisonSociale`). */
+type SocieteRow = Societe & { raisonSociale: string };
+
 type Props = {
-  items: Societe[];
+  items: SocieteRow[];
   peutEcrire: boolean;
   rightActions?: React.ReactNode;
 };
 
 export function SocietesTable({ items, peutEcrire, rightActions }: Props) {
-  const columns: DataTableColumn<Societe>[] = [
+  const columns: DataTableColumn<SocieteRow>[] = [
     {
       id: 'code',
       header: 'Code',

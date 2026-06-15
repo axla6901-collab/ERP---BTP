@@ -5,19 +5,23 @@ import Link from 'next/link';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { Client } from '@/db/schema/commercial';
 
-function libelleClient(c: Client): string {
+/** Le nom (raison sociale) provient désormais du référentiel central, joint
+ *  côté serveur et exposé sous `raisonSociale`. */
+type ClientRow = Client & { raisonSociale: string | null };
+
+function libelleClient(c: ClientRow): string {
   if (c.type === 'professionnel') return c.raisonSociale ?? '';
   return [c.prenom, c.nom].filter(Boolean).join(' ');
 }
 
 type Props = {
-  items: Client[];
+  items: ClientRow[];
   rightActions?: React.ReactNode;
   peutEcrire: boolean;
 };
 
 export function ClientsTable({ items, rightActions, peutEcrire }: Props) {
-  const columns: DataTableColumn<Client>[] = [
+  const columns: DataTableColumn<ClientRow>[] = [
     {
       id: 'code',
       header: 'Code',

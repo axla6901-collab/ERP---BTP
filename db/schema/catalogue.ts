@@ -17,6 +17,7 @@ import {
 import { sql } from 'drizzle-orm';
 
 import { entreprises } from './entreprises';
+import { raisonsSociales } from './raisons-sociales';
 import { utilisateurs } from './utilisateurs';
 
 /**
@@ -199,7 +200,10 @@ export const fournisseurs = pgTable(
       .notNull()
       .references(() => entreprises.id, { onDelete: 'restrict' }),
     code: text('code').notNull(),
-    nom: text('nom').notNull(),
+    /** FK vers le référentiel central des raisons sociales (remplace l'ancien `nom`). */
+    raisonSocialeId: uuid('raison_sociale_id')
+      .notNull()
+      .references(() => raisonsSociales.id, { onDelete: 'restrict' }),
     siret: text('siret'),
     email: text('email'),
     telephone: text('telephone'),
@@ -219,6 +223,7 @@ export const fournisseurs = pgTable(
   (t) => [
     index('idx_fournisseurs_actif').on(t.actif),
     index('idx_fournisseurs_ville').on(t.ville),
+    index('idx_fournisseurs_raison_sociale').on(t.raisonSocialeId),
     check('chk_fournisseurs_cp', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
   ],
 );

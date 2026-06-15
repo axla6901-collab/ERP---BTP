@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { clientSchema, type ClientInput } from '@/lib/validation/commercial';
 
 type ServerActionResult = {
@@ -44,9 +45,16 @@ type Props = {
   defaultValues?: Partial<ClientInput>;
   onSubmit: (values: ClientInput) => Promise<ServerActionResult>;
   successRedirect: string;
+  /** Raisons sociales déjà connues du référentiel (autocomplétion + anti-doublon). */
+  raisonsSocialesConnues?: string[];
 };
 
-export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) {
+export function ClientForm({
+  defaultValues,
+  onSubmit,
+  successRedirect,
+  raisonsSocialesConnues = [],
+}: Props) {
   const router = useRouter();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -175,8 +183,24 @@ export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) 
                   <FormItem>
                     <FormLabel>Raison sociale</FormLabel>
                     <FormControl>
-                      <Input maxLength={200} {...field} value={field.value ?? ''} />
+                      <Input
+                        maxLength={200}
+                        list="raisons-sociales-connues"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
+                    {raisonsSocialesConnues.length > 0 && (
+                      <datalist id="raisons-sociales-connues">
+                        {raisonsSocialesConnues.map((rs) => (
+                          <option key={rs} value={rs} />
+                        ))}
+                      </datalist>
+                    )}
+                    <FormDescription>
+                      Réutilisez une raison sociale existante pour éviter les doublons (référentiel
+                      central).
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -305,34 +329,7 @@ export function ClientForm({ defaultValues, onSubmit, successRedirect }: Props) 
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="codePostal"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Code postal</FormLabel>
-                      <FormControl>
-                        <Input maxLength={5} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="ville"
-                  render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Ville</FormLabel>
-                      <FormControl>
-                        <Input maxLength={100} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <CommuneAutocompleteFields control={form.control} />
               <FormField
                 control={form.control}
                 name="pays"

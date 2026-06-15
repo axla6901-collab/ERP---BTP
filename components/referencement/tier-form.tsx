@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
+import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -312,12 +313,12 @@ export function TierForm({
                 )}
               />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="adresseLigne1"
                 render={({ field }) => (
-                  <FormItem className="sm:col-span-2">
+                  <FormItem>
                     <FormLabel>Adresse</FormLabel>
                     <FormControl>
                       <Input maxLength={200} {...field} value={field.value ?? ''} />
@@ -326,32 +327,7 @@ export function TierForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="codePostal"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Code postal</FormLabel>
-                    <FormControl>
-                      <Input maxLength={5} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="ville"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ville</FormLabel>
-                    <FormControl>
-                      <Input maxLength={100} {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <CommuneAutocompleteFields control={form.control} />
             </div>
           </div>
         </FormSection>

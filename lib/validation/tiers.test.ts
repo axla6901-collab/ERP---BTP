@@ -85,6 +85,40 @@ describe('sousTraitantSchema', () => {
     expect(r.agrementDc4).toBe(true);
   });
 
+  it('accepte le nom et le prénom du gérant', () => {
+    const r = sousTraitantSchema.parse({
+      code: 'XX',
+      nom: 'X X',
+      qualifications: [],
+      gerantNom: 'Durand',
+      gerantPrenom: 'Jean',
+    });
+    expect(r.gerantNom).toBe('Durand');
+    expect(r.gerantPrenom).toBe('Jean');
+  });
+
+  it('met le gérant à null par défaut et convertit une chaîne vide en null', () => {
+    const r = sousTraitantSchema.parse({
+      code: 'XX',
+      nom: 'X X',
+      qualifications: [],
+      gerantPrenom: '',
+    });
+    expect(r.gerantNom).toBeNull();
+    expect(r.gerantPrenom).toBeNull();
+  });
+
+  it('refuse un nom de gérant trop long (> 100 caractères)', () => {
+    expect(() =>
+      sousTraitantSchema.parse({
+        code: 'XX',
+        nom: 'X X',
+        qualifications: [],
+        gerantNom: 'a'.repeat(101),
+      }),
+    ).toThrow(/gérant trop long/);
+  });
+
   it('refuse un n° TVA intracom mal formé', () => {
     expect(() =>
       sousTraitantSchema.parse({

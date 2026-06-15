@@ -2,6 +2,7 @@
 
 import { type Control, type FieldValues, type Path } from 'react-hook-form';
 
+import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -54,45 +55,7 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
           </FormItem>
         )}
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <FormField
-          control={control}
-          name={'codePostal' as Path<T>}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Code postal</FormLabel>
-              <FormControl>
-                <Input
-                  maxLength={5}
-                  inputMode="numeric"
-                  placeholder="69001"
-                  {...field}
-                  value={(field.value as string | null) ?? ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name={'ville' as Path<T>}
-          render={({ field }) => (
-            <FormItem className="col-span-2">
-              <FormLabel>Ville</FormLabel>
-              <FormControl>
-                <Input
-                  maxLength={100}
-                  placeholder="Lyon"
-                  {...field}
-                  value={(field.value as string | null) ?? ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <CommuneAutocompleteFields control={control} />
       <FormField
         control={control}
         name={'pays' as Path<T>}

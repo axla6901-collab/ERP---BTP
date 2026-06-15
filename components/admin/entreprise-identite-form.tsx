@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
+import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -183,62 +184,21 @@ export function EntrepriseIdentiteForm({ defaultValues, onSubmit }: Props) {
               )}
             />
 
-            <div className="grid gap-4 sm:grid-cols-[160px_1fr_160px]">
-              <FormField
-                control={form.control}
-                name="codePostal"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Code postal</FormLabel>
-                    <FormControl>
-                      <Input
-                        inputMode="numeric"
-                        maxLength={5}
-                        value={field.value ?? ''}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="ville"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ville</FormLabel>
-                    <FormControl>
-                      <Input
-                        maxLength={100}
-                        value={field.value ?? ''}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pays"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pays</FormLabel>
-                    <FormControl>
-                      <Input maxLength={80} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <CommuneAutocompleteFields control={form.control} />
+
+            <FormField
+              control={form.control}
+              name="pays"
+              render={({ field }) => (
+                <FormItem className="max-w-xs">
+                  <FormLabel>Pays</FormLabel>
+                  <FormControl>
+                    <Input maxLength={80} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </FormSection>
 

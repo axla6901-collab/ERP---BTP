@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
+import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -329,34 +330,7 @@ export function ChantierForm({
               </FormItem>
             )}
           />
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <FormField
-              control={form.control}
-              name="codePostal"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Code postal</FormLabel>
-                  <FormControl>
-                    <Input maxLength={5} {...field} value={field.value ?? ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ville"
-              render={({ field }) => (
-                <FormItem className="col-span-2">
-                  <FormLabel>Ville</FormLabel>
-                  <FormControl>
-                    <Input maxLength={100} {...field} value={field.value ?? ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <CommuneAutocompleteFields control={form.control} className="mt-4" />
         </FormSection>
 
         <FormSection number={5} title="Notes" storageKey="chantier:notes" defaultOpen={false}>

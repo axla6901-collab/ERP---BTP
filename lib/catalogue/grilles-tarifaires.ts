@@ -16,6 +16,7 @@ import {
   type GrilleTarifaireLigne,
 } from '@/db/schema/catalogue';
 import { chantiers } from '@/db/schema/chantiers';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { grilleTarifaireSchema, type GrilleTarifaireInput } from '@/lib/validation/catalogue';
 
 import { ROLES_CATALOGUE_WRITE } from './permissions';
@@ -98,10 +99,11 @@ export async function listerGrillesChantier(chantierId: string): Promise<GrilleR
       .select({
         grille: grillesTarifaires,
         fournisseurCode: fournisseurs.code,
-        fournisseurNom: fournisseurs.nom,
+        fournisseurNom: raisonsSociales.raisonSociale,
       })
       .from(grillesTarifaires)
       .innerJoin(fournisseurs, eq(grillesTarifaires.fournisseurId, fournisseurs.id))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .where(and(eq(grillesTarifaires.chantierId, chantierId), isNull(grillesTarifaires.deletedAt)))
       .orderBy(desc(grillesTarifaires.validFrom));
 
@@ -132,13 +134,14 @@ export async function lireGrille(id: string): Promise<GrilleDetail | null> {
     const [grille] = await tx
       .select({
         grille: grillesTarifaires,
-        fournisseurNom: fournisseurs.nom,
+        fournisseurNom: raisonsSociales.raisonSociale,
         fournisseurCode: fournisseurs.code,
         chantierNumero: chantiers.numero,
         chantierLibelle: chantiers.libelle,
       })
       .from(grillesTarifaires)
       .innerJoin(fournisseurs, eq(grillesTarifaires.fournisseurId, fournisseurs.id))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, fournisseurs.raisonSocialeId))
       .leftJoin(chantiers, eq(grillesTarifaires.chantierId, chantiers.id))
       .where(and(eq(grillesTarifaires.id, id), isNull(grillesTarifaires.deletedAt)))
       .limit(1);

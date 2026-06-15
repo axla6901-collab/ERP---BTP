@@ -6,6 +6,7 @@ import { DeleteButton } from '@/components/catalogue/delete-button';
 import { FormSection } from '@/components/ui/form-section';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { lireSociete, mettreAJourSociete, supprimerSociete } from '@/lib/referencement/societes';
+import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
 import { peutAdministrerReferentielTiers } from '@/lib/referencement/permissions';
 
 const BASE = '/administration/referentiel-tiers/societes';
@@ -16,11 +17,13 @@ export default async function SocieteDetailPage({ params }: { params: Promise<{ 
   const data = await lireSociete(id);
   if (!data) notFound();
   const peutEcrire = peutAdministrerReferentielTiers(utilisateur.role);
+  const raisonsSocialesConnues = await listerRaisonsSocialesActives();
 
   return (
     <div className="space-y-6">
       <SocieteForm
         titre={peutEcrire ? 'Modifier la société' : data.societe.raisonSociale}
+        raisonsSocialesConnues={raisonsSocialesConnues}
         defaultValues={{
           code: data.societe.code,
           raisonSociale: data.societe.raisonSociale,

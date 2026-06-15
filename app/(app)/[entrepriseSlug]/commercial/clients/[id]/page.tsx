@@ -11,6 +11,7 @@ import {
   mettreAJourClient,
   supprimerClient,
 } from '@/lib/commercial/clients';
+import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
 import { peutEcrireCommercial } from '@/lib/commercial/permissions';
 import type { ClientInput } from '@/lib/validation/commercial';
 
@@ -55,7 +56,10 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     actif: client.actif,
   } as Partial<ClientInput>;
 
-  const contacts = await listerClientContacts(id);
+  const [contacts, raisonsSocialesConnues] = await Promise.all([
+    listerClientContacts(id),
+    listerRaisonsSocialesActives(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -65,6 +69,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       </div>
       <ClientForm
         defaultValues={defaultValues}
+        raisonsSocialesConnues={raisonsSocialesConnues}
         onSubmit={async (values) => {
           'use server';
           return mettreAJourClient(id, values);

@@ -28,6 +28,7 @@ export type McdModuleId =
   | 'entreprises'
   | 'audit'
   | 'numerotation'
+  | 'geo'
   | 'catalogue'
   | 'commercial'
   | 'chantiers'
@@ -60,6 +61,7 @@ export const MCD_MODULES: Record<McdModuleId, McdModule> = {
   },
   audit: { id: 'audit', label: 'Audit', color: '#7c3aed', bg: '#ede9fe' },
   numerotation: { id: 'numerotation', label: 'Numérotation', color: '#0891b2', bg: '#cffafe' },
+  geo: { id: 'geo', label: 'Référentiel géographique', color: '#0369a1', bg: '#e0f2fe' },
   catalogue: { id: 'catalogue', label: 'Catalogue', color: '#16a34a', bg: '#dcfce7' },
   commercial: { id: 'commercial', label: 'Commercial', color: '#2563eb', bg: '#dbeafe' },
   chantiers: { id: 'chantiers', label: 'Chantiers', color: '#ea580c', bg: '#ffedd5' },
@@ -89,6 +91,7 @@ export const MCD_MODULE_ORDER: readonly McdModuleId[] = [
   'rbac',
   'audit',
   'numerotation',
+  'geo',
   'tiers',
   'catalogue',
   'commercial',

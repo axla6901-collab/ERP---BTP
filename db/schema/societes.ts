@@ -11,6 +11,7 @@ import {
 import { sql } from 'drizzle-orm';
 
 import { entreprises } from './entreprises';
+import { raisonsSociales } from './raisons-sociales';
 import { utilisateurs } from './utilisateurs';
 
 /**
@@ -29,7 +30,10 @@ export const societes = pgTable(
       .notNull()
       .references(() => entreprises.id, { onDelete: 'restrict' }),
     code: text('code').notNull(),
-    raisonSociale: text('raison_sociale').notNull(),
+    /** FK vers le référentiel central des raisons sociales (remplace l'ancien texte). */
+    raisonSocialeId: uuid('raison_sociale_id')
+      .notNull()
+      .references(() => raisonsSociales.id, { onDelete: 'restrict' }),
     siret: text('siret'),
     actif: boolean('actif').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -46,8 +50,8 @@ export const societes = pgTable(
       .on(t.actif)
       .where(sql`deleted_at IS NULL`),
     index('idx_societes_entreprise').on(t.entrepriseId),
+    index('idx_societes_raison_sociale').on(t.raisonSocialeId),
     check('chk_societes_code_format', sql`code ~ '^[A-Z0-9._-]{2,32}$'`),
-    check('chk_societes_raison_len', sql`char_length(raison_sociale) BETWEEN 2 AND 200`),
     check('chk_societes_siret', sql`siret IS NULL OR siret ~ '^[0-9]{14}$'`),
   ],
 );

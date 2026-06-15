@@ -10,6 +10,7 @@ import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant, type TenantTx } from '@/lib/db/with-tenant';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
 import { factures, situationsTravaux } from '@/db/schema/facturation';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { generateNumero } from '@/lib/numbering/generate';
 import {
   clients,
@@ -158,13 +159,14 @@ export async function listerDevis(): Promise<DevisAvecClient[]> {
         client: {
           type: clients.type,
           code: clients.code,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
       })
       .from(devis)
       .leftJoin(clients, eq(devis.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(isNull(devis.deletedAt))
       .orderBy(desc(devis.dateDevis), desc(devis.numero)),
   );
@@ -172,7 +174,7 @@ export async function listerDevis(): Promise<DevisAvecClient[]> {
   return rows.map((r) => ({
     ...r.devis,
     clientCode: r.client?.code ?? '',
-    clientNom: r.client ? libelleClient(r.client) : '',
+    clientNom: r.client ? libelleClient({ ...r.client, raisonSociale: r.clientRaisonSociale }) : '',
   }));
 }
 
@@ -186,13 +188,14 @@ export async function lireDevis(id: string): Promise<DevisHydrate | null> {
           id: clients.id,
           code: clients.code,
           type: clients.type,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
       })
       .from(devis)
       .leftJoin(clients, eq(devis.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(and(eq(devis.id, id), isNull(devis.deletedAt)))
       .limit(1);
     if (!row || !row.client) return null;
@@ -263,7 +266,7 @@ export async function lireDevis(id: string): Promise<DevisHydrate | null> {
       client: {
         id: row.client.id,
         code: row.client.code,
-        nom: libelleClient(row.client),
+        nom: libelleClient({ ...row.client, raisonSociale: row.clientRaisonSociale }),
       },
       lignes,
       postesInternes,

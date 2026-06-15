@@ -50,6 +50,12 @@ tsconfig.tsbuildinfo
 # Sentry
 .sentryclirc
 
+# Référentiel codes postaux : cache de téléchargement + seed complet généré.
+# Régénérables via `pnpm db:seed:codes-postaux` (open data La Poste/data.gouv).
+# L'échantillon db/seeds/codes_postaux.sample.sql, lui, est versionné.
+db/seeds/.cache/
+db/seeds/codes_postaux.sql
+
 # Volumes Docker locaux (créés par docker-compose)
 # Volumes nommés (postgres_data, minio_data) sont gérés par Docker, mais on évite tout dossier local résiduel
 .docker/

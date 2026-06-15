@@ -12,6 +12,7 @@ import {
   corpsEtatDocumentsRequis,
   naturesDocument,
 } from '@/db/schema/referentiel-tiers';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { societes } from '@/db/schema/societes';
 import {
   tierAgrementRelances,
@@ -121,10 +122,15 @@ export async function lireReferentielTiers(): Promise<ReferentielTiers> {
         .where(and(eq(corpsEtat.actif, true), isNull(corpsEtat.deletedAt)))
         .orderBy(corpsEtat.ordreAffichage),
       tx
-        .select({ id: societes.id, code: societes.code, raisonSociale: societes.raisonSociale })
+        .select({
+          id: societes.id,
+          code: societes.code,
+          raisonSociale: raisonsSociales.raisonSociale,
+        })
         .from(societes)
+        .innerJoin(raisonsSociales, eq(raisonsSociales.id, societes.raisonSocialeId))
         .where(and(eq(societes.actif, true), isNull(societes.deletedAt)))
-        .orderBy(societes.raisonSociale),
+        .orderBy(raisonsSociales.raisonSociale),
       tx
         .select()
         .from(naturesDocument)

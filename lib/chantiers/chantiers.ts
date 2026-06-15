@@ -13,6 +13,7 @@ import { chantiers, type Chantier } from '@/db/schema/chantiers';
 import { compteProrata } from '@/db/schema/compte-prorata';
 import { clients, devis } from '@/db/schema/commercial';
 import { factures, situationsTravaux } from '@/db/schema/facturation';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { pointages } from '@/db/schema/pointages';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import {
@@ -54,14 +55,15 @@ export async function listerChantiers(): Promise<ChantierAvecRelations[]> {
         client: {
           type: clients.type,
           code: clients.code,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
         responsable: { email: utilisateurs.email },
       })
       .from(chantiers)
       .leftJoin(clients, eq(chantiers.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .leftJoin(utilisateurs, eq(chantiers.responsableId, utilisateurs.id))
       .where(isNull(chantiers.deletedAt))
       .orderBy(desc(chantiers.createdAt)),
@@ -70,7 +72,7 @@ export async function listerChantiers(): Promise<ChantierAvecRelations[]> {
   return rows.map((r) => ({
     ...r.chantier,
     clientCode: r.client?.code ?? '',
-    clientNom: r.client ? libelleClient(r.client) : '',
+    clientNom: r.client ? libelleClient({ ...r.client, raisonSociale: r.clientRaisonSociale }) : '',
     responsableEmail: r.responsable?.email ?? null,
   }));
 }
@@ -114,14 +116,15 @@ export async function lireChantier(id: string): Promise<ChantierDetail | null> {
           id: clients.id,
           code: clients.code,
           type: clients.type,
-          raisonSociale: clients.raisonSociale,
           nom: clients.nom,
           prenom: clients.prenom,
         },
+        clientRaisonSociale: raisonsSociales.raisonSociale,
         responsable: { id: utilisateurs.id, email: utilisateurs.email },
       })
       .from(chantiers)
       .leftJoin(clients, eq(chantiers.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .leftJoin(utilisateurs, eq(chantiers.responsableId, utilisateurs.id))
       .where(and(eq(chantiers.id, id), isNull(chantiers.deletedAt)))
       .limit(1),
@@ -146,7 +149,7 @@ export async function lireChantier(id: string): Promise<ChantierDetail | null> {
     client: {
       id: row.client.id,
       code: row.client.code,
-      nom: libelleClient(row.client),
+      nom: libelleClient({ ...row.client, raisonSociale: row.clientRaisonSociale }),
     },
     responsable:
       row.responsable && row.responsable.id

@@ -35,9 +35,17 @@ type Props = {
   onSubmit: (values: SocieteInput) => Promise<ServerActionResult>;
   successRedirect: string;
   titre: string;
+  /** Raisons sociales déjà connues du référentiel (autocomplétion + anti-doublon). */
+  raisonsSocialesConnues?: string[];
 };
 
-export function SocieteForm({ defaultValues, onSubmit, successRedirect, titre }: Props) {
+export function SocieteForm({
+  defaultValues,
+  onSubmit,
+  successRedirect,
+  titre,
+  raisonsSocialesConnues = [],
+}: Props) {
   const router = useRouter();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -147,8 +155,15 @@ export function SocieteForm({ defaultValues, onSubmit, successRedirect, titre }:
               <FormItem className="mt-4">
                 <FormLabel>Raison sociale</FormLabel>
                 <FormControl>
-                  <Input maxLength={200} {...field} />
+                  <Input maxLength={200} list="raisons-sociales-connues" {...field} />
                 </FormControl>
+                {raisonsSocialesConnues.length > 0 && (
+                  <datalist id="raisons-sociales-connues">
+                    {raisonsSocialesConnues.map((rs) => (
+                      <option key={rs} value={rs} />
+                    ))}
+                  </datalist>
+                )}
                 <FormMessage />
               </FormItem>
             )}

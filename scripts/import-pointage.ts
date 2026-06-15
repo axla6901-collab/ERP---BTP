@@ -44,6 +44,7 @@ import { chantiers } from '@/db/schema/chantiers';
 import { employes } from '@/db/schema/employes';
 import { entreprises } from '@/db/schema/entreprises';
 import { pointages } from '@/db/schema/pointages';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import type { MotifAbsence, TypeContrat, TypePointage, ZoneDeplacement } from '@/lib/validation/rh';
 
 type SourceBdd = {
@@ -253,13 +254,34 @@ async function main() {
     clientId = existingClient.id;
     console.log(`  → existe déjà : ${clientId}`);
   } else {
+    // Référentiel central des raisons sociales : get-or-create du nom synthétique.
+    const [existingRs] = await db
+      .select({ id: raisonsSociales.id })
+      .from(raisonsSociales)
+      .where(
+        and(
+          eq(raisonsSociales.entrepriseId, entrepriseId),
+          isNull(raisonsSociales.deletedAt),
+          sql`lower(${raisonsSociales.raisonSociale}) = lower('Historique Pointage')`,
+        ),
+      );
+    let raisonSocialeId: string;
+    if (existingRs) {
+      raisonSocialeId = existingRs.id;
+    } else {
+      const [insRs] = await db
+        .insert(raisonsSociales)
+        .values({ entrepriseId, raisonSociale: 'Historique Pointage' })
+        .returning({ id: raisonsSociales.id });
+      raisonSocialeId = insRs!.id;
+    }
     const [inserted] = await db
       .insert(clients)
       .values({
         entrepriseId,
         code: 'PTG-HIST',
         type: 'professionnel',
-        raisonSociale: 'Historique Pointage',
+        raisonSocialeId,
         adresseLigne1: 'Adresse non renseignée',
         codePostal: '00000',
         ville: 'Non renseignée',

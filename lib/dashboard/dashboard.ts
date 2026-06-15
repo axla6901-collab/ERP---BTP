@@ -8,6 +8,7 @@ import { agregerSommaireChantiers } from '@/lib/planning/sommaire';
 import { chantierTacheEquipe, chantierTaches, chantiers } from '@/db/schema/chantiers';
 import { clients, devis } from '@/db/schema/commercial';
 import { employes } from '@/db/schema/employes';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { pointages } from '@/db/schema/pointages';
 import { utilisateurs } from '@/db/schema/utilisateurs';
 import { LIBELLES_STATUT_CHANTIER, type StatutChantier } from '@/lib/validation/chantiers';
@@ -125,12 +126,13 @@ export async function listerChantiersActifsTimeline(): Promise<ChantierTimeline[
         dateDebutPrevue: chantiers.dateDebutPrevue,
         dateFinPrevue: chantiers.dateFinPrevue,
         clientType: clients.type,
-        clientRaisonSociale: clients.raisonSociale,
+        clientRaisonSociale: raisonsSociales.raisonSociale,
         clientNom: clients.nom,
         clientPrenom: clients.prenom,
       })
       .from(chantiers)
       .leftJoin(clients, eq(chantiers.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(and(isNull(chantiers.deletedAt), inArray(chantiers.statut, STATUTS_ACTIFS)))
       .orderBy(asc(chantiers.dateDebutPrevue), asc(chantiers.numero));
 
@@ -245,13 +247,14 @@ export async function lireApercuChantier(chantierId: string): Promise<ApercuChan
       .select({
         chantier: chantiers,
         clientType: clients.type,
-        clientRaisonSociale: clients.raisonSociale,
+        clientRaisonSociale: raisonsSociales.raisonSociale,
         clientNom: clients.nom,
         clientPrenom: clients.prenom,
         responsableEmail: utilisateurs.email,
       })
       .from(chantiers)
       .leftJoin(clients, eq(chantiers.clientId, clients.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .leftJoin(utilisateurs, eq(chantiers.responsableId, utilisateurs.id))
       .where(and(eq(chantiers.id, chantierId), isNull(chantiers.deletedAt)))
       .limit(1);

@@ -1,6 +1,6 @@
 'use server';
 
-import { and, asc, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import {
@@ -10,16 +10,24 @@ import {
   type SousTraitantContact,
 } from '@/db/schema/tiers';
 import { compteProrataParticipants } from '@/db/schema/compte-prorata';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
 import { withTenant } from '@/lib/db/with-tenant';
+import { getOrCreateRaisonSocialeId } from '@/lib/referencement/raison-sociale-resolver';
 import { sousTraitantSchema, type SousTraitantInput } from '@/lib/validation/tiers';
 
 import { ROLES_TIERS_WRITE } from './permissions';
 import type { ActionResult } from './types';
 
-export type SousTraitantAvecCompteurs = SousTraitant & {
+/**
+ * Le nom du sous-traitant (ancienne colonne `nom`) vit désormais dans le
+ * référentiel central `raisons_sociales`. Lu via jointure, exposé sous `nom`.
+ */
+export type SousTraitantAvecNom = SousTraitant & { nom: string };
+
+export type SousTraitantAvecCompteurs = SousTraitantAvecNom & {
   contactsActifs: number;
   contactsTotal: number;
 };
@@ -32,7 +40,10 @@ export async function listerSousTraitants(): Promise<SousTraitantAvecCompteurs[]
         id: sousTraitants.id,
         entrepriseId: sousTraitants.entrepriseId,
         code: sousTraitants.code,
-        nom: sousTraitants.nom,
+        raisonSocialeId: sousTraitants.raisonSocialeId,
+        nom: raisonsSociales.raisonSociale,
+        gerantNom: sousTraitants.gerantNom,
+        gerantPrenom: sousTraitants.gerantPrenom,
         parentStId: sousTraitants.parentStId,
         tierId: sousTraitants.tierId,
         tauxRetenueGarantie: sousTraitants.tauxRetenueGarantie,
@@ -71,18 +82,20 @@ export async function listerSousTraitants(): Promise<SousTraitantAvecCompteurs[]
         `,
       })
       .from(sousTraitants)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(isNull(sousTraitants.deletedAt))
-      .orderBy(asc(sousTraitants.nom)),
+      .orderBy(asc(raisonsSociales.raisonSociale)),
   );
   return rows;
 }
 
-export async function lireSousTraitant(id: string): Promise<SousTraitant | null> {
+export async function lireSousTraitant(id: string): Promise<SousTraitantAvecNom | null> {
   const ctx = await requireTenantContextWithMfa();
   const [row] = await withTenant(ctx.entreprise.id, (tx) =>
     tx
-      .select()
+      .select({ ...getTableColumns(sousTraitants), nom: raisonsSociales.raisonSociale })
       .from(sousTraitants)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(and(eq(sousTraitants.id, id), isNull(sousTraitants.deletedAt)))
       .limit(1),
   );
@@ -124,12 +137,20 @@ export async function creerSousTraitant(
 
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.nom,
+        ctx.utilisateur.id,
+      );
       const [inserted] = await tx
         .insert(sousTraitants)
         .values({
           entrepriseId: ctx.entreprise.id,
           code: parsed.data.code,
-          nom: parsed.data.nom,
+          raisonSocialeId,
+          gerantNom: parsed.data.gerantNom,
+          gerantPrenom: parsed.data.gerantPrenom,
           parentStId: parsed.data.parentStId,
           tauxRetenueGarantie: parsed.data.tauxRetenueGarantie,
           siret: parsed.data.siret,
@@ -200,11 +221,20 @@ export async function mettreAJourSousTraitant(
         .where(and(eq(sousTraitants.id, id), isNull(sousTraitants.deletedAt)));
       if (!before) throw new Error('NOT_FOUND');
 
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.nom,
+        ctx.utilisateur.id,
+      );
+
       await tx
         .update(sousTraitants)
         .set({
           code: parsed.data.code,
-          nom: parsed.data.nom,
+          raisonSocialeId,
+          gerantNom: parsed.data.gerantNom,
+          gerantPrenom: parsed.data.gerantPrenom,
           parentStId: parsed.data.parentStId,
           tauxRetenueGarantie: parsed.data.tauxRetenueGarantie,
           siret: parsed.data.siret,

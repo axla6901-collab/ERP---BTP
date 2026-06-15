@@ -1,8 +1,9 @@
 'use server';
 
-import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { societes, societesRegles, type Societe, type SocieteRegle } from '@/db/schema/societes';
 import { tierSocietesAutorisees } from '@/db/schema/tiers-registre';
 import { auditLogIn } from '@/lib/audit/log';
@@ -11,6 +12,7 @@ import type { ActionResult } from '@/lib/common/action-result';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
 import { withTenant } from '@/lib/db/with-tenant';
 import { ROLES_REFERENTIEL_TIERS_WRITE } from '@/lib/referencement/permissions';
+import { getOrCreateRaisonSocialeId } from '@/lib/referencement/raison-sociale-resolver';
 import {
   societeRegleSchema,
   societeSchema,
@@ -18,25 +20,37 @@ import {
   type SocieteInput,
 } from '@/lib/validation/referencement-tiers';
 
+/**
+ * Société du groupe enrichie de son nom lu depuis le référentiel central
+ * `raisons_sociales` (alias `raisonSociale`), la colonne texte ayant disparu.
+ */
+export type SocieteAvecRaisonSociale = Societe & { raisonSociale: string };
+
 function pathBase(slug: string) {
   return `/${slug}/administration/referentiel-tiers/societes`;
 }
 
-export async function listerSocietes(): Promise<Societe[]> {
+export async function listerSocietes(): Promise<SocieteAvecRaisonSociale[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, (tx) =>
-    tx.select().from(societes).where(isNull(societes.deletedAt)).orderBy(asc(societes.code)),
+    tx
+      .select({ ...getTableColumns(societes), raisonSociale: raisonsSociales.raisonSociale })
+      .from(societes)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, societes.raisonSocialeId))
+      .where(isNull(societes.deletedAt))
+      .orderBy(asc(societes.code)),
   );
 }
 
 export async function lireSociete(
   id: string,
-): Promise<{ societe: Societe; regles: SocieteRegle[] } | null> {
+): Promise<{ societe: SocieteAvecRaisonSociale; regles: SocieteRegle[] } | null> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, async (tx) => {
     const [societe] = await tx
-      .select()
+      .select({ ...getTableColumns(societes), raisonSociale: raisonsSociales.raisonSociale })
       .from(societes)
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, societes.raisonSocialeId))
       .where(and(eq(societes.id, id), isNull(societes.deletedAt)))
       .limit(1);
     if (!societe) return null;
@@ -61,12 +75,18 @@ export async function creerSociete(input: SocieteInput): Promise<ActionResult<{ 
   }
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.raisonSociale,
+        ctx.utilisateur.id,
+      );
       const [inserted] = await tx
         .insert(societes)
         .values({
           entrepriseId: ctx.entreprise.id,
           code: parsed.data.code,
-          raisonSociale: parsed.data.raisonSociale,
+          raisonSocialeId,
           siret: parsed.data.siret,
           actif: parsed.data.actif,
           createdBy: ctx.utilisateur.id,
@@ -109,11 +129,17 @@ export async function mettreAJourSociete(id: string, input: SocieteInput): Promi
         .from(societes)
         .where(and(eq(societes.id, id), isNull(societes.deletedAt)));
       if (!before) throw new Error('NOT_FOUND');
+      const raisonSocialeId = await getOrCreateRaisonSocialeId(
+        tx,
+        ctx.entreprise.id,
+        parsed.data.raisonSociale,
+        ctx.utilisateur.id,
+      );
       await tx
         .update(societes)
         .set({
           code: parsed.data.code,
-          raisonSociale: parsed.data.raisonSociale,
+          raisonSocialeId,
           siret: parsed.data.siret,
           actif: parsed.data.actif,
           updatedBy: ctx.utilisateur.id,

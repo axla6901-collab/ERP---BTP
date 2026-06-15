@@ -10,6 +10,7 @@ import {
   type FactureSt,
   type LigneFactureSt,
 } from '@/db/schema/sous-traitance';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { sousTraitants } from '@/db/schema/tiers';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
@@ -45,7 +46,7 @@ export type FactureStHydratee = FactureStAvecContexte & {
 
 const SELECT_CONTEXTE = {
   contratNumero: contratsSt.numero,
-  sousTraitantNom: sousTraitants.nom,
+  sousTraitantNom: raisonsSociales.raisonSociale,
   sousTraitantCode: sousTraitants.code,
 } as const;
 
@@ -71,12 +72,13 @@ export async function listerFacturesSt(filtre?: {
       .select({
         facture: facturesSt,
         contratNumero: contratsSt.numero,
-        sousTraitantNom: sousTraitants.nom,
+        sousTraitantNom: raisonsSociales.raisonSociale,
         sousTraitantCode: sousTraitants.code,
       })
       .from(facturesSt)
       .innerJoin(contratsSt, eq(contratsSt.id, facturesSt.contratStId))
       .innerJoin(sousTraitants, eq(sousTraitants.id, contratsSt.sousTraitantId))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(and(...conds))
       .orderBy(desc(facturesSt.dateFacture), desc(facturesSt.numero))
       .then((rows) =>
@@ -98,6 +100,7 @@ export async function lireFactureSt(id: string): Promise<FactureStHydratee | nul
       .from(facturesSt)
       .innerJoin(contratsSt, eq(contratsSt.id, facturesSt.contratStId))
       .innerJoin(sousTraitants, eq(sousTraitants.id, contratsSt.sousTraitantId))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(and(eq(facturesSt.id, id), isNull(facturesSt.deletedAt)))
       .limit(1);
     if (!row) return null;

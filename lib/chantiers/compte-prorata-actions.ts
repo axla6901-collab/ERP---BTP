@@ -11,6 +11,7 @@ import { messageBlocageSuppression } from '@/lib/common/references-suppression';
 import { withTenant, type TenantTx } from '@/lib/db/with-tenant';
 import { chantiers } from '@/db/schema/chantiers';
 import { entreprises } from '@/db/schema/entreprises';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { sousTraitants } from '@/db/schema/tiers';
 import {
   compteProrata,
@@ -224,10 +225,11 @@ export async function lireCompteProrataChantier(
     const participants = await tx
       .select({
         row: compteProrataParticipants,
-        sousTraitantNom: sousTraitants.nom,
+        sousTraitantNom: raisonsSociales.raisonSociale,
       })
       .from(compteProrataParticipants)
       .leftJoin(sousTraitants, eq(compteProrataParticipants.sousTraitantId, sousTraitants.id))
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .where(
         and(
           eq(compteProrataParticipants.compteProrataId, compte.id),

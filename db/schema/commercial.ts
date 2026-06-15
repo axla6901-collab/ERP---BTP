@@ -16,6 +16,7 @@ import {
 import { sql } from 'drizzle-orm';
 
 import { entreprises } from './entreprises';
+import { raisonsSociales } from './raisons-sociales';
 import { utilisateurs } from './utilisateurs';
 import { articles } from './catalogue';
 
@@ -51,7 +52,10 @@ export const clients = pgTable(
       .references(() => entreprises.id, { onDelete: 'restrict' }),
     code: text('code').notNull(),
     type: typeClient('type').notNull(),
-    raisonSociale: text('raison_sociale'),
+    /** FK vers le référentiel central des raisons sociales (professionnels). NULL pour un particulier. */
+    raisonSocialeId: uuid('raison_sociale_id').references(() => raisonsSociales.id, {
+      onDelete: 'restrict',
+    }),
     nom: text('nom'),
     prenom: text('prenom'),
     siret: text('siret'),
@@ -75,8 +79,9 @@ export const clients = pgTable(
     index('idx_clients_ville').on(t.ville),
     check(
       'chk_clients_type_cohesion',
-      sql`(type = 'particulier' AND nom IS NOT NULL) OR (type = 'professionnel' AND raison_sociale IS NOT NULL)`,
+      sql`(type = 'particulier' AND nom IS NOT NULL) OR (type = 'professionnel' AND raison_sociale_id IS NOT NULL)`,
     ),
+    index('idx_clients_raison_sociale').on(t.raisonSocialeId),
     check('chk_clients_siret', sql`siret IS NULL OR siret ~ '^[0-9]{14}$'`),
     check('chk_clients_cp', sql`code_postal ~ '^[0-9]{5}$'`),
   ],

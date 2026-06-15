@@ -4,6 +4,7 @@ import { and, desc, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { chantiers } from '@/db/schema/chantiers';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { contratsSt, facturesSt, type ContratSt } from '@/db/schema/sous-traitance';
 import { sousTraitants } from '@/db/schema/tiers';
 import { auditLogIn } from '@/lib/audit/log';
@@ -32,7 +33,7 @@ export type ContratStAvecContexte = ContratSt & {
 };
 
 const SELECT_CONTEXTE = {
-  sousTraitantNom: sousTraitants.nom,
+  sousTraitantNom: raisonsSociales.raisonSociale,
   sousTraitantCode: sousTraitants.code,
   chantierNumero: chantiers.numero,
   chantierLibelle: chantiers.libelle,
@@ -55,6 +56,7 @@ export async function listerContratsSt(filtre?: {
       .select({ ...getTableColumns(contratsSt), ...SELECT_CONTEXTE })
       .from(contratsSt)
       .innerJoin(sousTraitants, eq(sousTraitants.id, contratsSt.sousTraitantId))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .innerJoin(chantiers, eq(chantiers.id, contratsSt.chantierId))
       .where(and(...conds))
       .orderBy(desc(contratsSt.createdAt));
@@ -68,6 +70,7 @@ export async function lireContratSt(id: string): Promise<ContratStAvecContexte |
       .select({ ...getTableColumns(contratsSt), ...SELECT_CONTEXTE })
       .from(contratsSt)
       .innerJoin(sousTraitants, eq(sousTraitants.id, contratsSt.sousTraitantId))
+      .innerJoin(raisonsSociales, eq(raisonsSociales.id, sousTraitants.raisonSocialeId))
       .innerJoin(chantiers, eq(chantiers.id, contratsSt.chantierId))
       .where(and(eq(contratsSt.id, id), isNull(contratsSt.deletedAt)))
       .limit(1),

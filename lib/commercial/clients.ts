@@ -1,6 +1,6 @@
 'use server';
 
-import { and, asc, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { auditLogIn } from '@/lib/audit/log';
@@ -16,24 +16,40 @@ import {
 } from '@/db/schema/commercial';
 import { chantiers } from '@/db/schema/chantiers';
 import { factures } from '@/db/schema/facturation';
+import { raisonsSociales } from '@/db/schema/raisons-sociales';
+import { getOrCreateRaisonSocialeId } from '@/lib/referencement/raison-sociale-resolver';
 import { clientSchema, type ClientInput } from '@/lib/validation/commercial';
 
 import { ROLES_COMMERCIAL_WRITE } from './permissions';
 import type { ActionResult } from '@/lib/catalogue/types';
 
-export async function listerClients(): Promise<Client[]> {
+/**
+ * Client enrichi du nom lu depuis le référentiel central (`raisons_sociales`).
+ * La raison sociale n'est plus stockée en texte sur `clients` : elle est lue
+ * via jointure sur `raison_sociale_id` et exposée sous `raisonSociale` (alias)
+ * pour rester compatible avec tout le code d'affichage existant.
+ */
+export type ClientAvecRaisonSociale = Client & { raisonSociale: string | null };
+
+export async function listerClients(): Promise<ClientAvecRaisonSociale[]> {
   const ctx = await requireTenantContextWithMfa();
   return withTenant(ctx.entreprise.id, (tx) =>
-    tx.select().from(clients).where(isNull(clients.deletedAt)).orderBy(asc(clients.code)),
+    tx
+      .select({ ...getTableColumns(clients), raisonSociale: raisonsSociales.raisonSociale })
+      .from(clients)
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
+      .where(isNull(clients.deletedAt))
+      .orderBy(asc(clients.code)),
   );
 }
 
-export async function lireClient(id: string): Promise<Client | null> {
+export async function lireClient(id: string): Promise<ClientAvecRaisonSociale | null> {
   const ctx = await requireTenantContextWithMfa();
   const [row] = await withTenant(ctx.entreprise.id, (tx) =>
     tx
-      .select()
+      .select({ ...getTableColumns(clients), raisonSociale: raisonsSociales.raisonSociale })
       .from(clients)
+      .leftJoin(raisonsSociales, eq(raisonsSociales.id, clients.raisonSocialeId))
       .where(and(eq(clients.id, id), isNull(clients.deletedAt)))
       .limit(1),
   );
@@ -67,13 +83,22 @@ export async function creerClient(input: ClientInput): Promise<ActionResult<{ id
 
   try {
     const id = await withTenant(ctx.entreprise.id, async (tx) => {
+      const raisonSocialeId =
+        parsed.data.type === 'professionnel'
+          ? await getOrCreateRaisonSocialeId(
+              tx,
+              ctx.entreprise.id,
+              parsed.data.raisonSociale,
+              ctx.utilisateur.id,
+            )
+          : null;
       const [inserted] = await tx
         .insert(clients)
         .values({
           entrepriseId: ctx.entreprise.id,
           code: parsed.data.code,
           type: parsed.data.type,
-          raisonSociale: parsed.data.raisonSociale ?? null,
+          raisonSocialeId,
           nom: parsed.data.nom ?? null,
           prenom: parsed.data.prenom ?? null,
           siret: parsed.data.siret ?? null,
@@ -130,12 +155,22 @@ export async function mettreAJourClient(id: string, input: ClientInput): Promise
         .where(and(eq(clients.id, id), isNull(clients.deletedAt)));
       if (!before) throw new Error('NOT_FOUND');
 
+      const raisonSocialeId =
+        parsed.data.type === 'professionnel'
+          ? await getOrCreateRaisonSocialeId(
+              tx,
+              ctx.entreprise.id,
+              parsed.data.raisonSociale,
+              ctx.utilisateur.id,
+            )
+          : null;
+
       await tx
         .update(clients)
         .set({
           code: parsed.data.code,
           type: parsed.data.type,
-          raisonSociale: parsed.data.raisonSociale ?? null,
+          raisonSocialeId,
           nom: parsed.data.nom ?? null,
           prenom: parsed.data.prenom ?? null,
           siret: parsed.data.siret ?? null,
