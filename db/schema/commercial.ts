@@ -288,7 +288,7 @@ export const repartitionsPosteInterne = pgTable(
       .references(() => lignesDevis.id, { onDelete: 'cascade' }),
     poids: numeric('poids', { precision: 10, scale: 4 }).notNull(),
   },
-  (t) => [check('chk_repartitions_poids_nonneg', sql`poids >= 0`)],
+  (_t) => [check('chk_repartitions_poids_nonneg', sql`poids >= 0`)],
 );
 
 export type RepartitionPosteInterne = typeof repartitionsPosteInterne.$inferSelect;

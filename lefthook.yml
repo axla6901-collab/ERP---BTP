@@ -22,8 +22,8 @@ pre-commit:
       fail_text: 'Format non conforme. Lance : pnpm format'
 
     - name: eslint
-      glob: '*.{ts,tsx,js,jsx}'
-      run: pnpm exec next lint
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs}'
+      run: pnpm lint
       fail_text: 'Erreurs ESLint à corriger avant commit (détail : pnpm lint).'
 
 pre-push:
