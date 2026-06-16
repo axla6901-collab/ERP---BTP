@@ -27,12 +27,17 @@ export type CommuneSuggestion = {
   longitude: number | null;
 };
 
-const LIMITE_DEFAUT = 8;
-const LIMITE_MAX = 20;
+const LIMITE_DEFAUT = 10;
+const LIMITE_MAX = 50;
 
 /** Vrai si le terme ressemble à un (début de) code postal. */
 function estCodePostal(terme: string): boolean {
   return /^\d{2,5}$/.test(terme);
+}
+
+/** Vrai si le terme est un code postal COMPLET (5 chiffres). */
+function estCodePostalComplet(terme: string): boolean {
+  return /^\d{5}$/.test(terme);
 }
 
 /**
@@ -46,7 +51,14 @@ export async function rechercherCommunes(
   const q = terme.trim();
   if (q.length < 2) return [];
 
-  const limiteSure = Math.min(Math.max(Math.trunc(limite) || LIMITE_DEFAUT, 1), LIMITE_MAX);
+  // Un code postal complet (5 chiffres) peut être partagé par de nombreuses
+  // communes : on remonte alors TOUTES les communes du code (jusqu'à la limite
+  // max) plutôt que de tronquer à la limite d'autocomplétion par défaut.
+  const limiteEffective = estCodePostalComplet(q) ? LIMITE_MAX : limite;
+  const limiteSure = Math.min(
+    Math.max(Math.trunc(limiteEffective) || LIMITE_DEFAUT, 1),
+    LIMITE_MAX,
+  );
 
   const condition = estCodePostal(q)
     ? like(codesPostaux.codePostal, `${q}%`)

@@ -71,6 +71,24 @@ describe('ArticleForm — barre d’actions sticky', () => {
     expect(getByRole('button', { name: /historique des prix/i })).toBeInTheDocument();
   });
 
+  it('rend le lien retour et le sous-titre dans le bandeau (zone B)', () => {
+    const { getByRole, getByText } = render(
+      <ArticleForm
+        titre="Modifier l'article"
+        sousTitre="ART001 · Article composé"
+        backHref="/catalogue/articles"
+        backLabel="Articles"
+        familles={familles}
+        unites={unites}
+        onSubmit={onSubmit}
+        successRedirect="/x"
+      />,
+    );
+    const back = getByRole('link', { name: /Articles/ });
+    expect(back).toHaveAttribute('href', '/catalogue/articles');
+    expect(getByText('ART001 · Article composé')).toBeInTheDocument();
+  });
+
   it('n’affiche pas d’actions secondaires quand la prop est absente', () => {
     const { queryByRole } = render(
       <ArticleForm
@@ -85,10 +103,11 @@ describe('ArticleForm — barre d’actions sticky', () => {
   });
 });
 
-// Agencement : 4 sections en grille (1&2 / 3&4). La section « 5. Statut » a été
-// supprimée et l'interrupteur « Actif » remonte dans le cadre « 1. Identification ».
-describe('ArticleForm — agencement des sections', () => {
-  it('rend 4 sections numérotées et plus aucune section « Statut »', () => {
+// Gabarit unifié : la saisie (Identification / Caractéristiques / Description)
+// vit dans la colonne principale (zone C) et les Unités dans le rail (zone D).
+// L'interrupteur « Actif » reste dans le cadre « Identification ».
+describe('ArticleForm — agencement des sections (gabarit unifié)', () => {
+  it('rend les sections de saisie + Unités et plus aucune section « Statut »', () => {
     render(
       <ArticleForm
         titre="Modifier l'article"
@@ -120,5 +139,21 @@ describe('ArticleForm — agencement des sections', () => {
     expect(
       within(section as HTMLElement).getByRole('button', { name: /Identification/ }),
     ).toBeInTheDocument();
+  });
+
+  it('rend les slots contextuels railTop et railBottom (zone D)', () => {
+    render(
+      <ArticleForm
+        titre="Modifier l'article"
+        familles={familles}
+        unites={unites}
+        onSubmit={onSubmit}
+        successRedirect="/x"
+        railTop={<div>Prix de revient calculé</div>}
+        railBottom={<div>Statut de la fiche</div>}
+      />,
+    );
+    expect(screen.getByText('Prix de revient calculé')).toBeInTheDocument();
+    expect(screen.getByText('Statut de la fiche')).toBeInTheDocument();
   });
 });

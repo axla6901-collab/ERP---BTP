@@ -40,6 +40,13 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [enregistrementEnCours, setEnregistrementEnCours] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // Rendu client-only de la modale : c'est une chrome 100 % interactive (ouverte
+  // via dialogRef.showModal() après une action utilisateur, donc post-hydratation)
+  // qui n'apporte rien en SSR. La rendre seulement après montage élimine toute
+  // comparaison d'hydratation sur ce <dialog> — y compris les mismatches induits
+  // par une extension de navigateur qui mute le DOM avant le chargement de React.
+  const [monte, setMonte] = useState(false);
+  useEffect(() => setMonte(true), []);
 
   const register = useCallback((id: string, form: RegisteredForm) => {
     formsRef.current.set(id, form);
@@ -116,7 +123,17 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
     setEnregistrementEnCours(true);
     try {
       const ok = await formAvecSave.onSave();
-      if (!ok) return; // erreur de validation : on reste sur le form
+      if (!ok) {
+        // Échec d'enregistrement (validation Zod ou erreur serveur). On ferme
+        // la dialog pour révéler le feedback d'erreur du formulaire : sa
+        // bannière / ses <FormMessage> sont rendus dans la page, donc masqués
+        // tant que la modale (avec backdrop) reste ouverte. Sans cette
+        // fermeture, le clic « Enregistrer et quitter » paraît ne rien faire.
+        // Le formulaire reste dirty : l'utilisateur corrige puis pourra
+        // relancer la navigation.
+        setPendingAction(null);
+        return;
+      }
       const action = pendingAction;
       setPendingAction(null);
       formsRef.current.clear();
@@ -138,67 +155,69 @@ export function NavigationGuardProvider({ children }: { children: React.ReactNod
   return (
     <Context.Provider value={{ tryNavigate, register }}>
       {children}
-      <dialog
-        ref={dialogRef}
-        className="m-auto bg-transparent p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm backdrop:duration-150 backdrop:animate-in backdrop:fade-in-0 open:duration-150 open:animate-in open:fade-in-0 open:zoom-in-95"
-        onCancel={(e) => {
-          e.preventDefault();
-          annuler();
-        }}
-        onClose={() => {
-          if (pendingAction) setPendingAction(null);
-        }}
-      >
-        <div className="w-[min(92vw,32rem)] overflow-hidden rounded-xl border bg-background shadow-2xl">
-          <div className="flex items-start gap-4 p-6">
-            <div
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40"
-              aria-hidden
-            >
-              <AlertTriangleIcon className="size-5 text-amber-600 dark:text-amber-400" />
+      {monte && (
+        <dialog
+          ref={dialogRef}
+          className="m-auto bg-transparent p-0 backdrop:bg-black/50 backdrop:backdrop-blur-sm backdrop:duration-150 backdrop:animate-in backdrop:fade-in-0 open:duration-150 open:animate-in open:fade-in-0 open:zoom-in-95"
+          onCancel={(e) => {
+            e.preventDefault();
+            annuler();
+          }}
+          onClose={() => {
+            if (pendingAction) setPendingAction(null);
+          }}
+        >
+          <div className="w-[min(92vw,32rem)] overflow-hidden rounded-xl border bg-background shadow-2xl">
+            <div className="flex items-start gap-4 p-6">
+              <div
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/40"
+                aria-hidden
+              >
+                <AlertTriangleIcon className="size-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base font-semibold leading-tight">
+                  Modifications non enregistrées
+                </h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  Vous avez des modifications en cours sur ce formulaire. Souhaitez-vous les
+                  enregistrer avant de quitter cette page ?
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-base font-semibold leading-tight">
-                Modifications non enregistrées
-              </h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                Vous avez des modifications en cours sur ce formulaire. Souhaitez-vous les
-                enregistrer avant de quitter cette page ?
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 border-t bg-muted/30 px-6 py-3">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={annuler}
-              disabled={enregistrementEnCours}
-            >
-              Annuler
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={quitterSansEnregistrer}
-              disabled={enregistrementEnCours}
-            >
-              Quitter sans enregistrer
-            </Button>
-            {peutEnregistrer && (
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t bg-muted/30 px-6 py-3">
               <Button
                 type="button"
+                variant="ghost"
                 size="sm"
-                onClick={enregistrerPuisNaviguer}
+                onClick={annuler}
                 disabled={enregistrementEnCours}
               >
-                {enregistrementEnCours ? 'Enregistrement…' : 'Enregistrer et quitter'}
+                Annuler
               </Button>
-            )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={quitterSansEnregistrer}
+                disabled={enregistrementEnCours}
+              >
+                Quitter sans enregistrer
+              </Button>
+              {peutEnregistrer && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={enregistrerPuisNaviguer}
+                  disabled={enregistrementEnCours}
+                >
+                  {enregistrementEnCours ? 'Enregistrement…' : 'Enregistrer et quitter'}
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </dialog>
+        </dialog>
+      )}
     </Context.Provider>
   );
 }

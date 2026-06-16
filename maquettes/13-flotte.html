@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flotte automobile — module (gabarit unifié) · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      /* Contour d'annotation (cf. gabarit-ecran-unifie.html) : chaque zone positionnée
+         séparément pour ne pas écraser le sticky de la sidebar / du bandeau. */
+      .zone {
+        outline: 1px dashed rgba(217, 119, 6, 0.45);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+      }
+      .zone > .zone-tag {
+        position: absolute;
+        top: -0.7rem;
+        left: 0.5rem;
+        z-index: 6;
+        font-size: 10px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: #d97706;
+        color: #fff;
+        padding: 0.18rem 0.45rem;
+        border-radius: 9999px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      }
+      body.clean .zone {
+        outline: none;
+      }
+      body.clean .zone > .zone-tag {
+        display: none;
+      }
+      /* Sidebar figée comme dans le devis : pleine page, un seul scroll (la page). */
+      .app-sidebar {
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100vh;
+      }
+      .vue-sep {
+        scroll-margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-100 text-neutral-900">
+    <!-- Barre de présentation (défile, hors application) -->
+    <div class="sticky top-0 z-50 border-b bg-white">
+      <div class="flex flex-wrap items-center gap-3 px-5 py-3">
+        <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+        <div>
+          <h1 class="text-base font-semibold leading-tight">Flotte automobile — module optionnel (gabarit unifié)</h1>
+          <p class="text-xs text-neutral-500">
+            3 écrans clés : <b>Tableau de bord</b> (alertes d'échéances), <b>Véhicules</b> (liste + filtres),
+            <b>Fiche véhicule</b> (zones C/D). Option commerciale activable par entreprise · écriture réservée
+            <b>admin + acheteur</b>, lecture ouverte.
+          </p>
+        </div>
+        <div class="ml-auto flex items-center gap-4">
+          <nav class="hidden items-center gap-2 text-xs sm:flex">
+            <a href="#vue-dashboard" class="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 font-medium text-amber-800">1 · Dashboard</a>
+            <a href="#vue-liste" class="rounded-full border px-2.5 py-1 text-neutral-600 hover:bg-neutral-50">2 · Véhicules</a>
+            <a href="#vue-fiche" class="rounded-full border px-2.5 py-1 text-neutral-600 hover:bg-neutral-50">3 · Fiche</a>
+          </nav>
+          <label class="flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+            <input type="checkbox" class="accent-amber-500" onchange="document.body.classList.toggle('clean', this.checked)" />
+            Masquer les annotations
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         VUE 1 · TABLEAU DE BORD FLOTTE
+         ════════════════════════════════════════════════════════════════════ -->
+    <div id="vue-dashboard" class="vue-sep border-b-4 border-amber-200 bg-amber-500/10 px-5 py-2 text-xs font-semibold uppercase tracking-widest text-amber-800">
+      Vue 1 — Tableau de bord (alertes d'échéances)
+    </div>
+    <div class="flex">
+      <!-- ZONE A · SIDEBAR -->
+      <aside class="zone app-sidebar hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <span class="zone-tag">A · Sidebar (figée)</span>
+        <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <div class="border-b border-orange-200 p-3">
+          <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+            <span class="truncate">Compte-R BTP</span><span>▾</span>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Catalogue</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Commercial</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+          <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Flotte</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Tableau de bord</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Véhicules</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Échéancier</a>
+          </div>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH &amp; Pointage</a>
+        </nav>
+        <div class="border-t border-orange-200 p-3 text-sm">
+          <div class="font-medium text-orange-900">aacosta@compte-r.com</div>
+          <div class="text-xs text-orange-700">Acheteur · peut gérer la flotte</div>
+          <button class="mt-2 w-full rounded-md border border-orange-300 bg-white/60 px-2 py-1 text-xs text-orange-800">Se déconnecter</button>
+        </div>
+      </aside>
+
+      <!-- COLONNE CONTENU -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ZONE B · BANDEAU -->
+        <div class="zone sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+          <span class="zone-tag">B · Bandeau figé (titre + actions)</span>
+          <div class="px-5 pb-3 pt-2.5">
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold leading-tight">Flotte automobile</h2>
+                <p class="mt-0.5 text-xs text-neutral-500">14 véhicules · 5 échéances à venir (J-30) · 1 véhicule en sinistre</p>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50">Échéancier complet</button>
+                <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">+ Nouveau véhicule</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CORPS -->
+        <div class="px-5 py-5">
+          <div class="zone relative space-y-5">
+            <span class="zone-tag">C · Contenu (KPI + alertes)</span>
+
+            <!-- StatGrid — 4 KPI -->
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <div class="text-xs font-medium text-neutral-500">Véhicules</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">14</div>
+                <div class="mt-0.5 text-xs text-neutral-400">12 actifs · 1 immobilisé · 1 en sinistre</div>
+              </div>
+              <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 shadow-sm">
+                <div class="text-xs font-medium text-amber-700">Échéances J-30</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums text-amber-800">5</div>
+                <div class="mt-0.5 text-xs text-amber-700/80">dont <b>2 dépassées</b></div>
+              </div>
+              <div class="rounded-xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm">
+                <div class="text-xs font-medium text-rose-700">En sinistre</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">1</div>
+                <div class="mt-0.5 text-xs text-rose-700/80">dossier ouvert chez l'assureur</div>
+              </div>
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <div class="text-xs font-medium text-neutral-500">TCO mensuel</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">8 420 €</div>
+                <div class="mt-0.5 text-xs text-neutral-400">loyers + carburant + entretien</div>
+              </div>
+            </div>
+
+            <!-- Tableau d'alertes -->
+            <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+              <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+                <div>
+                  <h3 class="font-semibold text-orange-700">Échéances à venir &amp; dépassées</h3>
+                  <p class="text-xs text-neutral-500">Triées par urgence. Rappel automatique J-30 (seuil paramétrable par échéance).</p>
+                </div>
+                <!-- FilterPills par type d'échéance -->
+                <div class="flex flex-wrap items-center gap-2 text-sm">
+                  <button class="rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white">Tout <span class="ml-1 opacity-70">5</span></button>
+                  <button class="rounded-full border px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-50">Contrôle technique <span class="ml-1 text-neutral-400">2</span></button>
+                  <button class="rounded-full border px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-50">Assurance <span class="ml-1 text-neutral-400">2</span></button>
+                  <button class="rounded-full border px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-50">Carte grise <span class="ml-1 text-neutral-400">0</span></button>
+                  <button class="rounded-full border px-3 py-1 text-xs text-neutral-600 hover:bg-neutral-50">Crit'Air <span class="ml-1 text-neutral-400">1</span></button>
+                </div>
+              </div>
+              <table class="w-full border-t text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Véhicule</th>
+                    <th class="px-5 py-2.5 font-medium">Échéance</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Date</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Reste</th>
+                    <th class="px-5 py-2.5 font-medium">Conducteur</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <!-- Dépassé : ligne rose -->
+                  <tr class="cursor-pointer bg-rose-50/70 hover:bg-rose-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">AA-123-BB</span> · <span class="text-neutral-600">Renault Master</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">Contrôle technique</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">13/06/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-rose-700">−3 j</span></td>
+                    <td class="px-5 py-3 text-neutral-600">M. Dubois</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                  <tr class="cursor-pointer bg-rose-50/70 hover:bg-rose-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">KK-678-LL</span> · <span class="text-neutral-600">Ford Transit</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">Assurance</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">14/06/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-rose-700">−2 j</span></td>
+                    <td class="px-5 py-3 text-neutral-400">— (parc)</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                  <!-- ≤ 30 j : ligne ambre -->
+                  <tr class="cursor-pointer bg-amber-50/60 hover:bg-amber-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">CC-456-DD</span> · <span class="text-neutral-600">Peugeot 308</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">Assurance</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">04/07/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-800">18 j</span></td>
+                    <td class="px-5 py-3 text-neutral-600">M. Martin</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                  <tr class="cursor-pointer bg-amber-50/60 hover:bg-amber-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">GG-012-HH</span> · <span class="text-neutral-600">Renault Kangoo Z.E.</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">Contrôle technique</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">11/07/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-800">25 j</span></td>
+                    <td class="px-5 py-3 text-neutral-600">Mme Leroy</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                  <tr class="cursor-pointer bg-amber-50/60 hover:bg-amber-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">GG-012-HH</span> · <span class="text-neutral-600">Renault Kangoo Z.E.</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Vignette Crit'Air</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">10/07/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-800">24 j</span></td>
+                    <td class="px-5 py-3 text-neutral-600">Mme Leroy</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                  <!-- > 30 j : ligne neutre (hors compteur J-30, montrée pour le contraste) -->
+                  <tr class="cursor-pointer hover:bg-neutral-50">
+                    <td class="px-5 py-3"><span class="font-mono font-medium">EE-789-FF</span> · <span class="text-neutral-600">Iveco Daily benne</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">Contrôle technique</span></td>
+                    <td class="px-5 py-3 text-right tabular-nums text-neutral-600">20/08/2026</td>
+                    <td class="px-5 py-3 text-right"><span class="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium tabular-nums text-neutral-500">65 j</span></td>
+                    <td class="px-5 py-3 text-neutral-600">M. Bernard</td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Ouvrir →</button></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="border-t bg-neutral-50/60">
+                    <td colspan="6" class="px-5 py-2.5 text-xs text-neutral-500">
+                      Statut calculé en applicatif (pas de vue SQL) :
+                      <span class="rounded bg-rose-100 px-1 text-rose-700">dépassé / ≤ 7 j</span> ·
+                      <span class="rounded bg-amber-100 px-1 text-amber-800">≤ 30 j</span> ·
+                      <span class="rounded bg-neutral-100 px-1 text-neutral-500">au-delà</span>.
+                      Logique réutilisée du module Référencement tiers (conformité J-30).
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         VUE 2 · LISTE DES VÉHICULES
+         ════════════════════════════════════════════════════════════════════ -->
+    <div id="vue-liste" class="vue-sep border-y-4 border-amber-200 bg-amber-500/10 px-5 py-2 text-xs font-semibold uppercase tracking-widest text-amber-800">
+      Vue 2 — Véhicules (liste + rail de filtres)
+    </div>
+    <div class="flex">
+      <!-- ZONE A · SIDEBAR -->
+      <aside class="zone app-sidebar hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <span class="zone-tag">A · Sidebar (figée)</span>
+        <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <div class="border-b border-orange-200 p-3">
+          <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+            <span class="truncate">Compte-R BTP</span><span>▾</span>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Catalogue</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Commercial</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+          <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Flotte</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Tableau de bord</a>
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Véhicules</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Échéancier</a>
+          </div>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH &amp; Pointage</a>
+        </nav>
+        <div class="border-t border-orange-200 p-3 text-sm">
+          <div class="font-medium text-orange-900">aacosta@compte-r.com</div>
+          <div class="text-xs text-orange-700">Acheteur · peut gérer la flotte</div>
+        </div>
+      </aside>
+
+      <!-- COLONNE CONTENU -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ZONE B · BANDEAU -->
+        <div class="zone sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+          <span class="zone-tag">B · Bandeau figé</span>
+          <div class="px-5 pb-3 pt-2.5">
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold leading-tight">Véhicules</h2>
+                <p class="mt-0.5 text-xs text-neutral-500">14 véhicules · dernière mise à jour il y a 2 h</p>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <!-- SegmentedControl Liste / Grille -->
+                <div class="inline-flex gap-0.5 rounded-lg border bg-neutral-100 p-0.5 text-sm">
+                  <button class="rounded-md bg-white px-3 py-1 font-medium text-neutral-900 shadow-sm">Liste</button>
+                  <button class="rounded-md px-3 py-1 text-neutral-500 hover:text-neutral-800">Grille</button>
+                </div>
+                <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">+ Nouveau véhicule</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CORPS : ListLayout (rail filtres gauche + contenu) -->
+        <div class="px-5 py-5">
+          <div class="flex flex-col gap-5 lg:flex-row lg:items-start">
+            <!-- Rail de filtres -->
+            <aside class="zone relative space-y-4 lg:w-72 lg:shrink-0">
+              <span class="zone-tag">Rail filtres (FilterRail)</span>
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <div class="mb-2 flex items-center justify-between">
+                  <h4 class="text-xs font-semibold uppercase tracking-wide text-neutral-500">Filtres rapides</h4>
+                </div>
+                <div class="space-y-1 text-sm">
+                  <button class="flex w-full items-center justify-between rounded-md bg-amber-50 px-3 py-1.5 font-medium text-amber-800">Échéance &lt; 30 j <span class="text-amber-700">5</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-rose-700 hover:bg-rose-50">En sinistre <span>1</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Immobilisés <span class="text-neutral-400">1</span></button>
+                </div>
+              </div>
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Catégorie</h4>
+                <div class="space-y-1 text-sm">
+                  <button class="flex w-full items-center justify-between rounded-md bg-amber-50 px-3 py-1.5 font-medium text-amber-800">Toutes <span class="text-amber-700">14</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">VL — léger <span class="text-neutral-400">5</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">VU — utilitaire <span class="text-neutral-400">6</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">PL — poids lourd <span class="text-neutral-400">2</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Engin / remorque <span class="text-neutral-400">1</span></button>
+                </div>
+              </div>
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Énergie</h4>
+                <div class="space-y-1 text-sm">
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Diesel <span class="text-neutral-400">9</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Essence <span class="text-neutral-400">3</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Électrique <span class="text-neutral-400">2</span></button>
+                </div>
+              </div>
+              <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">Statut</h4>
+                <div class="space-y-1 text-sm">
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Actif <span class="text-neutral-400">12</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Immobilisé <span class="text-neutral-400">1</span></button>
+                  <button class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-neutral-700 hover:bg-neutral-50">Vendu / réformé <span class="text-neutral-400">0</span></button>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Tableau véhicules -->
+            <section class="zone relative min-w-0 flex-1 overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+              <span class="zone-tag">C · Liste (DataTable, rowClassName contextuel)</span>
+              <div class="flex items-center gap-2 border-b px-5 py-3">
+                <div class="flex flex-1 items-center gap-2 rounded-md border bg-neutral-50 px-3 py-1.5 text-sm text-neutral-400">
+                  <span>🔍</span><span>Rechercher (immatriculation, marque, conducteur…)</span>
+                </div>
+                <span class="text-xs text-neutral-500">14 véhicules</span>
+              </div>
+              <table class="w-full text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Immatriculation</th>
+                    <th class="px-5 py-2.5 font-medium">Véhicule</th>
+                    <th class="px-5 py-2.5 font-medium">Catégorie</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Km</th>
+                    <th class="px-5 py-2.5 font-medium">Conducteur / chantier</th>
+                    <th class="px-5 py-2.5 font-medium">Prochaine échéance</th>
+                    <th class="px-5 py-2.5 font-medium">Statut</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="cursor-pointer bg-rose-50/60 hover:bg-rose-50">
+                    <td class="px-5 py-3 font-mono font-medium">AA-123-BB</td>
+                    <td class="px-5 py-3">Renault Master <span class="text-xs text-neutral-500">L2H2 dCi 135</span></td>
+                    <td class="px-5 py-3 text-neutral-600">VU · Diesel</td>
+                    <td class="px-5 py-3 text-right tabular-nums">87 450</td>
+                    <td class="px-5 py-3 text-neutral-600">M. Dubois · Tour Oxygène</td>
+                    <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">CT dépassé −3 j</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Immobilisé</span></td>
+                  </tr>
+                  <tr class="cursor-pointer bg-amber-50/50 hover:bg-amber-50">
+                    <td class="px-5 py-3 font-mono font-medium">CC-456-DD</td>
+                    <td class="px-5 py-3">Peugeot 308 <span class="text-xs text-neutral-500">BlueHDi 130</span></td>
+                    <td class="px-5 py-3 text-neutral-600">VL · Diesel</td>
+                    <td class="px-5 py-3 text-right tabular-nums">42 110</td>
+                    <td class="px-5 py-3 text-neutral-600">M. Martin</td>
+                    <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Assurance 18 j</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span></td>
+                  </tr>
+                  <tr class="cursor-pointer bg-amber-50/50 hover:bg-amber-50">
+                    <td class="px-5 py-3 font-mono font-medium">GG-012-HH</td>
+                    <td class="px-5 py-3">Renault Kangoo Z.E. <span class="text-xs text-neutral-500">Électrique</span></td>
+                    <td class="px-5 py-3 text-neutral-600">VU · Électrique</td>
+                    <td class="px-5 py-3 text-right tabular-nums">18 900</td>
+                    <td class="px-5 py-3 text-neutral-600">Mme Leroy</td>
+                    <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">CT 25 j</span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-neutral-50">
+                    <td class="px-5 py-3 font-mono font-medium">EE-789-FF</td>
+                    <td class="px-5 py-3">Iveco Daily benne <span class="text-xs text-neutral-500">35C16</span></td>
+                    <td class="px-5 py-3 text-neutral-600">PL · Diesel</td>
+                    <td class="px-5 py-3 text-right tabular-nums">123 040</td>
+                    <td class="px-5 py-3 text-neutral-600">M. Bernard · Loire sur Rhône</td>
+                    <td class="px-5 py-3 text-neutral-500">CT 20/08/2026</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span></td>
+                  </tr>
+                  <tr class="cursor-pointer hover:bg-neutral-50">
+                    <td class="px-5 py-3 font-mono font-medium">II-345-JJ</td>
+                    <td class="px-5 py-3">Citroën Berlingo <span class="text-xs text-neutral-500">BlueHDi 100</span></td>
+                    <td class="px-5 py-3 text-neutral-600">VU · Diesel</td>
+                    <td class="px-5 py-3 text-right tabular-nums">61 230</td>
+                    <td class="px-5 py-3 text-neutral-600">M. Petit</td>
+                    <td class="px-5 py-3 text-neutral-500">Assurance 12/2026</td>
+                    <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">En sinistre</span></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="border-t bg-neutral-50/60">
+                    <td colspan="7" class="px-5 py-2.5 text-xs text-neutral-500">
+                      Ligne <span class="rounded bg-rose-100 px-1 text-rose-700">rose</span> = échéance dépassée / sinistre ·
+                      <span class="rounded bg-amber-100 px-1 text-amber-800">ambre</span> = échéance &lt; 30 j. Clic → fiche véhicule.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         VUE 3 · FICHE VÉHICULE
+         ════════════════════════════════════════════════════════════════════ -->
+    <div id="vue-fiche" class="vue-sep border-y-4 border-amber-200 bg-amber-500/10 px-5 py-2 text-xs font-semibold uppercase tracking-widest text-amber-800">
+      Vue 3 — Fiche véhicule (zones C/D)
+    </div>
+    <div class="flex">
+      <!-- ZONE A · SIDEBAR -->
+      <aside class="zone app-sidebar hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <span class="zone-tag">A · Sidebar (figée)</span>
+        <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <div class="border-b border-orange-200 p-3">
+          <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+            <span class="truncate">Compte-R BTP</span><span>▾</span>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Catalogue</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Commercial</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+          <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Flotte</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Tableau de bord</a>
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Véhicules</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Échéancier</a>
+          </div>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH &amp; Pointage</a>
+        </nav>
+        <div class="border-t border-orange-200 p-3 text-sm">
+          <div class="font-medium text-orange-900">aacosta@compte-r.com</div>
+          <div class="text-xs text-orange-700">Acheteur · peut gérer la flotte</div>
+        </div>
+      </aside>
+
+      <!-- COLONNE CONTENU -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ZONE B · BANDEAU -->
+        <div class="zone sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+          <span class="zone-tag">B · Bandeau figé (titre + statuts + actions)</span>
+          <div class="px-5 pb-3 pt-2.5">
+            <a class="mb-0.5 inline-block text-xs text-neutral-400 hover:text-neutral-700">‹ Véhicules</a>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="truncate text-lg font-semibold leading-tight">Renault Master <span class="font-mono text-neutral-500">AA-123-BB</span></h2>
+                  <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Immobilisé</span>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700 ring-1 ring-rose-300">
+                    <span class="size-1.5 rounded-full bg-rose-500"></span>CT dépassé
+                  </span>
+                </div>
+                <p class="mt-0.5 text-xs text-neutral-500">
+                  <span class="font-mono">VEH-0007</span> · VU · Diesel · Crit'Air 2 · modifié il y a 2 h par A. Acosta
+                </p>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">Annuler</button>
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50">+ Entretien</button>
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50">Affecter</button>
+                <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CORPS -->
+        <div class="px-5 py-5">
+          <div class="grid grid-cols-12 gap-5">
+            <!-- ZONE C · COLONNE PRINCIPALE -->
+            <div class="zone relative col-span-12 space-y-5 lg:col-span-8">
+              <span class="zone-tag">C · Colonne principale (saisie)</span>
+
+              <!-- 1. Identification -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                  <span class="text-neutral-400">⌄</span>
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">1.</span>Identification</h3>
+                </button>
+                <div class="space-y-4 border-t px-5 py-4">
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Immatriculation</label>
+                      <input value="AA-123-BB" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Code interne <span class="font-normal text-neutral-400">(auto)</span></label>
+                      <input value="VEH-0007" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Catégorie</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option>VL — véhicule léger</option>
+                        <option selected>VU — utilitaire</option>
+                        <option>PL — poids lourd</option>
+                        <option>Engin de chantier</option>
+                        <option>Remorque</option>
+                        <option>Deux-roues</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Marque</label>
+                      <input value="Renault" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Modèle</label>
+                      <input value="Master" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Version</label>
+                      <input value="L2H2 dCi 135" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Énergie</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option selected>Diesel</option>
+                        <option>Essence</option>
+                        <option>Électrique</option>
+                        <option>Hybride</option>
+                        <option>GNV</option>
+                        <option>E85</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">N° de série (VIN)</label>
+                      <input value="VF1MA000XXX123456" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">1re mise en circulation</label>
+                      <input type="date" value="2021-03-15" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 2. Caractéristiques -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                  <span class="text-neutral-400">⌄</span>
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">2.</span>Caractéristiques &amp; détention</h3>
+                </button>
+                <div class="space-y-4 border-t px-5 py-4">
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Puissance fiscale</label>
+                      <input value="7" class="w-full rounded-md border px-3 py-2 text-sm" /><span class="text-xs text-neutral-400">CV</span>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Crit'Air</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option>0 (vert / élec.)</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Kilométrage</label>
+                      <input value="87 450" class="w-full rounded-md border px-3 py-2 text-right text-sm tabular-nums" /><span class="text-xs text-neutral-400">au 14/06/2026</span>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">PTAC</label>
+                      <input value="3 500" class="w-full rounded-md border px-3 py-2 text-right text-sm tabular-nums" /><span class="text-xs text-neutral-400">kg</span>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Mode de détention</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option>Propriété</option>
+                        <option selected>LLD — location longue durée</option>
+                        <option>LOA — location avec option d'achat</option>
+                        <option>Crédit-bail</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Loyer mensuel HT</label>
+                      <input value="465,00" class="w-full rounded-md border px-3 py-2 text-right text-sm tabular-nums" /><span class="text-xs text-neutral-400">€</span>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Organisme</label>
+                      <input value="Arval" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 3. Échéances réglementaires -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-amber-200">
+                <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                  <span class="text-neutral-400">⌄</span>
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">3.</span>Échéances réglementaires
+                    <span class="ml-1 rounded-full bg-rose-100 px-2 py-0.5 align-middle text-[10px] font-medium text-rose-700 ring-1 ring-rose-300">1 dépassée</span>
+                  </h3>
+                </button>
+                <table class="w-full border-t text-sm">
+                  <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                    <tr>
+                      <th class="px-5 py-2.5 font-medium">Type</th>
+                      <th class="px-5 py-2.5 font-medium">Référence / prestataire</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Échéance</th>
+                      <th class="px-5 py-2.5 font-medium">Statut</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr class="bg-rose-50/60 hover:bg-rose-50">
+                      <td class="px-5 py-3 font-medium">Contrôle technique</td>
+                      <td class="px-5 py-3 text-neutral-600">Centre Autosur Vénissieux</td>
+                      <td class="px-5 py-3 text-right tabular-nums text-rose-700">13/06/2026</td>
+                      <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">Dépassé −3 j</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Renouveler</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 font-medium">Assurance</td>
+                      <td class="px-5 py-3 text-neutral-600">AXA Flotte · police N° 4521-887</td>
+                      <td class="px-5 py-3 text-right tabular-nums">22/11/2026</td>
+                      <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 font-medium">Carte grise</td>
+                      <td class="px-5 py-3 text-neutral-600">Certificat d'immatriculation</td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Au dossier</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 font-medium">Vignette Crit'Air</td>
+                      <td class="px-5 py-3 text-neutral-600">Pastille n° 2 (jaune)</td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Permanente</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- 4. Affectation courante -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                  <span class="text-neutral-400">⌄</span>
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">4.</span>Affectation courante</h3>
+                </button>
+                <div class="space-y-4 border-t px-5 py-4">
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Conducteur</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option selected>Dubois Marc</option>
+                        <option>Martin Julien</option>
+                        <option>Leroy Sophie</option>
+                      </select>
+                      <p class="mt-1 inline-flex items-center gap-1 text-xs text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span>Permis B + C valide jusqu'au 09/2028</p>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Chantier</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                        <option selected>Tour Oxygène — Lyon 3</option>
+                        <option>Loire sur Rhône</option>
+                        <option>— (parc / dépôt)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Depuis le</label>
+                      <input type="date" value="2026-05-02" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                  <p class="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    Contrôle automatique : la catégorie du permis du conducteur (réutilisée du module RH ▸ Employés)
+                    doit couvrir la catégorie du véhicule. Avertissement non bloquant si permis absent / expiré.
+                  </p>
+                  <button class="text-sm font-medium text-orange-700 hover:underline">Voir l'historique des affectations →</button>
+                </div>
+              </section>
+
+              <!-- 5. Entretiens -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="flex items-center justify-between px-5 py-3">
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">5.</span>Entretiens &amp; maintenance</h3>
+                  <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Saisir un entretien</button>
+                </div>
+                <table class="w-full border-t text-sm">
+                  <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                    <tr>
+                      <th class="px-5 py-2.5 font-medium">Date</th>
+                      <th class="px-5 py-2.5 font-medium">Type</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Km</th>
+                      <th class="px-5 py-2.5 font-medium">Prestataire</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Coût TTC</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 tabular-nums">28/04/2026</td>
+                      <td class="px-5 py-3">Révision constructeur</td>
+                      <td class="px-5 py-3 text-right tabular-nums">85 000</td>
+                      <td class="px-5 py-3 text-neutral-600">Garage Renault Pro</td>
+                      <td class="px-5 py-3 text-right tabular-nums">612,40 €</td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 tabular-nums">12/02/2026</td>
+                      <td class="px-5 py-3">Pneumatiques (x4)</td>
+                      <td class="px-5 py-3 text-right tabular-nums">79 800</td>
+                      <td class="px-5 py-3 text-neutral-600">Euromaster</td>
+                      <td class="px-5 py-3 text-right tabular-nums">948,00 €</td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 tabular-nums">03/11/2025</td>
+                      <td class="px-5 py-3">Vidange</td>
+                      <td class="px-5 py-3 text-right tabular-nums">72 100</td>
+                      <td class="px-5 py-3 text-neutral-600">Garage Renault Pro</td>
+                      <td class="px-5 py-3 text-right tabular-nums">189,90 €</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="border-t bg-neutral-50/60">
+                      <td colspan="4" class="px-5 py-2.5 text-right text-xs font-medium text-neutral-500">Cumul entretien (12 mois)</td>
+                      <td class="px-5 py-2.5 text-right text-sm font-semibold tabular-nums">1 750,30 €</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </section>
+
+              <!-- 6. Sinistres -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="flex items-center justify-between px-5 py-3">
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">6.</span>Sinistres</h3>
+                  <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Déclarer un sinistre</button>
+                </div>
+                <table class="w-full border-t text-sm">
+                  <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                    <tr>
+                      <th class="px-5 py-2.5 font-medium">Date</th>
+                      <th class="px-5 py-2.5 font-medium">Nature</th>
+                      <th class="px-5 py-2.5 font-medium">Responsabilité</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Franchise</th>
+                      <th class="px-5 py-2.5 font-medium">Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3 tabular-nums">17/09/2025</td>
+                      <td class="px-5 py-3">Bris de glace</td>
+                      <td class="px-5 py-3 text-neutral-600">Non responsable</td>
+                      <td class="px-5 py-3 text-right tabular-nums">0,00 €</td>
+                      <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Clos</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- 7. Documents (GED véhicule — MinIO presigned, comme documents_tiers) -->
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="flex items-center justify-between px-5 py-3">
+                  <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">7.</span>Documents
+                    <span class="ml-1 rounded-full bg-neutral-100 px-2 py-0.5 align-middle text-[10px] font-medium text-neutral-500 ring-1 ring-neutral-200">6 pièces</span>
+                  </h3>
+                  <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">↥ Téléverser un document</button>
+                </div>
+                <table class="w-full border-t text-sm">
+                  <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                    <tr>
+                      <th class="px-5 py-2.5 font-medium">Type</th>
+                      <th class="px-5 py-2.5 font-medium">Libellé / référence</th>
+                      <th class="px-5 py-2.5 font-medium">Rattaché à</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Validité</th>
+                      <th class="px-5 py-2.5 font-medium">Statut</th>
+                      <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3">Carte grise</td>
+                      <td class="px-5 py-3 text-neutral-600">Certificat d'immatriculation <span class="text-xs text-neutral-400">· PDF · 1,2 Mo</span></td>
+                      <td class="px-5 py-3 text-neutral-400">—</td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Au dossier</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3">Attestation d'assurance</td>
+                      <td class="px-5 py-3 text-neutral-600">AXA · police 4521-887 <span class="text-xs text-neutral-400">· PDF · 340 Ko</span></td>
+                      <td class="px-5 py-3"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">Échéance · Assurance</span></td>
+                      <td class="px-5 py-3 text-right tabular-nums text-neutral-600">22/11/2026</td>
+                      <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir · Remplacer</button></td>
+                    </tr>
+                    <tr class="bg-rose-50/60 hover:bg-rose-50">
+                      <td class="px-5 py-3">PV de contrôle technique</td>
+                      <td class="px-5 py-3 text-neutral-600">Autosur · 13/06/2024 <span class="text-xs text-neutral-400">· PDF · 510 Ko</span></td>
+                      <td class="px-5 py-3"><span class="rounded bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-800">Échéance · CT</span></td>
+                      <td class="px-5 py-3 text-right tabular-nums text-rose-700">13/06/2026</td>
+                      <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">Expiré</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Remplacer</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3">Contrat de location (LLD)</td>
+                      <td class="px-5 py-3 text-neutral-600">Arval · CT-2021-7782 <span class="text-xs text-neutral-400">· PDF · 2,8 Mo</span></td>
+                      <td class="px-5 py-3 text-neutral-400">—</td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Permanent</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3">Facture d'entretien</td>
+                      <td class="px-5 py-3 text-neutral-600">Renault Pro · révision 28/04 <span class="text-xs text-neutral-400">· PDF · 180 Ko</span></td>
+                      <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Entretien · révision</span></td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Classé</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                    <tr class="hover:bg-neutral-50">
+                      <td class="px-5 py-3">Photo</td>
+                      <td class="px-5 py-3 text-neutral-600">Face avant <span class="text-xs text-neutral-400">· JPG · 1,9 Mo</span></td>
+                      <td class="px-5 py-3 text-neutral-400">—</td>
+                      <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                      <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Classé</span></td>
+                      <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr class="border-t bg-neutral-50/60">
+                      <td colspan="6" class="px-5 py-2.5 text-xs text-neutral-500">
+                        Stockage MinIO chiffré (URL présignées, même mécanique que <code class="rounded bg-neutral-200/70 px-1">documents_tiers</code>) · PDF / JPG / PNG · max 25 Mo.
+                        Un document peut être <b>rattaché</b> à une échéance, un entretien ou un sinistre (colonne « Rattaché à »).
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </section>
+            </div>
+
+            <!-- ZONE D · RAIL CONTEXTUEL -->
+            <aside class="zone relative col-span-12 space-y-5 lg:col-span-4">
+              <span class="zone-tag">D · Rail contextuel (prochaine échéance, statut, affectation, TCO, historique)</span>
+              <div class="space-y-5">
+                <!-- Carte mise en avant : PROCHAINE ÉCHÉANCE (ici dépassée → rose) -->
+                <section class="overflow-hidden rounded-xl bg-rose-50 ring-1 ring-rose-200">
+                  <div class="flex items-center justify-between px-4 pb-1 pt-3">
+                    <h3 class="font-semibold text-rose-700">Prochaine échéance</h3>
+                    <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-medium text-rose-700 ring-1 ring-rose-300">action requise</span>
+                  </div>
+                  <div class="px-4 pb-2 pt-1">
+                    <div class="text-2xl font-semibold text-rose-700">Contrôle technique</div>
+                    <p class="mt-1 text-xs text-rose-700/80">Échéance 13/06/2026 · <b>dépassée de 3 jours</b>. Véhicule à immobiliser jusqu'au contrôle.</p>
+                  </div>
+                  <div class="border-t border-rose-100 px-4 py-2">
+                    <button class="text-sm font-medium text-rose-700 hover:underline">Planifier le rendez-vous →</button>
+                  </div>
+                </section>
+
+                <!-- Statut & disponibilité -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <div class="flex items-center justify-between px-4 py-3">
+                    <h3 class="font-semibold text-orange-700">Statut &amp; disponibilité</h3>
+                    <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Immobilisé</span>
+                  </div>
+                  <div class="space-y-2 border-t px-4 py-3 text-xs text-neutral-500">
+                    <div class="flex items-center justify-between gap-2"><span>Disponibilité</span><span class="inline-flex items-center gap-1 text-neutral-700"><span class="size-1.5 rounded-full bg-rose-500"></span>Indisponible (CT)</span></div>
+                    <div class="flex items-center justify-between gap-2"><span>Kilométrage</span><span class="tabular-nums text-neutral-700">87 450 km</span></div>
+                    <div class="flex items-center justify-between gap-2"><span>Détention</span><span class="text-neutral-700">LLD Arval · 465 €/mois</span></div>
+                  </div>
+                </section>
+
+                <!-- Conducteur & chantier -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <div class="flex items-center justify-between px-4 py-3">
+                    <h3 class="font-semibold text-orange-700">Affectation courante</h3>
+                  </div>
+                  <div class="space-y-2 border-t px-4 py-3 text-sm">
+                    <div class="flex items-center justify-between gap-2"><span class="text-neutral-600">Conducteur</span><span class="font-medium">Marc Dubois</span></div>
+                    <div class="flex items-center justify-between gap-2"><span class="text-neutral-600">Chantier</span><span class="font-medium">Tour Oxygène</span></div>
+                    <div class="flex items-center justify-between gap-2"><span class="text-neutral-600">Depuis</span><span class="tabular-nums text-neutral-700">02/05/2026</span></div>
+                    <div class="flex items-center gap-1 pt-1 text-xs text-emerald-700"><span class="size-1.5 rounded-full bg-emerald-500"></span>Permis compatible (B + C)</div>
+                  </div>
+                  <div class="border-t px-4 py-2.5"><button class="text-sm font-medium text-orange-700 hover:underline">Gérer l'affectation →</button></div>
+                </section>
+
+                <!-- Échéances pastillées -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Échéances</h3></div>
+                  <ul class="space-y-2 border-t px-4 py-3 text-sm">
+                    <li class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-rose-500"></span>Contrôle technique</span><span class="text-xs font-medium text-rose-700">−3 j</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-emerald-500"></span>Assurance</span><span class="text-xs text-neutral-500">22/11/2026</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-emerald-500"></span>Carte grise</span><span class="text-xs text-neutral-500">au dossier</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-2"><span class="size-1.5 rounded-full bg-neutral-300"></span>Vignette Crit'Air 2</span><span class="text-xs text-neutral-400">permanente</span></li>
+                  </ul>
+                </section>
+
+                <!-- Synthèse TCO -->
+                <section class="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                  <div class="flex items-center justify-between px-4 pb-1 pt-3">
+                    <h3 class="font-semibold text-orange-700">Synthèse TCO</h3>
+                    <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 ring-1 ring-amber-300">12 mois glissants</span>
+                  </div>
+                  <div class="px-4 pb-2 pt-1">
+                    <div class="text-3xl font-semibold tabular-nums text-amber-700">0,38 €/km</div>
+                    <p class="mt-1 text-xs text-amber-800/80">Coût total de possession : 11 240 € · 29 600 km parcourus.</p>
+                  </div>
+                  <ul class="space-y-1.5 border-t border-amber-100 px-4 py-3 text-sm">
+                    <li class="flex items-center justify-between gap-2"><span class="text-neutral-600">Loyers LLD</span><span class="tabular-nums">5 580 €</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-neutral-600">Carburant</span><span class="tabular-nums">3 410 €</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-neutral-600">Entretien</span><span class="tabular-nums">1 750 €</span></li>
+                    <li class="flex items-center justify-between gap-2"><span class="text-neutral-600">Assurance</span><span class="tabular-nums">500 €</span></li>
+                  </ul>
+                  <p class="border-t border-amber-100 px-4 py-2 text-xs text-amber-800/80">Agrégat calculé en applicatif — non saisissable.</p>
+                </section>
+
+                <!-- Historique -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Historique</h3></div>
+                  <ul class="space-y-2.5 border-t px-4 py-3 text-xs">
+                    <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-rose-500"></span><span>CT signalé dépassé (alerte J-30)<br /><span class="text-neutral-500">13/06 · 06:00 · système</span></span></li>
+                    <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Affecté à Marc Dubois · Tour Oxygène<br /><span class="text-neutral-500">02/05 · 08:15 · A. Acosta</span></span></li>
+                    <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Révision constructeur saisie<br /><span class="text-neutral-500">28/04 · 17:30 · A. Acosta</span></span></li>
+                    <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Véhicule créé<br /><span class="text-neutral-500">15/03/2021 · 09:00</span></span></li>
+                  </ul>
+                </section>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         LÉGENDE & MAPPING
+         ════════════════════════════════════════════════════════════════════ -->
+    <div class="border-t-4 border-amber-200 bg-white px-5 py-8">
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <section class="rounded-xl border bg-neutral-50 p-5">
+          <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Mapping du gabarit → module Flotte</h2>
+          <ol class="space-y-2.5 text-sm text-neutral-700">
+            <li class="flex gap-2">
+              <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">A</span>
+              <span><b>Sidebar figée.</b> Entrée « Flotte » (option commerciale, masquée si non souscrite) avec 3 sous-liens : Tableau de bord, Véhicules, Échéancier.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">B</span>
+              <span><b>Bandeau figé.</b> Titre + badges (statut technique, alerte échéance). Actions à droite (Affecter, + Entretien), <span class="font-medium text-amber-600">Enregistrer</span> en dernier. Boutons d'écriture <b>visibles seulement pour admin + acheteur</b>.</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">C</span>
+              <span><b>Colonne principale (8/12).</b> Fiche = 7 sections : Identification, Caractéristiques/détention, Échéances, Affectation, Entretiens, Sinistres, <b>Documents</b> (GED MinIO).</span>
+            </li>
+            <li class="flex gap-2">
+              <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">D</span>
+              <span><b>Rail contextuel (4/12), collant.</b> Carte mise en avant = <b>prochaine échéance</b> (ambre si &lt; 30 j, rose si dépassée), puis statut, affectation, échéances pastillées, <b>synthèse TCO</b>, historique.</span>
+            </li>
+          </ol>
+          <p class="mt-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Fil rouge de la flotte : la <b>conformité réglementaire (échéances)</b>. Le tableau d'alertes du dashboard et la carte
+            « prochaine échéance » du rail s'appuient sur la même logique J-30 que le module Référencement tiers.
+          </p>
+        </section>
+
+        <section class="space-y-5">
+          <div class="rounded-xl border bg-neutral-50 p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Tokens couleur</h2>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#f59e0b"></span> Primaire actions · <code>amber-500</code></div>
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#ffedd5"></span> Sidebar · <code>orange-100</code></div>
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#c2410c"></span> Titres section · <code>orange-700</code></div>
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#ffe4e6"></span> Dépassé / sinistre · <code>rose-50/700</code></div>
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#fef3c7"></span> Échéance &lt; 30 j · <code>amber-50/800</code></div>
+              <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#d1fae5"></span> À jour / OK · <code>emerald-100/800</code></div>
+            </div>
+          </div>
+
+          <div class="rounded-xl border bg-neutral-50 p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Statut d'une échéance (calcul applicatif)</h2>
+            <ul class="space-y-2 text-sm text-neutral-700">
+              <li class="flex items-center gap-2"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">Expiré / ≤ 7 j</span> ligne rose · action requise</li>
+              <li class="flex items-center gap-2"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">À renouveler</span> ≤ seuil d'alerte (J-30 par défaut, paramétrable)</li>
+              <li class="flex items-center gap-2"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span> au-delà du seuil</li>
+            </ul>
+            <p class="mt-3 text-xs text-neutral-500">
+              Aucune vue SQL : <code class="rounded bg-neutral-200/70 px-1">statutEcheance(date, seuil, aujourd'hui)</code> en TS pur, testable —
+              calqué sur <code class="rounded bg-neutral-200/70 px-1">lib/referencement/conformite.ts</code>.
+            </p>
+          </div>
+
+          <div class="rounded-xl border bg-neutral-50 p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Droits (gestion fine)</h2>
+            <ul class="space-y-2 text-sm text-neutral-700">
+              <li class="flex items-start gap-2"><span class="mt-0.5 rounded bg-neutral-200 px-1.5 py-0.5 font-mono text-[10px]">FLOTTE_READ</span><span>tous les rôles du tenant — consultation</span></li>
+              <li class="flex items-start gap-2"><span class="mt-0.5 rounded bg-neutral-200 px-1.5 py-0.5 font-mono text-[10px]">FLOTTE_WRITE</span><span><b>admin + acheteur</b> — véhicules, échéances, entretiens, sinistres</span></li>
+              <li class="flex items-start gap-2"><span class="mt-0.5 rounded bg-neutral-200 px-1.5 py-0.5 font-mono text-[10px]">FLOTTE_AFFECTATION_WRITE</span><span>admin, acheteur, conducteur trav., chef chantier — affectations terrain</span></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

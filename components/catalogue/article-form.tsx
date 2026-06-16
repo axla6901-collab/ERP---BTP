@@ -55,8 +55,24 @@ type Props = {
   successRedirect: string;
   /** Titre affiché à gauche de la barre d'actions sticky. */
   titre: string;
+  /** Méta affichée sous le titre (ex. « ART001 · Article composé »). */
+  sousTitre?: React.ReactNode;
+  /** Lien retour rendu au-dessus du titre (zone B du gabarit). */
+  backHref?: string;
+  /** Libellé du lien retour. */
+  backLabel?: React.ReactNode;
   /** Actions secondaires rendues dans la barre (ex. lien « Historique des prix »). */
   actions?: React.ReactNode;
+  /**
+   * Carte contextuelle placée en haut du rail collant (zone D) : prix de revient
+   * calculé (composé) ou prix de référence (simple). Rendue côté serveur.
+   */
+  railTop?: React.ReactNode;
+  /**
+   * Carte(s) contextuelle(s) placée(s) en bas du rail collant (zone D) : statut,
+   * méta, historique. Rendue(s) côté serveur.
+   */
+  railBottom?: React.ReactNode;
 };
 
 function renderFamille(value: string | null | undefined, list: FamilleOption[]): string {
@@ -78,7 +94,12 @@ export function ArticleForm({
   onSubmit,
   successRedirect,
   titre,
+  sousTitre,
+  backHref,
+  backLabel,
   actions,
+  railTop,
+  railBottom,
 }: Props) {
   const router = useRouter();
   const guardedRouter = useGuardedRouter();
@@ -132,6 +153,9 @@ export function ArticleForm({
           l'attribut `form` bien qu'il soit rendu hors de lui. */}
       <PageToolbar
         title={titre}
+        subtitle={sousTitre}
+        backHref={backHref}
+        backLabel={backLabel}
         actions={
           <>
             <Button
@@ -155,7 +179,7 @@ export function ArticleForm({
         id="article-form"
         method="post"
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="max-w-5xl space-y-4"
+        className="space-y-5"
       >
         {erreur && (
           <Alert variant="destructive">
@@ -163,19 +187,66 @@ export function ArticleForm({
             <AlertDescription>{erreur}</AlertDescription>
           </Alert>
         )}
-        {/* Sections agencées en grille : 1 & 2 sur la 1re ligne, 3 & 4 sur la
-            2e. `items-start` pour que chaque cadre garde sa hauteur naturelle. */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
-          <FormSection number={1} title="Identification" storageKey="article:identification">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Gabarit unifié : colonne principale de saisie (zone C) + rail
+            contextuel collant (zone D). Flex (et non grille 12 colonnes) pour
+            rester robuste face au JIT Tailwind et garder un rail à largeur fixe. */}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+          {/* Zone C — colonne principale (saisie) */}
+          <div className="min-w-0 flex-1 space-y-5">
+            <FormSection number={1} title="Identification" storageKey="article:identification">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="ART001" maxLength={32} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Type">
+                              {(value) =>
+                                LIBELLES_ARTICLE_TYPE[
+                                  value as keyof typeof LIBELLES_ARTICLE_TYPE
+                                ] ?? 'Type'
+                              }
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ARTICLE_TYPES.map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {LIBELLES_ARTICLE_TYPE[t]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
-                name="code"
+                name="libelle"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Code</FormLabel>
+                  <FormItem className="mt-4">
+                    <FormLabel>Libellé</FormLabel>
                     <FormControl>
-                      <Input placeholder="ART001" maxLength={32} {...field} />
+                      <Input maxLength={200} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,25 +254,22 @@ export function ArticleForm({
               />
               <FormField
                 control={form.control}
-                name="type"
+                name="familleId"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
+                  <FormItem className="mt-4">
+                    <FormLabel>Famille</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Type">
-                            {(value) =>
-                              LIBELLES_ARTICLE_TYPE[value as keyof typeof LIBELLES_ARTICLE_TYPE] ??
-                              'Type'
-                            }
+                          <SelectValue placeholder="Choisir une famille">
+                            {(value) => renderFamille(value as string, familles)}
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {ARTICLE_TYPES.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {LIBELLES_ARTICLE_TYPE[t]}
+                        {familles.map((f) => (
+                          <SelectItem key={f.id} value={f.id}>
+                            {f.code} — {f.libelle}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -210,250 +278,213 @@ export function ArticleForm({
                   </FormItem>
                 )}
               />
-            </div>
-            <FormField
-              control={form.control}
-              name="libelle"
-              render={({ field }) => (
-                <FormItem className="mt-4">
-                  <FormLabel>Libellé</FormLabel>
-                  <FormControl>
-                    <Input maxLength={200} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="familleId"
-              render={({ field }) => (
-                <FormItem className="mt-4">
-                  <FormLabel>Famille</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+              <FormField
+                control={form.control}
+                name="actif"
+                render={({ field }) => (
+                  <FormItem className="mt-4 flex items-center gap-3">
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choisir une famille">
-                          {(value) => renderFamille(value as string, familles)}
-                        </SelectValue>
-                      </SelectTrigger>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
-                    <SelectContent>
-                      {familles.map((f) => (
-                        <SelectItem key={f.id} value={f.id}>
-                          {f.code} — {f.libelle}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="actif"
-              render={({ field }) => (
-                <FormItem className="mt-4 flex items-center gap-3">
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <FormLabel className="!mt-0">Actif</FormLabel>
-                </FormItem>
-              )}
-            />
-          </FormSection>
-          <FormSection
-            number={2}
-            title="Unités (achat / stock / vente)"
-            storageKey="article:unites"
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <FormField
-                control={form.control}
-                name="uniteAchatId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Achat</FormLabel>
-                    <Select
-                      value={field.value ?? '__none__'}
-                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="—">
-                            {(value) => {
-                              if (!value || value === '__none__') return '—';
-                              return renderUnite(value as string, unites);
-                            }}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__none__">Aucune</SelectItem>
-                        {unites.map((u) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.code} ({u.symbole})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                    <FormLabel className="!mt-0">Actif</FormLabel>
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="uniteStockId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stock</FormLabel>
-                    <Select
-                      value={field.value ?? '__none__'}
-                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="—">
-                            {(value) => {
-                              if (!value || value === '__none__') return '—';
-                              return renderUnite(value as string, unites);
-                            }}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__none__">Aucune</SelectItem>
-                        {unites.map((u) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.code} ({u.symbole})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="uniteVenteId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vente</FormLabel>
-                    <Select
-                      value={field.value ?? '__none__'}
-                      onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="—">
-                            {(value) => {
-                              if (!value || value === '__none__') return '—';
-                              return renderUnite(value as string, unites);
-                            }}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="__none__">Aucune</SelectItem>
-                        {unites.map((u) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.code} ({u.symbole})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </FormSection>
+            </FormSection>
 
-          <FormSection
-            number={3}
-            title="Caractéristiques physiques"
-            description="Optionnel — utile pour conversion cross-type."
-            storageKey="article:caracteristiques"
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="densite"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Densité</FormLabel>
-                    <FormControl>
-                      <Input
-                        inputMode="decimal"
-                        placeholder="ex: 7.85 (acier)"
-                        {...field}
-                        value={field.value ?? ''}
-                      />
-                    </FormControl>
-                    <FormDescription>kg/m³ ou kg/m² selon le matériau.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="epaisseur"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Épaisseur (mm)</FormLabel>
-                    <FormControl>
-                      <Input inputMode="decimal" {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="longueurStd"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Longueur standard (m)</FormLabel>
-                    <FormControl>
-                      <Input inputMode="decimal" {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="largeurStd"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Largeur standard (m)</FormLabel>
-                    <FormControl>
-                      <Input inputMode="decimal" {...field} value={field.value ?? ''} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </FormSection>
+            <FormSection
+              number={2}
+              title="Caractéristiques physiques"
+              description="Optionnel — utile pour conversion cross-type."
+              storageKey="article:caracteristiques"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="densite"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Densité</FormLabel>
+                      <FormControl>
+                        <Input
+                          inputMode="decimal"
+                          placeholder="ex: 7.85 (acier)"
+                          {...field}
+                          value={field.value ?? ''}
+                        />
+                      </FormControl>
+                      <FormDescription>kg/m³ ou kg/m² selon le matériau.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="epaisseur"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Épaisseur (mm)</FormLabel>
+                      <FormControl>
+                        <Input inputMode="decimal" {...field} value={field.value ?? ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="longueurStd"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longueur standard (m)</FormLabel>
+                      <FormControl>
+                        <Input inputMode="decimal" {...field} value={field.value ?? ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="largeurStd"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Largeur standard (m)</FormLabel>
+                      <FormControl>
+                        <Input inputMode="decimal" {...field} value={field.value ?? ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormSection>
 
-          <FormSection number={4} title="Description" storageKey="article:description">
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (optionnel)</FormLabel>
-                  <FormControl>
-                    <Textarea rows={3} {...field} value={field.value ?? ''} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </FormSection>
+            <FormSection number={3} title="Description" storageKey="article:description">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description (optionnel)</FormLabel>
+                    <FormControl>
+                      <Textarea rows={3} {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </FormSection>
+          </div>
+
+          {/* Zone D — rail contextuel collant : calculs, unités, statut, méta */}
+          <aside className="w-full space-y-5 lg:sticky lg:top-32 lg:w-96 lg:shrink-0 lg:self-start">
+            {railTop}
+            <FormSection title="Unités (achat / stock / vente)" storageKey="article:unites">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <FormField
+                  control={form.control}
+                  name="uniteAchatId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Achat</FormLabel>
+                      <Select
+                        value={field.value ?? '__none__'}
+                        onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="—">
+                              {(value) => {
+                                if (!value || value === '__none__') return '—';
+                                return renderUnite(value as string, unites);
+                              }}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__none__">Aucune</SelectItem>
+                          {unites.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.code} ({u.symbole})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="uniteStockId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock</FormLabel>
+                      <Select
+                        value={field.value ?? '__none__'}
+                        onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="—">
+                              {(value) => {
+                                if (!value || value === '__none__') return '—';
+                                return renderUnite(value as string, unites);
+                              }}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__none__">Aucune</SelectItem>
+                          {unites.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.code} ({u.symbole})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="uniteVenteId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vente</FormLabel>
+                      <Select
+                        value={field.value ?? '__none__'}
+                        onValueChange={(v) => field.onChange(v === '__none__' ? null : v)}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="—">
+                              {(value) => {
+                                if (!value || value === '__none__') return '—';
+                                return renderUnite(value as string, unites);
+                              }}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__none__">Aucune</SelectItem>
+                          {unites.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.code} ({u.symbole})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormSection>
+            {railBottom}
+          </aside>
         </div>
       </form>
     </Form>

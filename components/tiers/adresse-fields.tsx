@@ -17,14 +17,13 @@ type Props<T extends FieldValues> = {
  */
 export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
   return (
-    <section className="space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground">Adresse</h3>
+    <div className="space-y-4">
       <FormField
         control={control}
         name={'adresseLigne1' as Path<T>}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Adresse (ligne 1)</FormLabel>
+            <FormLabel>Adresse ligne 1</FormLabel>
             <FormControl>
               <Input
                 maxLength={200}
@@ -42,7 +41,7 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
         name={'adresseLigne2' as Path<T>}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Adresse (ligne 2)</FormLabel>
+            <FormLabel>Adresse ligne 2</FormLabel>
             <FormControl>
               <Input
                 maxLength={200}
@@ -69,6 +68,6 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
           </FormItem>
         )}
       />
-    </section>
+    </div>
   );
 }

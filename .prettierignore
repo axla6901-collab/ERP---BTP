@@ -7,5 +7,7 @@ coverage/
 playwright-report/
 test-results/
 db/migrations/
+# Maquettes : artefacts HTML autonomes (mockups), non soumis au formatage.
+maquettes/
 pnpm-lock.yaml
 *.lock

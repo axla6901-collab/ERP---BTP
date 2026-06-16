@@ -52,17 +52,18 @@ describe('DevisEditor — toolbar de la section « Lignes du devis » dans l’e
     renderEditor();
 
     const ajouterSection = screen.getByLabelText('Ajouter une section');
-    const indiceCorps = screen.getByText('Le tableau défile horizontalement.');
+    const tableau = screen.getByRole('table');
 
-    // Section dépliée par défaut : corps et toolbar visibles.
+    // Section dépliée par défaut : corps (tableau) et toolbar visibles.
     expect(ajouterSection).toBeVisible();
-    expect(indiceCorps).toBeVisible();
+    expect(tableau).toBeVisible();
 
     // On replie la section via le bouton d'en-tête « 2. Lignes du devis ».
     fireEvent.click(screen.getByRole('button', { name: /Lignes du devis/ }));
 
-    // Le corps disparaît, mais le toolbar reste accessible.
-    expect(indiceCorps).not.toBeVisible();
+    // Le corps (tableau) disparaît, mais le toolbar reste accessible :
+    // l'en-tête figé porte les menus, indépendamment du repli du corps.
+    expect(tableau).not.toBeVisible();
     expect(ajouterSection).toBeVisible();
   });
 });

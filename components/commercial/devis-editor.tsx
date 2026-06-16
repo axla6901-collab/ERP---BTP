@@ -7,6 +7,7 @@ import {
   ChevronsDownUpIcon,
   ChevronsUpDownIcon,
   FolderPlusIcon,
+  MoreVerticalIcon,
   PackageIcon,
   PencilIcon,
   Trash2Icon,
@@ -34,6 +35,8 @@ import { DupliquerDevisDialog } from '@/components/commercial/dupliquer-devis-di
 import { PostesInternesEditor } from '@/components/commercial/postes-internes-editor';
 import { TotauxDevis } from '@/components/commercial/totaux-devis';
 import { WorkflowDevis } from '@/components/commercial/workflow-devis';
+import { GuardedLink } from '@/components/layout/guarded-link';
+import { useSidebarOptional } from '@/components/layout/sidebar-context';
 import type {
   DpgfAnalyse,
   DpgfImportResult,
@@ -67,8 +70,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import {
   devisSchema,
+  LIBELLES_STATUT_DEVIS,
   type ComposantLigneInput,
   type DevisInput,
+  type EvenementHistoriqueDevis,
   type LigneDevisInput,
   type StatutDevis,
 } from '@/lib/validation/commercial';
@@ -164,6 +169,14 @@ type Props = {
    *  Détermine si l'option « Nouvelle version pour ce client » est
    *  sélectionnable dans le dialog de duplication. */
   workflowPeutVersionner?: boolean | undefined;
+  /** Chantier rattaché au devis (si déjà lié) : affiché dans le rail.
+   *  Absent en création. */
+  chantierRattache?:
+    | { id: string; numero: string; libelle: string; avancementPct?: number | null }
+    | undefined;
+  /** Journal d'audit du devis (rail « Historique »). Absent en création (le
+   *  devis n'existe pas encore) → la carte n'est pas rendue. */
+  historique?: EvenementHistoriqueDevis[] | undefined;
 };
 
 const TAUX_TVA_OPTIONS = [
@@ -192,6 +205,22 @@ function formatMontant(n: number): string {
     maximumFractionDigits: 2,
   });
 }
+
+// Largeurs (%) des 8 colonnes du tableau des lignes
+// (Désignation · Qté · Unité · PU HT · TVA · Remise % · Montant HT · Actions).
+// En % plutôt qu'en px : avec `table-fixed w-full` la somme fait toujours 100 %
+// → le tableau ne déborde jamais de sa colonne, ce qui permet de coller le
+// `thead` au viewport (gabarit dynamique « un seul scroll ») sans conteneur de
+// scroll horizontal — incompatible avec un `thead` figé.
+// En mode normal, la colonne Actions est réduite (un seul menu ⋮) et la place
+// gagnée va à la Désignation ; en plein écran elle s'élargit pour les icônes en
+// ligne.
+const COLW_NORMAL = [34, 8, 9, 12, 11, 8, 13, 5];
+const COLW_PLEIN = [28, 8, 9, 12, 11, 8, 12, 12];
+
+// Classe commune des `th` figés : sticky calé sous l'en-tête de section via la
+// variable CSS `--thead-top` (posée dynamiquement sur le `<section>`).
+const TH_STICKY = 'sticky top-[var(--thead-top,11rem)] z-10 border-b bg-muted py-1.5 text-center';
 
 const LABELS_CHAMPS_DEVIS: Record<string, string> = {
   clientId: 'Client',
@@ -460,8 +489,69 @@ export function DevisEditor({
   workflowChangerStatutAction,
   workflowDupliquerAction,
   workflowPeutVersionner = false,
+  chantierRattache,
+  historique,
 }: Props) {
   const router = useRouter();
+  // Mode plein écran : piloté via le contexte sidebar (masque sidebar + header
+  // + rail). Optionnel pour rester montable hors `<SidebarProvider>` (tests).
+  const sidebar = useSidebarOptional();
+  const focusMode = sidebar?.focusMode ?? false;
+  const setFocusMode = sidebar?.setFocusMode;
+  // Réinitialise le plein écran au démontage (ex. navigation) pour ne pas
+  // laisser le chrome de l'app masqué. `setFocusMode` est un setState stable.
+  useEffect(() => {
+    return () => setFocusMode?.(false);
+  }, [setFocusMode]);
+
+  // Pile de figés sur un seul scroll (gabarit dynamique) : bandeau workflow
+  // (sticky) → en-tête de la section « Lignes » → `thead` du tableau restent
+  // empilés en haut pendant qu'on déroule la liste des lignes. Les offsets
+  // `top` sont dynamiques (la frise du bandeau s'enroule, le plein écran change
+  // les hauteurs) : on mesure le bandeau + l'en-tête et on pose deux variables
+  // CSS sur le `<section>`, lues par `top-[var(--lines-top)]` / `--thead-top`.
+  const lignesSectionRef = useRef<HTMLElement>(null);
+  const lignesHeaderRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const section = lignesSectionRef.current;
+    if (!section) return;
+    const band = document.querySelector<HTMLElement>('[data-devis-band]');
+    // Plus de header global (AppHeader retiré des layouts) → le bandeau se
+    // colle toujours au viewport, l'offset d'empilement est donc nul.
+    const headerOffset = 0;
+    function maj() {
+      // Bandeau introuvable (ex. bundle `workflow-devis` périmé pendant un HMR,
+      // sans l'attribut `data-devis-band`) : ne pas caler l'en-tête à
+      // `headerOffset` seul (l'en-tête chevaucherait alors le bandeau) — on
+      // retire les variables pour laisser les replis CSS (`…,8rem` / `…,11rem`),
+      // calés sous un bandeau de hauteur typique.
+      if (!band) {
+        section!.style.removeProperty('--lines-top');
+        section!.style.removeProperty('--thead-top');
+        return;
+      }
+      const linesTop = headerOffset + band.offsetHeight;
+      const headerH = lignesHeaderRef.current?.offsetHeight ?? 0;
+      section!.style.setProperty('--lines-top', `${linesTop}px`);
+      section!.style.setProperty('--thead-top', `${linesTop + headerH}px`);
+    }
+    maj();
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(maj);
+      if (band) ro.observe(band);
+      if (lignesHeaderRef.current) ro.observe(lignesHeaderRef.current);
+    }
+    window.addEventListener('resize', maj);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', maj);
+    };
+    // Le bandeau (`data-devis-band`) et l'en-tête sont observés par le
+    // ResizeObserver : un repli en plein écran déclenche `maj()` sans relancer
+    // l'effet, l'offset ne dépend plus du header (retiré).
+  }, []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<{ titre: string; details: string[] } | null>(null);
   const [sectionsRepliees, setSectionsRepliees] = useState<Set<number>>(new Set());
@@ -530,6 +620,31 @@ export function DevisEditor({
     totalHtDevis = Number(calculerTotauxDevis(lignesLive, postesInternesLive).totalHt);
   } catch {
     totalHtDevis = 0;
+  }
+
+  // Coût estimé (carte « Estimation marge » du rail) : somme, sur les lignes
+  // d'article catalogue, de quantité × prix de revient de l'article
+  // (`prixCourant` = sortie de `prix_courant_article`, c.-à-d. le coût). Les
+  // lignes libres (sans article référencé, ex. DPGF non chiffré) n'ont pas de
+  // coût de référence → exclues. C'est donc une estimation sur le périmètre
+  // catalogue, signalée comme telle dans la carte.
+  const coutParArticle = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of articles) {
+      if (a.prixCourant == null) continue;
+      const p = Number(a.prixCourant);
+      if (Number.isFinite(p)) m.set(a.id, p);
+    }
+    return m;
+  }, [articles]);
+
+  // Recalcul à chaque render (même raison que `totalHtDevis`).
+  let coutEstimeDevis = 0;
+  for (const l of lignesLive) {
+    if (l.type !== 'article_catalogue' || !l.articleId) continue;
+    const pc = coutParArticle.get(l.articleId);
+    const q = Number(l.quantite ?? '');
+    if (pc != null && Number.isFinite(q)) coutEstimeDevis += q * pc;
   }
 
   function toggleSection(idx: number) {
@@ -633,36 +748,55 @@ export function DevisEditor({
   async function handleSubmit(values: DevisInput) {
     setErreur(null);
     setIsSubmitting(true);
-    const result = await onSubmit(values);
-    setIsSubmitting(false);
-    if (!result.ok) {
+    // try/finally impératif : si l'action serveur lève (la branche `throw err`
+    // de mettreAJourDevis relance toute erreur inattendue), `await onSubmit`
+    // rejette. Sans ce filet, `setIsSubmitting(false)` n'était jamais atteint
+    // et le bouton restait figé sur « Enregistrement… », désactivé à vie, sans
+    // afficher la cause → l'utilisateur ne pouvait plus enregistrer.
+    try {
+      const result = await onSubmit(values);
+      if (!result.ok) {
+        setErreur({
+          titre: result.error ?? 'Enregistrement impossible.',
+          details: [],
+        });
+        if (result.fieldErrors) {
+          for (const [field, msgs] of Object.entries(result.fieldErrors)) {
+            if (msgs?.[0]) form.setError(field as never, { type: 'server', message: msgs[0] });
+          }
+        }
+        return;
+      }
+      setDirtyOverride(false);
+      toast.success(
+        result.data && 'numero' in result.data
+          ? `Devis ${result.data.numero} créé`
+          : 'Devis enregistré',
+      );
+      const resolvedId =
+        result.data && typeof result.data === 'object' && 'id' in result.data
+          ? (result.data as { id?: string }).id
+          : undefined;
+      const url =
+        successRedirectAppendId && resolvedId
+          ? `${successRedirect.replace(/\/$/, '')}/${resolvedId}`
+          : successRedirect;
+      router.push(url);
+      router.refresh();
+    } catch (err) {
       setErreur({
-        titre: result.error ?? 'Enregistrement impossible.',
+        titre:
+          err instanceof Error && err.message
+            ? `Erreur lors de l'enregistrement : ${err.message}`
+            : "Une erreur inattendue est survenue lors de l'enregistrement. Réessaie.",
         details: [],
       });
-      if (result.fieldErrors) {
-        for (const [field, msgs] of Object.entries(result.fieldErrors)) {
-          if (msgs?.[0]) form.setError(field as never, { type: 'server', message: msgs[0] });
-        }
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-    setDirtyOverride(false);
-    toast.success(
-      result.data && 'numero' in result.data
-        ? `Devis ${result.data.numero} créé`
-        : 'Devis enregistré',
-    );
-    const resolvedId =
-      result.data && typeof result.data === 'object' && 'id' in result.data
-        ? (result.data as { id?: string }).id
-        : undefined;
-    const url =
-      successRedirectAppendId && resolvedId
-        ? `${successRedirect.replace(/\/$/, '')}/${resolvedId}`
-        : successRedirect;
-    router.push(url);
-    router.refresh();
   }
 
   /** Surface les erreurs de validation Zod côté client, surtout celles des
@@ -672,13 +806,16 @@ export function DevisEditor({
    *  paraît « ne rien faire » : RHF bloque silencieusement la soumission. */
   function handleInvalid(errors: FieldErrors<DevisInput>) {
     const details = aplatirErreursRhf(errors).slice(0, 20);
-    setErreur({
-      titre:
-        details.length === 0
-          ? 'Le formulaire contient des erreurs.'
-          : `Le formulaire contient ${details.length} erreur${details.length > 1 ? 's' : ''} — corrige les champs ci-dessous avant d'enregistrer.`,
-      details,
-    });
+    const titre =
+      details.length === 0
+        ? 'Le formulaire contient des erreurs.'
+        : `Le formulaire contient ${details.length} erreur${details.length > 1 ? 's' : ''} — corrige les champs ci-dessous avant d'enregistrer.`;
+    setErreur({ titre, details });
+    // Toast en complément de la bannière : rendu dans un portail au-dessus de
+    // tout (y compris la modale « Enregistrer et quitter » de la garde de
+    // navigation), il garantit un retour visible même si la page reste
+    // scrollée sur les lignes.
+    toast.error(titre);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -748,14 +885,24 @@ export function DevisEditor({
     onSave: async () => {
       let succes = false;
       await form.handleSubmit(async (values) => {
-        const r = await onSubmit(values);
-        succes = r.ok;
-        if (r.ok) {
-          toast.success(
-            r.data && 'numero' in r.data ? `Devis ${r.data.numero} créé` : 'Devis enregistré',
-          );
-        } else if (r.error) {
-          setErreur({ titre: r.error, details: [] });
+        try {
+          const r = await onSubmit(values);
+          succes = r.ok;
+          if (r.ok) {
+            toast.success(
+              r.data && 'numero' in r.data ? `Devis ${r.data.numero} créé` : 'Devis enregistré',
+            );
+          } else if (r.error) {
+            setErreur({ titre: r.error, details: [] });
+            toast.error(r.error);
+          }
+        } catch (err) {
+          const titre =
+            err instanceof Error && err.message
+              ? `Erreur lors de l'enregistrement : ${err.message}`
+              : "Une erreur inattendue est survenue lors de l'enregistrement.";
+          setErreur({ titre, details: [] });
+          toast.error(titre);
         }
       }, handleInvalid)();
       return succes;
@@ -782,6 +929,8 @@ export function DevisEditor({
           enregistrerDisabled={isSubmitting}
           onImporterDpgf={peutImporterDpgf ? () => dpgfRef.current?.ouvrir() : undefined}
           onDupliquer={workflowDupliquerAction ? () => setDupliquerOuvert(true) : undefined}
+          onTogglePlein={setFocusMode ? () => setFocusMode(!focusMode) : undefined}
+          pleinActif={focusMode}
         />
         {workflowDupliquerAction && (
           <DupliquerDevisDialog
@@ -812,376 +961,574 @@ export function DevisEditor({
           </Alert>
         )}
 
-        <FormSection
-          number={1}
-          title="Affaire / Client"
-          storageKey="devis:affaire-client"
-          rightSlot={
-            <span className="font-mono text-lg font-semibold tabular-nums text-foreground sm:text-xl">
-              {formatMontant(totalHtDevis)} € HT
-            </span>
-          }
-        >
-          <FormField
-            control={form.control}
-            name="clientId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir un client">
-                        {(v) => {
-                          if (!v) return 'Choisir un client';
-                          const c = clients.find((x) => x.id === v);
-                          return c ? `${c.code} — ${c.libelle}` : String(v);
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.code} — {c.libelle}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Partie gauche : adresse + e-mail du client sélectionné. */}
-            <div className="rounded-md border bg-muted/20 p-3 text-sm">
-              <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Coordonnées client
-              </div>
-              {clientSelectionne ? (
-                <div className="space-y-0.5">
-                  <div className="font-medium text-foreground">{clientSelectionne.libelle}</div>
-                  <div>{clientSelectionne.adresseLigne1}</div>
-                  {clientSelectionne.adresseLigne2 && <div>{clientSelectionne.adresseLigne2}</div>}
-                  <div>
-                    {clientSelectionne.codePostal} {clientSelectionne.ville}
+        {/* Corps en deux colonnes (maquette devis) : saisie à gauche, rail
+            récap/contexte à droite. Flex (pas de grid-cols-12) pour rester
+            robuste au JIT Tailwind du serveur dev. Le rail disparaît en plein
+            écran. */}
+        <div className="flex flex-col gap-5 lg:flex-row">
+          <div className="min-w-0 flex-1 space-y-6">
+            <FormSection number={1} title="Affaire / Client" storageKey="devis:affaire-client">
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choisir un client">
+                            {(v) => {
+                              if (!v) return 'Choisir un client';
+                              const c = clients.find((x) => x.id === v);
+                              return c ? `${c.code} — ${c.libelle}` : String(v);
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clients.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.code} — {c.libelle}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* Partie gauche : adresse + e-mail du client sélectionné. */}
+                <div className="rounded-md border bg-muted/20 p-3 text-sm">
+                  <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Coordonnées client
                   </div>
-                  {clientSelectionne.email && (
-                    <a
-                      href={`mailto:${clientSelectionne.email}`}
-                      className="mt-1 inline-block break-all text-primary underline underline-offset-4"
-                    >
-                      {clientSelectionne.email}
-                    </a>
+                  {clientSelectionne ? (
+                    <div className="space-y-0.5">
+                      <div className="font-medium text-foreground">{clientSelectionne.libelle}</div>
+                      <div>{clientSelectionne.adresseLigne1}</div>
+                      {clientSelectionne.adresseLigne2 && (
+                        <div>{clientSelectionne.adresseLigne2}</div>
+                      )}
+                      <div>
+                        {clientSelectionne.codePostal} {clientSelectionne.ville}
+                      </div>
+                      {clientSelectionne.email && (
+                        <a
+                          href={`mailto:${clientSelectionne.email}`}
+                          className="mt-1 inline-block break-all text-primary underline underline-offset-4"
+                        >
+                          {clientSelectionne.email}
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Sélectionne un client pour afficher son adresse et son e-mail.
+                    </p>
                   )}
                 </div>
-              ) : (
-                <p className="text-muted-foreground">
-                  Sélectionne un client pour afficher son adresse et son e-mail.
-                </p>
-              )}
-            </div>
 
-            {/* Partie droite : dates empilées les unes sous les autres. */}
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="dateDevis"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date du devis</FormLabel>
-                    <FormControl>
-                      <Input type="date" className="w-44" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dateValidite"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Valable jusqu&apos;au</FormLabel>
-                    <FormControl>
-                      <Input type="date" className="w-44" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-          <FormField
-            control={form.control}
-            name="objet"
-            render={({ field }) => (
-              <FormItem className="mt-4">
-                <FormLabel>Objet (optionnel)</FormLabel>
-                <FormControl>
-                  <Input
-                    maxLength={200}
-                    placeholder="Rénovation cuisine, agrandissement…"
-                    {...field}
-                    value={field.value ?? ''}
+                {/* Partie droite : dates empilées les unes sous les autres. */}
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="dateDevis"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date du devis</FormLabel>
+                        <FormControl>
+                          <Input type="date" className="w-44" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </FormSection>
-
-        {peutImporterDpgf && (
-          <DpgfImportZone
-            ref={dpgfRef}
-            analyserAction={analyserDpgfAction!}
-            importerAction={importerDpgfAction!}
-            onConfirm={appliquerImportDpgf}
-          />
-        )}
-
-        <FormSection
-          number={2}
-          title="Lignes du devis"
-          storageKey="devis:lignes"
-          bodyClassName="p-0"
-          rightSlot={
-            <div className="flex items-center gap-2 text-foreground">
-              {tousLesIdxSections.length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={toggleToutesLesSections}
-                  aria-label={
-                    toutDeplie ? 'Replier toutes les sections' : 'Déplier toutes les sections'
-                  }
-                  title={toutDeplie ? 'Tout replier' : 'Tout déplier'}
-                >
-                  {toutDeplie ? <ChevronsDownUpIcon /> : <ChevronsUpDownIcon />}
-                </Button>
-              )}
-              <MenuAjouterArticle
-                label="Ajouter article catalogue"
-                icon={BookOpenIcon}
-                groupes={groupes}
-                lignes={lignesLive}
-                onAjouterFin={() => append(nouvelleLigneArticleCatalogue())}
-                onAjouterDansSection={(sectionIdx) => {
-                  const groupe = groupes.find((g) => g.sectionIdx === sectionIdx);
-                  ajouterLigneDansSection(
-                    sectionIdx,
-                    groupe?.articleIdxs ?? [],
-                    nouvelleLigneArticleCatalogue,
-                  );
-                }}
-              />
-              <MenuAjouterArticle
-                label="Ajouter article libre"
-                icon={PencilIcon}
-                groupes={groupes}
-                lignes={lignesLive}
-                onAjouterFin={() => append(nouvelleLigneLibre())}
-                onAjouterDansSection={(sectionIdx) => {
-                  const groupe = groupes.find((g) => g.sectionIdx === sectionIdx);
-                  ajouterLigneDansSection(
-                    sectionIdx,
-                    groupe?.articleIdxs ?? [],
-                    nouvelleLigneLibre,
-                  );
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                onClick={() => append(nouvelleSection())}
-                aria-label="Ajouter une section"
-                title="Ajouter une section"
-              >
-                <FolderPlusIcon />
-              </Button>
-            </div>
-          }
-        >
-          <p className="px-4 py-1 text-xs text-muted-foreground sm:hidden" aria-hidden="true">
-            Le tableau défile horizontalement.
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[960px] table-fixed">
-              <colgroup>
-                <col />
-                <col style={{ width: '72px' }} />
-                <col style={{ width: '72px' }} />
-                <col style={{ width: '120px' }} />
-                <col style={{ width: '100px' }} />
-                <col style={{ width: '76px' }} />
-                <col style={{ width: '140px' }} />
-                <col style={{ width: '180px' }} />
-              </colgroup>
-              <thead className="bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                <tr className="border-b">
-                  <th className="px-3 py-1.5 text-center">Désignation</th>
-                  <th className="px-2 py-1.5 text-center">Qté</th>
-                  <th className="px-2 py-1.5 text-center">Unité</th>
-                  <th className="px-2 py-1.5 text-center">PU HT</th>
-                  <th className="px-2 py-1.5 text-center">TVA</th>
-                  <th className="px-2 py-1.5 text-center">Remise %</th>
-                  <th className="px-2 py-1.5 text-center">Montant HT</th>
-                  <th className="px-2 py-1.5 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {groupes.map((g) => {
-                  if (g.sectionIdx !== null && groupesMasques.has(g.sectionIdx)) {
-                    return null;
-                  }
-                  return (
-                    <GroupeRow
-                      key={g.sectionIdx ?? `orphelins-${g.articleIdxs.join('-')}`}
-                      groupe={g}
-                      lignes={lignesLive}
-                      articles={articles}
-                      unites={unites}
-                      form={form}
-                      replie={g.sectionIdx !== null && sectionsRepliees.has(g.sectionIdx)}
-                      onToggle={() => g.sectionIdx !== null && toggleSection(g.sectionIdx)}
-                      onSupprimer={(idx) => remove(idx)}
-                      totalSection={
-                        g.sectionIdx !== null
-                          ? (totauxRecursifs.get(g.sectionIdx) ?? 0)
-                          : calculerTotalGroupe(g.articleIdxs, lignesLive)
-                      }
-                      profondeur={
-                        g.sectionIdx !== null ? (profondeurParSection.get(g.sectionIdx) ?? 1) : 1
-                      }
-                      enModeTree={enModeTree}
-                      dpgfImporte={dpgfImporte}
-                    />
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </FormSection>
-
-        {peutGererPostesInternes && (
-          <PostesInternesEditor form={form} forcerAffichage={dpgfImporte} />
-        )}
-
-        <div className="rounded-md border bg-muted/20 p-4">
-          <div className="mb-1 text-sm font-medium">Remise globale</div>
-          <p className="mb-3 text-xs text-muted-foreground">
-            Remise appliquée directement sur le total HT, en plus des éventuelles remises par ligne.
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="remiseGlobaleType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type de remise</FormLabel>
-                  <Select
-                    value={field.value ?? '__aucune__'}
-                    onValueChange={(v) => {
-                      if (!v) return;
-                      if (v === '__aucune__') {
-                        field.onChange(null);
-                        form.setValue('remiseGlobaleValeur', null, { shouldDirty: true });
-                      } else {
-                        field.onChange(v);
-                      }
-                    }}
-                  >
+                  <FormField
+                    control={form.control}
+                    name="dateValidite"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valable jusqu&apos;au</FormLabel>
+                        <FormControl>
+                          <Input type="date" className="w-44" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <FormField
+                control={form.control}
+                name="objet"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Objet (optionnel)</FormLabel>
                     <FormControl>
-                      <SelectTrigger aria-label="Type de remise globale">
-                        <SelectValue>
-                          {(val) =>
-                            val === 'pourcent'
-                              ? 'Pourcentage (%)'
-                              : val === 'montant'
-                                ? 'Montant (€)'
-                                : 'Aucune remise'
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
+                      <Input
+                        maxLength={200}
+                        placeholder="Rénovation cuisine, agrandissement…"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="__aucune__">Aucune remise</SelectItem>
-                      <SelectItem value="pourcent">Pourcentage (%)</SelectItem>
-                      <SelectItem value="montant">Montant (€)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="remiseGlobaleValeur"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {remiseGlobaleType === 'montant' ? 'Montant de la remise (€)' : 'Remise (%)'}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-right"
-                      inputMode="decimal"
-                      placeholder={remiseGlobaleType === 'montant' ? '0.00' : '0'}
-                      disabled={remiseGlobaleType === null}
-                      aria-label="Valeur de la remise globale"
-                      {...field}
-                      value={field.value ?? ''}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === '' ? null : e.target.value)
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </FormSection>
+
+            {peutImporterDpgf && (
+              <DpgfImportZone
+                ref={dpgfRef}
+                analyserAction={analyserDpgfAction!}
+                importerAction={importerDpgfAction!}
+                onConfirm={appliquerImportDpgf}
+              />
+            )}
+
+            <FormSection
+              number={2}
+              title="Lignes du devis"
+              storageKey="devis:lignes"
+              bodyClassName="p-0"
+              unclipped
+              containerRef={lignesSectionRef}
+              headerRef={lignesHeaderRef}
+              headerClassName="sticky top-[var(--lines-top,8rem)] z-20 rounded-t-xl bg-card"
+              rightSlot={
+                <div className="flex items-center gap-2 text-foreground">
+                  {/* Total HT live : posé à droite de l'en-tête (au-dessus de la
+                  colonne Montant), seul rappel du montant en plein écran où le
+                  rail récap est masqué. */}
+                  <span className="mr-1 hidden font-mono text-base font-semibold tabular-nums text-orange-700 sm:inline">
+                    {formatMontant(totalHtDevis)} € HT
+                  </span>
+                  {tousLesIdxSections.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={toggleToutesLesSections}
+                      aria-label={
+                        toutDeplie ? 'Replier toutes les sections' : 'Déplier toutes les sections'
                       }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                      title={toutDeplie ? 'Tout replier' : 'Tout déplier'}
+                    >
+                      {toutDeplie ? <ChevronsDownUpIcon /> : <ChevronsUpDownIcon />}
+                    </Button>
+                  )}
+                  <MenuAjouterArticle
+                    label="Ajouter article catalogue"
+                    icon={BookOpenIcon}
+                    groupes={groupes}
+                    lignes={lignesLive}
+                    onAjouterFin={() => append(nouvelleLigneArticleCatalogue())}
+                    onAjouterDansSection={(sectionIdx) => {
+                      const groupe = groupes.find((g) => g.sectionIdx === sectionIdx);
+                      ajouterLigneDansSection(
+                        sectionIdx,
+                        groupe?.articleIdxs ?? [],
+                        nouvelleLigneArticleCatalogue,
+                      );
+                    }}
+                  />
+                  <MenuAjouterArticle
+                    label="Ajouter article libre"
+                    icon={PencilIcon}
+                    groupes={groupes}
+                    lignes={lignesLive}
+                    onAjouterFin={() => append(nouvelleLigneLibre())}
+                    onAjouterDansSection={(sectionIdx) => {
+                      const groupe = groupes.find((g) => g.sectionIdx === sectionIdx);
+                      ajouterLigneDansSection(
+                        sectionIdx,
+                        groupe?.articleIdxs ?? [],
+                        nouvelleLigneLibre,
+                      );
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => append(nouvelleSection())}
+                    aria-label="Ajouter une section"
+                    title="Ajouter une section"
+                  >
+                    <FolderPlusIcon />
+                  </Button>
+                </div>
+              }
+            >
+              <table className="w-full table-fixed">
+                <colgroup>
+                  {(focusMode ? COLW_PLEIN : COLW_NORMAL).map((w, i) => (
+                    <col key={i} style={{ width: `${w}%` }} />
+                  ))}
+                </colgroup>
+                <thead className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className={cn(TH_STICKY, 'px-3')}>Désignation</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>Qté</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>Unité</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>PU HT</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>TVA</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>Remise %</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>Montant HT</th>
+                    <th className={cn(TH_STICKY, 'px-2')}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupes.map((g) => {
+                    if (g.sectionIdx !== null && groupesMasques.has(g.sectionIdx)) {
+                      return null;
+                    }
+                    return (
+                      <GroupeRow
+                        key={g.sectionIdx ?? `orphelins-${g.articleIdxs.join('-')}`}
+                        groupe={g}
+                        lignes={lignesLive}
+                        articles={articles}
+                        unites={unites}
+                        form={form}
+                        replie={g.sectionIdx !== null && sectionsRepliees.has(g.sectionIdx)}
+                        onToggle={() => g.sectionIdx !== null && toggleSection(g.sectionIdx)}
+                        onSupprimer={(idx) => remove(idx)}
+                        totalSection={
+                          g.sectionIdx !== null
+                            ? (totauxRecursifs.get(g.sectionIdx) ?? 0)
+                            : calculerTotalGroupe(g.articleIdxs, lignesLive)
+                        }
+                        profondeur={
+                          g.sectionIdx !== null ? (profondeurParSection.get(g.sectionIdx) ?? 1) : 1
+                        }
+                        enModeTree={enModeTree}
+                        dpgfImporte={dpgfImporte}
+                      />
+                    );
+                  })}
+                </tbody>
+              </table>
+            </FormSection>
+
+            <FormSection
+              number={3}
+              title="Remise globale &amp; postes internes"
+              storageKey="devis:remise-postes"
+            >
+              <p className="mb-3 text-xs text-muted-foreground">
+                Remise appliquée directement sur le total HT, en plus des éventuelles remises par
+                ligne.
+              </p>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="remiseGlobaleType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type de remise</FormLabel>
+                      <Select
+                        value={field.value ?? '__aucune__'}
+                        onValueChange={(v) => {
+                          if (!v) return;
+                          if (v === '__aucune__') {
+                            field.onChange(null);
+                            form.setValue('remiseGlobaleValeur', null, { shouldDirty: true });
+                          } else {
+                            field.onChange(v);
+                          }
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger aria-label="Type de remise globale">
+                            <SelectValue>
+                              {(val) =>
+                                val === 'pourcent'
+                                  ? 'Pourcentage (%)'
+                                  : val === 'montant'
+                                    ? 'Montant (€)'
+                                    : 'Aucune remise'
+                              }
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__aucune__">Aucune remise</SelectItem>
+                          <SelectItem value="pourcent">Pourcentage (%)</SelectItem>
+                          <SelectItem value="montant">Montant (€)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="remiseGlobaleValeur"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {remiseGlobaleType === 'montant'
+                          ? 'Montant de la remise (€)'
+                          : 'Remise (%)'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="text-right"
+                          inputMode="decimal"
+                          placeholder={remiseGlobaleType === 'montant' ? '0.00' : '0'}
+                          disabled={remiseGlobaleType === null}
+                          aria-label="Valeur de la remise globale"
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) =>
+                            field.onChange(e.target.value === '' ? null : e.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {peutGererPostesInternes && (
+                <div className="mt-4">
+                  <PostesInternesEditor form={form} forcerAffichage={dpgfImporte} />
+                </div>
               )}
-            />
+            </FormSection>
+
+            <FormSection number={4} title="Notes &amp; conditions" storageKey="devis:notes">
+              <FormField
+                control={form.control}
+                name="conditionsGenerales"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Conditions générales (optionnel)</FormLabel>
+                    <FormControl>
+                      <Textarea rows={4} {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Notes internes (non imprimées)</FormLabel>
+                    <FormControl>
+                      <Textarea rows={2} {...field} value={field.value ?? ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </FormSection>
           </div>
+
+          {/* Rail récap / contexte (maquette devis dynamique : ~1/4 de la
+              largeur, principal ~3/4 — soit le 9/3 de la maquette), masqué en
+              plein écran. */}
+          <aside className={cn('space-y-5 lg:w-1/4 lg:shrink-0', focusMode && 'hidden')}>
+            <TotauxDevis
+              lignes={lignesLive}
+              postesInternes={postesInternesLive}
+              remiseGlobale={{ type: remiseGlobaleType, valeur: remiseGlobaleValeur }}
+            />
+            {chantierRattache && <ChantierRattacheCard chantier={chantierRattache} />}
+            <EstimationMargeCard
+              venteHt={totalHtDevis}
+              coutEstime={coutEstimeDevis}
+              ciblePct={20}
+            />
+            {historique && <HistoriqueCard evenements={historique} />}
+          </aside>
         </div>
 
-        <TotauxDevis
-          lignes={lignesLive}
-          postesInternes={postesInternesLive}
-          remiseGlobale={{ type: remiseGlobaleType, valeur: remiseGlobaleValeur }}
-        />
-
-        <FormSection number={3} title="Notes &amp; conditions" storageKey="devis:notes">
-          <FormField
-            control={form.control}
-            name="conditionsGenerales"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Conditions générales (optionnel)</FormLabel>
-                <FormControl>
-                  <Textarea rows={4} {...field} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem className="mt-4">
-                <FormLabel>Notes internes (non imprimées)</FormLabel>
-                <FormControl>
-                  <Textarea rows={2} {...field} value={field.value ?? ''} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </FormSection>
+        {/* Barre figée en bas (plein écran uniquement) : rappel du total +
+            Enregistrer, sans avoir à remonter au bandeau. */}
+        {focusMode && (
+          <div className="sticky bottom-0 z-40 -mx-4 -mb-6 flex items-center gap-4 border-t bg-card/95 px-4 py-2.5 shadow-[0_-1px_3px_rgba(0,0,0,0.06)] backdrop-blur lg:-mx-8 lg:px-8">
+            <Button type="button" variant="outline" size="sm" onClick={() => setFocusMode?.(false)}>
+              Quitter le plein écran
+            </Button>
+            <span className="font-mono text-sm font-semibold tabular-nums text-orange-700">
+              {formatMontant(totalHtDevis)} € HT
+            </span>
+            <div className="ml-auto">
+              <Button type="submit" size="sm" disabled={isSubmitting}>
+                {isSubmitting ? 'Enregistrement…' : 'Enregistrer le devis'}
+              </Button>
+            </div>
+          </div>
+        )}
       </form>
     </Form>
+  );
+}
+
+/** Carte « Chantier rattaché » du rail (maquette devis) : lien vers la fiche
+ *  chantier, fidèle aux hrefs non préfixés utilisés ailleurs dans l'écran. */
+function ChantierRattacheCard({
+  chantier,
+}: {
+  chantier: { id: string; numero: string; libelle: string; avancementPct?: number | null };
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <div className="px-4 py-3">
+        <h3 className="font-heading font-semibold text-orange-700">Chantier rattaché</h3>
+      </div>
+      <GuardedLink
+        href={`/chantiers/${chantier.id}`}
+        className="m-3 mt-0 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3 transition-colors hover:bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30"
+      >
+        <span className="size-2 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-medium text-amber-900 dark:text-amber-200">
+            {chantier.libelle}
+          </span>
+          <span className="block truncate text-xs text-amber-700/80 dark:text-amber-300/70">
+            {chantier.numero}
+            {typeof chantier.avancementPct === 'number'
+              ? ` · ${chantier.avancementPct} % avancement`
+              : ''}
+          </span>
+        </span>
+        <span className="text-amber-700 dark:text-amber-300" aria-hidden="true">
+          ›
+        </span>
+      </GuardedLink>
+    </section>
+  );
+}
+
+/** Carte « Estimation marge » du rail (maquette devis dynamique). La vente HT
+ *  est le total réel du devis ; le coût estimé est calculé sur les lignes
+ *  catalogue (prix de revient des articles) — les lignes libres ne sont pas
+ *  chiffrées en coût, d'où la mention « estimation sur les lignes catalogue ». */
+function EstimationMargeCard({
+  venteHt,
+  coutEstime,
+  ciblePct,
+}: {
+  venteHt: number;
+  coutEstime: number;
+  ciblePct: number;
+}) {
+  const margePct = venteHt > 0 ? ((venteHt - coutEstime) / venteHt) * 100 : 0;
+  const okCible = margePct >= ciblePct;
+  // Barre : 0 → 30 % de marge mappés sur 0 → 100 % de largeur (comme la maquette).
+  const largeurBarre = Math.max(0, Math.min(100, margePct / 0.3));
+  return (
+    <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <div className="px-4 py-3">
+        <h3 className="font-heading font-semibold text-orange-700">Estimation marge</h3>
+      </div>
+      <div className="border-t px-4 py-3">
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Vente HT</span>
+            <span className="font-mono font-semibold tabular-nums">{formatMontant(venteHt)} €</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Coût estimé</span>
+            <span className="font-mono font-semibold tabular-nums">
+              {formatMontant(coutEstime)} €
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Marge</span>
+            <span
+              className={cn(
+                'font-mono font-semibold tabular-nums',
+                okCible ? 'text-emerald-700' : 'text-rose-600',
+              )}
+            >
+              {margePct.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} %
+            </span>
+          </div>
+        </div>
+        <div className="mt-3 h-1.5 rounded bg-muted">
+          <div
+            className={cn('h-full rounded', okCible ? 'bg-emerald-500' : 'bg-rose-500')}
+            style={{ width: `${largeurBarre}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {okCible ? 'au-dessus' : 'en-dessous'} de la cible ({ciblePct} %) · estimation sur les
+          lignes catalogue
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/** Libellé lisible d'un événement d'audit du devis. */
+function libelleEvenementDevis(e: EvenementHistoriqueDevis): string {
+  if (e.action === 'insert') return 'Devis créé';
+  if (e.action === 'delete') return 'Devis supprimé';
+  if (e.statutApres && e.statutApres !== e.statutAvant) {
+    return `Statut → ${LIBELLES_STATUT_DEVIS[e.statutApres]}`;
+  }
+  return 'Devis modifié';
+}
+
+/** Date + heure courtes (fr-FR), formatées côté client. */
+function formatDateHeureCourt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/** Carte « Historique » du rail (maquette devis dynamique), alimentée par le
+ *  journal d'audit réel du devis (création, modifications, changements de
+ *  statut). */
+function HistoriqueCard({ evenements }: { evenements: EvenementHistoriqueDevis[] }) {
+  return (
+    <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <div className="px-4 py-3">
+        <h3 className="font-heading font-semibold text-orange-700">Historique</h3>
+      </div>
+      {evenements.length === 0 ? (
+        <p className="border-t px-4 py-3 text-xs text-muted-foreground">
+          Aucun événement enregistré.
+        </p>
+      ) : (
+        <ul className="space-y-2.5 border-t px-4 py-3 text-xs">
+          {evenements.map((e) => (
+            <li key={e.id} className="flex items-start gap-2">
+              <span
+                className={cn(
+                  'mt-1 size-1.5 shrink-0 rounded-full',
+                  e.action === 'insert' ? 'bg-emerald-500' : 'bg-amber-500',
+                )}
+                aria-hidden="true"
+              />
+              <span>
+                {libelleEvenementDevis(e)}
+                <br />
+                <span className="text-muted-foreground">
+                  {formatDateHeureCourt(e.createdAt)}
+                  {e.email ? ` · ${e.email}` : ''}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -1337,6 +1684,24 @@ function LigneArticleRow({
   dpgfImporte: boolean;
 }) {
   const [composantsOuverts, setComposantsOuverts] = useState(false);
+
+  // Plein écran : actions de ligne en icônes alignées ; mode normal : repliées
+  // sous un menu ⋮ (gabarit dynamique) pour libérer de la place à la
+  // Désignation. Hors `<SidebarProvider>` (tests) → mode normal.
+  const focusMode = useSidebarOptional()?.focusMode ?? false;
+  const kebabRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (kebabRef.current && !kebabRef.current.contains(e.target as Node)) {
+        kebabRef.current.open = false;
+      }
+    }
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, []);
+  function fermerKebab() {
+    if (kebabRef.current) kebabRef.current.open = false;
+  }
 
   // Abonnement direct au state de la ligne via useWatch. Indispensable car
   // RHF mute son state interne sans changer les références d'objets : si on
@@ -1562,74 +1927,138 @@ function LigneArticleRow({
           {formatMontant(montantHt)} €
         </td>
         <td className="px-2 py-2">
-          <div className="flex items-center justify-center gap-0.5">
-            {/* Boutons de gestion des composants (sous-détail de prix) :
-             *  visibles uniquement quand un DPGF a été importé sur le devis.
-             *  On les conserve aussi si la ligne porte déjà des composants
-             *  (anciens devis), pour ne pas rendre ce contenu inaccessible. */}
-            {(dpgfImporte || composants.length > 0) && (
-              <>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => setComposantsOuverts((v) => !v)}
-                  disabled={composants.length === 0}
-                  aria-label="Afficher / masquer les composants"
-                  title={
-                    composants.length === 0
-                      ? 'Aucun composant — utiliser 📖 ou ✏️ pour en ajouter'
-                      : composantsOuverts
-                        ? 'Masquer les composants'
-                        : 'Afficher les composants'
-                  }
+          {focusMode ? (
+            <div className="flex flex-wrap items-center justify-center gap-0.5">
+              {/* Boutons de gestion des composants (sous-détail de prix) :
+               *  visibles uniquement quand un DPGF a été importé sur le devis.
+               *  On les conserve aussi si la ligne porte déjà des composants
+               *  (anciens devis), pour ne pas rendre ce contenu inaccessible. */}
+              {(dpgfImporte || composants.length > 0) && (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setComposantsOuverts((v) => !v)}
+                    disabled={composants.length === 0}
+                    aria-label="Afficher / masquer les composants"
+                    title={
+                      composants.length === 0
+                        ? 'Aucun composant — utiliser 📖 ou ✏️ pour en ajouter'
+                        : composantsOuverts
+                          ? 'Masquer les composants'
+                          : 'Afficher les composants'
+                    }
+                  >
+                    <PackageIcon className={composants.length > 0 ? 'text-primary' : undefined} />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={ajouterComposantCatalogue}
+                    aria-label="Ajouter un composant article catalogue"
+                    title="Ajouter un composant article catalogue"
+                  >
+                    <BookOpenIcon />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={ajouterComposantLibre}
+                    aria-label="Ajouter un composant libre"
+                    title="Ajouter un composant libre"
+                  >
+                    <PencilIcon />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={viderComposants}
+                    disabled={composants.length === 0}
+                    aria-label="Vider les composants"
+                    title="Vider tous les composants"
+                  >
+                    <Trash2Icon className="text-muted-foreground" />
+                  </Button>
+                </>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={supprimerLigne}
+                aria-label="Supprimer la ligne"
+                title="Supprimer la ligne"
+              >
+                <Trash2Icon />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <details ref={kebabRef} className="relative inline-block text-left">
+                <summary
+                  className="inline-flex size-7 cursor-pointer items-center justify-center rounded-[min(var(--radius-md),12px)] text-muted-foreground hover:bg-accent hover:text-foreground [&::-webkit-details-marker]:hidden [&::marker]:hidden"
+                  aria-label="Actions de la ligne"
+                  title="Actions de la ligne"
                 >
-                  <PackageIcon className={composants.length > 0 ? 'text-primary' : undefined} />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={ajouterComposantCatalogue}
-                  aria-label="Ajouter un composant article catalogue"
-                  title="Ajouter un composant article catalogue"
-                >
-                  <BookOpenIcon />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={ajouterComposantLibre}
-                  aria-label="Ajouter un composant libre"
-                  title="Ajouter un composant libre"
-                >
-                  <PencilIcon />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={viderComposants}
-                  disabled={composants.length === 0}
-                  aria-label="Vider les composants"
-                  title="Vider tous les composants"
-                >
-                  <Trash2Icon className="text-muted-foreground" />
-                </Button>
-              </>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={supprimerLigne}
-              aria-label="Supprimer la ligne"
-              title="Supprimer la ligne"
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
+                  <MoreVerticalIcon className="size-4" />
+                </summary>
+                <div className="absolute right-0 top-full z-30 mt-1 w-60 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                  {(dpgfImporte || composants.length > 0) && (
+                    <>
+                      <LigneMenuItem
+                        icon={PackageIcon}
+                        label="Afficher / masquer les composants"
+                        disabled={composants.length === 0}
+                        onClick={() => {
+                          setComposantsOuverts((v) => !v);
+                          fermerKebab();
+                        }}
+                      />
+                      <LigneMenuItem
+                        icon={BookOpenIcon}
+                        label="Ajouter un composant article catalogue"
+                        onClick={() => {
+                          ajouterComposantCatalogue();
+                          fermerKebab();
+                        }}
+                      />
+                      <LigneMenuItem
+                        icon={PencilIcon}
+                        label="Ajouter un composant libre"
+                        onClick={() => {
+                          ajouterComposantLibre();
+                          fermerKebab();
+                        }}
+                      />
+                      <LigneMenuItem
+                        icon={Trash2Icon}
+                        label="Vider les composants"
+                        disabled={composants.length === 0}
+                        onClick={() => {
+                          viderComposants();
+                          fermerKebab();
+                        }}
+                      />
+                      <div className="my-1 border-t" />
+                    </>
+                  )}
+                  <LigneMenuItem
+                    icon={Trash2Icon}
+                    label="Supprimer la ligne"
+                    danger
+                    onClick={() => {
+                      supprimerLigne();
+                      fermerKebab();
+                    }}
+                  />
+                </div>
+              </details>
+            </div>
+          )}
         </td>
       </tr>
 
@@ -2018,5 +2447,38 @@ function MenuAjouterArticle({
         </button>
       </div>
     </details>
+  );
+}
+
+/** Item du menu ⋮ des actions d'une ligne (mode normal). Mêmes intitulés
+ *  (`aria-label`) que les icônes en ligne du plein écran. */
+function LigneMenuItem({
+  icon: Icon,
+  label,
+  onClick,
+  disabled = false,
+  danger = false,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className={cn(
+        'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent',
+        danger ? 'text-rose-600' : 'text-foreground',
+      )}
+    >
+      <Icon className="size-4 shrink-0" />
+      <span className="truncate">{label}</span>
+    </button>
   );
 }

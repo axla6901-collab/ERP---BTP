@@ -31,6 +31,8 @@ export default async function NouvelArticlePage() {
     <div className="space-y-4">
       <ArticleForm
         titre="Nouvel article"
+        backHref="/catalogue/articles"
+        backLabel="Articles"
         familles={familles.map((f) => ({ id: f.id, code: f.code, libelle: f.libelle }))}
         unites={unites.map((u) => ({
           id: u.id,

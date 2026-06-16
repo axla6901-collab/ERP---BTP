@@ -47,39 +47,48 @@ export function TotauxDevis({
   const totalInterne = Number(totaux.totalHt) - Number(totauxNus.totalHt);
   const hasPostesInternes = postesInternes.length > 0 && totalInterne > 0.01;
 
+  // Carte récap « ambre » du rail, fidèle à la maquette devis : en-tête + corps
+  // détaillé (HT brut, postes internes, remise ventilée, TVA par taux) + pied
+  // Total TTC mis en avant.
   return (
-    <div className="rounded-md border bg-muted/30 p-4">
-      <div className="mb-3 text-sm font-medium text-muted-foreground">
-        Récapitulatif {hasPostesInternes && '— montants client (all-in)'}
+    <section className="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:ring-amber-900/50">
+      <div className="px-4 pb-1 pt-3">
+        <h3 className="font-heading font-semibold text-orange-700">
+          Récapitulatif{' '}
+          {hasPostesInternes && (
+            <span className="font-normal text-orange-700/70">— montants client (all-in)</span>
+          )}
+        </h3>
       </div>
-      <dl className="grid grid-cols-2 gap-2 text-sm">
+      <dl className="space-y-1.5 border-t border-amber-200/70 px-4 py-3 text-sm dark:border-amber-900/40">
         {hasPostesInternes && (
           <>
-            <dt className="text-xs text-muted-foreground">Lignes (HT nu)</dt>
-            <dd className="text-right text-xs tabular-nums text-muted-foreground">
-              {formatMontant(totauxNus.totalHt)} €
-            </dd>
-            <dt className="text-xs text-muted-foreground">
-              + Postes internes ventilés ({postesInternes.length})
-            </dt>
-            <dd className="text-right text-xs tabular-nums text-muted-foreground">
-              {formatMontant(totalInterne)} €
-            </dd>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <dt>Lignes (HT nu)</dt>
+              <dd className="tabular-nums">{formatMontant(totauxNus.totalHt)} €</dd>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <dt>+ Postes internes ventilés ({postesInternes.length})</dt>
+              <dd className="tabular-nums">{formatMontant(totalInterne)} €</dd>
+            </div>
           </>
         )}
-        <dt className="text-muted-foreground">Total HT{aRemise ? ' brut' : ''}</dt>
-        <dd className="text-right tabular-nums">{formatMontant(net.totalHtAvantRemise)} €</dd>
+
+        <div className="flex justify-between text-muted-foreground">
+          <dt>Total HT{aRemise ? ' brut' : ''}</dt>
+          <dd className="tabular-nums">{formatMontant(net.totalHtAvantRemise)} €</dd>
+        </div>
 
         {aRemise && (
           <>
-            <dt className="text-muted-foreground">
-              Remise globale ({libelleRemiseGlobale(remiseGlobale)})
-            </dt>
-            <dd className="text-right tabular-nums text-destructive">
-              − {formatMontant(net.remiseGlobaleMontant)} €
-            </dd>
-            <dt className="font-medium">Total HT net</dt>
-            <dd className="text-right font-medium tabular-nums">{formatMontant(net.totalHt)} €</dd>
+            <div className="flex justify-between text-destructive">
+              <dt>Remise globale ({libelleRemiseGlobale(remiseGlobale)})</dt>
+              <dd className="tabular-nums">− {formatMontant(net.remiseGlobaleMontant)} €</dd>
+            </div>
+            <div className="flex justify-between border-t border-amber-200/70 pt-1.5 font-medium dark:border-amber-900/40">
+              <dt>Total HT net</dt>
+              <dd className="tabular-nums">{formatMontant(net.totalHt)} €</dd>
+            </div>
           </>
         )}
 
@@ -87,10 +96,7 @@ export function TotauxDevis({
           const d = net.detailsTva[taux];
           if (!d) return null;
           return (
-            <div
-              key={taux}
-              className="col-span-2 grid grid-cols-2 gap-2 text-xs text-muted-foreground"
-            >
+            <div key={taux} className="flex justify-between text-xs text-muted-foreground">
               <dt>
                 TVA{' '}
                 {Number(taux)
@@ -98,19 +104,24 @@ export function TotauxDevis({
                   .replace(/\.?0+$/, '')}{' '}
                 % sur {formatMontant(d.base)} €
               </dt>
-              <dd className="text-right tabular-nums">{formatMontant(d.tva)} €</dd>
+              <dd className="tabular-nums">{formatMontant(d.tva)} €</dd>
             </div>
           );
         })}
 
-        <dt className="text-muted-foreground">Total TVA</dt>
-        <dd className="text-right tabular-nums">{formatMontant(net.totalTva)} €</dd>
-
-        <dt className="text-base font-semibold">Total TTC</dt>
-        <dd className="text-right text-base font-semibold tabular-nums">
-          {formatMontant(net.totalTtc)} €
-        </dd>
+        <div className="flex justify-between border-t border-amber-200/70 pt-1.5 text-muted-foreground dark:border-amber-900/40">
+          <dt>Total TVA</dt>
+          <dd className="tabular-nums">{formatMontant(net.totalTva)} €</dd>
+        </div>
       </dl>
-    </div>
+      <div className="flex items-center justify-between border-t border-amber-200 px-4 py-3 dark:border-amber-900/50">
+        <span className="text-sm font-semibold text-orange-800 dark:text-orange-300">
+          Total TTC
+        </span>
+        <span className="font-heading text-2xl font-semibold tabular-nums text-orange-800 dark:text-orange-300">
+          {formatMontant(net.totalTtc)} €
+        </span>
+      </div>
+    </section>
   );
 }

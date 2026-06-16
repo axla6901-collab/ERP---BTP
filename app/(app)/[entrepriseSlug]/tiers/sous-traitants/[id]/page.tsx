@@ -5,6 +5,7 @@ import { ContactCreateButton } from '@/components/contacts/contact-create-button
 import { ContactsSection } from '@/components/contacts/contacts-section';
 import { DocumentsTierList } from '@/components/tiers/documents-tier-list';
 import { SousTraitantForm } from '@/components/tiers/sous-traitant-form';
+import { SousTraitantRail, type HistoriqueRailItem } from '@/components/tiers/sous-traitant-rail';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import {
@@ -15,16 +16,30 @@ import {
   urlTelechargementDocumentTier,
 } from '@/lib/tiers/documents';
 import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
+import {
+  calculerRangCascade,
+  calculerSyntheseConformite,
+  decrireEvenementSousTraitant,
+  formaterDateFr,
+  type SyntheseConformite,
+} from '@/lib/sous-traitance/fiche-synthese';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
 import {
   changerStatutSousTraitant,
   lireSousTraitant,
+  listerHistoriqueSousTraitant,
   listerSousTraitantContacts,
   listerSousTraitants,
   mettreAJourSousTraitant,
+  resoudreEmailsUtilisateurs,
   supprimerSousTraitant,
+  type EvenementHistoriqueST,
 } from '@/lib/tiers/sous-traitants';
-import { STATUT_SOUS_TRAITANT_LABELS, type TypeDocumentTier } from '@/lib/validation/tiers';
+import {
+  STATUT_SOUS_TRAITANT_LABELS,
+  type DocumentTierInput,
+  type TypeDocumentTier,
+} from '@/lib/validation/tiers';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
@@ -33,20 +48,40 @@ function formatDate(iso: string | null): string {
   return d.toLocaleDateString('fr-FR');
 }
 
+/** Horodatage compact pour la timeline du rail (« 14/06 · 16:40 »), en UTC. */
+function formatQuand(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);
+  if (!m) return iso;
+  return `${m[3]}/${m[2]} · ${m[4]}:${m[5]}`;
+}
+
+/** Ton (couleur de pastille) d'un événement d'historique. */
+function tonEvenement(e: EvenementHistoriqueST, label: string): HistoriqueRailItem['ton'] {
+  if (e.action === 'insert') return 'emerald';
+  if (e.action === 'delete') return 'rose';
+  if (label.startsWith('Réactivation') || label.includes('Agréé')) return 'emerald';
+  if (label.startsWith('Désactivation') || label.includes('Suspendu') || label.includes('Refusé')) {
+    return 'amber';
+  }
+  if (label.includes('cascade')) return 'amber';
+  return 'slate';
+}
+
 export default async function SousTraitantDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ entrepriseSlug: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { entrepriseSlug, id } = await params;
   const utilisateur = await requireAuthWithMfa();
-  const [sousTraitant, contacts, documents, tousSousTraitants, raisonsSocialesConnues] =
+  const [sousTraitant, contacts, documents, tousSousTraitants, raisonsSocialesConnues, historique] =
     await Promise.all([
       lireSousTraitant(id),
       listerSousTraitantContacts(id),
       listerDocumentsTier({ type: 'sous_traitant', id }),
       listerSousTraitants(),
       listerRaisonsSocialesActives(),
+      listerHistoriqueSousTraitant(id),
     ]);
   if (!sousTraitant) notFound();
 
@@ -58,50 +93,45 @@ export default async function SousTraitantDetailPage({
     .map((s) => ({ id: s.id, code: s.code, nom: s.nom }));
   const today = new Date().toISOString().slice(0, 10);
 
-  const documentsSection = (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle className="text-base">Documents ({documents.length})</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <DocumentsTierList
-          items={documents.map((d) => ({
-            id: d.id,
-            type: d.type as TypeDocumentTier,
-            libelle: d.libelle,
-            mimeType: d.mimeType,
-            tailleBytes: d.tailleBytes,
-            dateValidite: d.dateValidite,
-            createdAt: d.createdAt.toISOString(),
-          }))}
-          peutEcrire={peutEcrire}
-          today={today}
-          actions={{
-            preparerUpload: async (contentType, filename, tailleBytes) => {
-              'use server';
-              return preparerUploadDocumentTier(
-                { type: 'sous_traitant', id },
-                contentType,
-                filename,
-                tailleBytes,
-              );
-            },
-            enregistrer: async (input) => {
-              'use server';
-              return enregistrerDocumentTier({ type: 'sous_traitant', id }, input);
-            },
-            getDownloadUrl: async (docId) => {
-              'use server';
-              return urlTelechargementDocumentTier(docId);
-            },
-            supprimer: async (docId) => {
-              'use server';
-              return supprimerDocumentTier(docId);
-            },
-          }}
-        />
-      </CardContent>
-    </Card>
+  const documentsItems = documents.map((d) => ({
+    id: d.id,
+    type: d.type as TypeDocumentTier,
+    libelle: d.libelle,
+    mimeType: d.mimeType,
+    tailleBytes: d.tailleBytes,
+    dateValidite: d.dateValidite,
+    createdAt: d.createdAt.toISOString(),
+  }));
+  const documentsActions = {
+    preparerUpload: async (contentType: string, filename: string, tailleBytes: number) => {
+      'use server';
+      return preparerUploadDocumentTier(
+        { type: 'sous_traitant', id },
+        contentType,
+        filename,
+        tailleBytes,
+      );
+    },
+    enregistrer: async (input: DocumentTierInput) => {
+      'use server';
+      return enregistrerDocumentTier({ type: 'sous_traitant', id }, input);
+    },
+    getDownloadUrl: async (docId: string) => {
+      'use server';
+      return urlTelechargementDocumentTier(docId);
+    },
+    supprimer: async (docId: string) => {
+      'use server';
+      return supprimerDocumentTier(docId);
+    },
+  };
+  const documentsTier = (
+    <DocumentsTierList
+      items={documentsItems}
+      peutEcrire={peutEcrire}
+      today={today}
+      actions={documentsActions}
+    />
   );
 
   if (!peutEcrire) {
@@ -151,17 +181,115 @@ export default async function SousTraitantDetailPage({
           </CardContent>
         </Card>
 
-        {documentsSection}
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle className="text-base">Documents ({documents.length})</CardTitle>
+          </CardHeader>
+          <CardContent>{documentsTier}</CardContent>
+        </Card>
       </div>
     );
   }
 
+  // ── Données dérivées (zone D / bandeau) ───────────────────────────────────
+  // Conformité = source unique : dérivée des pièces de la zone Vigilance
+  // (décennale, URSSAF, contrat/DC4) + les qualifications de la fiche.
+  const conformite: SyntheseConformite = calculerSyntheseConformite(
+    {
+      documents: documents.map((d) => ({
+        type: d.type as TypeDocumentTier,
+        dateValidite: d.dateValidite,
+      })),
+      qualifications: sousTraitant.qualifications,
+    },
+    today,
+  );
+
+  const parentParId = new Map(tousSousTraitants.map((s) => [s.id, s.parentStId]));
+  const rang = calculerRangCascade(id, parentParId);
+  const parent = sousTraitant.parentStId
+    ? tousSousTraitants.find((s) => s.id === sousTraitant.parentStId)
+    : null;
+
+  const emails = await resoudreEmailsUtilisateurs([sousTraitant.createdBy, sousTraitant.updatedBy]);
+
+  const contactsActifs = contacts.filter((c) => c.actif).length;
+  // Mini-liste du rail (zone D) : contact principal en tête, puis les autres.
+  const contactsRailItems = contacts
+    .map((c) => ({
+      id: c.id,
+      nom: [c.prenom, c.nom].filter(Boolean).join(' ').trim() || c.nom,
+      fonction: c.fonction,
+      principal: c.principal && c.actif,
+    }))
+    .sort((a, b) => Number(b.principal) - Number(a.principal));
+
+  const historiqueItems: HistoriqueRailItem[] = historique.map((e) => {
+    const label = decrireEvenementSousTraitant(e);
+    return {
+      id: e.id,
+      label,
+      ton: tonEvenement(e, label),
+      quand: formatQuand(e.createdAt),
+      par: e.email,
+    };
+  });
+
+  const rail = (
+    <SousTraitantRail
+      conformite={conformite}
+      cascade={{
+        rang: rang.rang,
+        max: rang.max,
+        depassement: rang.depassement,
+        parent: parent
+          ? {
+              libelle: `${parent.code} — ${parent.nom}`,
+              href: `/${entrepriseSlug}/tiers/sous-traitants/${parent.id}`,
+            }
+          : null,
+        retenuePct: (sousTraitant.tauxRetenueGarantie ?? '0').replace('.', ','),
+      }}
+      meta={{
+        statut: sousTraitant.statut,
+        actif: sousTraitant.actif,
+        creeLe: sousTraitant.createdAt.toISOString().slice(0, 10),
+        creePar: sousTraitant.createdBy ? (emails.get(sousTraitant.createdBy) ?? null) : null,
+        modifieLe: sousTraitant.updatedAt.toISOString().slice(0, 10),
+        modifiePar: sousTraitant.updatedBy ? (emails.get(sousTraitant.updatedBy) ?? null) : null,
+      }}
+      contacts={{
+        actifs: contactsActifs,
+        total: contacts.length,
+        items: contactsRailItems,
+        gererHref: '#contacts',
+      }}
+      historique={historiqueItems}
+    />
+  );
+
+  const sousTitre = (
+    <>
+      <span className="font-mono">{sousTraitant.code}</span>
+      {sousTraitant.siret ? ` · SIRET ${sousTraitant.siret}` : ''}
+      {` · modifié le ${formaterDateFr(sousTraitant.updatedAt.toISOString().slice(0, 10))}`}
+      {sousTraitant.updatedBy && emails.get(sousTraitant.updatedBy)
+        ? ` par ${emails.get(sousTraitant.updatedBy)}`
+        : ''}
+    </>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <SousTraitantForm
         titre={sousTraitant.nom}
         parentsPossibles={parentsPossibles}
         raisonsSocialesConnues={raisonsSocialesConnues}
+        retourHref={`/${entrepriseSlug}/tiers/sous-traitants`}
+        sousTitre={sousTitre}
+        rangCascade={{ rang: rang.rang, max: rang.max, depassement: rang.depassement }}
+        conformite={{ niveau: conformite.niveau, label: conformite.label }}
+        rail={rail}
         defaultValues={{
           code: sousTraitant.code,
           nom: sousTraitant.nom,
@@ -198,27 +326,56 @@ export default async function SousTraitantDetailPage({
         successRedirect="/tiers/sous-traitants"
       />
 
-      <ContactsSection
-        source="sous_traitant"
-        tiersId={id}
-        contacts={contacts.map((c) => ({
-          id: c.id,
-          nom: c.nom,
-          prenom: c.prenom,
-          fonction: c.fonction,
-          email: c.email,
-          telephoneMobile: c.telephoneMobile,
-          telephoneFixe: c.telephoneFixe,
-          notes: c.notes,
-          principal: c.principal,
-          actif: c.actif,
-        }))}
-        className="max-w-2xl"
-      />
+      {/* ── Zone E · blocs pleine largeur ─────────────────────────────────── */}
+      <section id="vigilance" className="overflow-hidden rounded-xl bg-card ring-1 ring-amber-200">
+        <DocumentsTierList
+          items={documentsItems}
+          peutEcrire={peutEcrire}
+          today={today}
+          actions={documentsActions}
+          entete={{
+            titre: (
+              <>
+                Vigilance &amp; pièces administratives{' '}
+                <span className="font-normal text-muted-foreground">(loi 75-1334)</span>
+              </>
+            ),
+            description:
+              'Source unique de la conformité : chaque pièce porte sa référence, son échéance et son statut. La synthèse du rail en découle.',
+          }}
+        />
+      </section>
 
-      {documentsSection}
+      <section
+        id="contacts"
+        className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10"
+      >
+        <ContactsSection
+          source="sous_traitant"
+          tiersId={id}
+          entete={{
+            titre: 'Contacts du sous-traitant',
+            description: `${contactsActifs} actifs sur ${contacts.length} · enregistrement immédiat via la frame contacts.`,
+          }}
+          action={
+            <ContactCreateButton source="sous_traitant" tiersId={id} label="Ajouter un contact" />
+          }
+          contacts={contacts.map((c) => ({
+            id: c.id,
+            nom: c.nom,
+            prenom: c.prenom,
+            fonction: c.fonction,
+            email: c.email,
+            telephoneMobile: c.telephoneMobile,
+            telephoneFixe: c.telephoneFixe,
+            notes: c.notes,
+            principal: c.principal,
+            actif: c.actif,
+          }))}
+        />
+      </section>
 
-      <div className="max-w-xl border-t pt-6">
+      <div className="border-t pt-6">
         <h3 className="mb-2 text-sm font-medium text-destructive">Zone dangereuse</h3>
         <DeleteButton
           label="Supprimer ce sous-traitant"

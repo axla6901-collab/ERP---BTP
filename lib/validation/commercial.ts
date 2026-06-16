@@ -431,4 +431,19 @@ export const TRANSITIONS_VALIDEUR: ReadonlyArray<{
   { from: 'en_validation', to: 'brouillon' },
 ];
 
+/** Un événement de l'historique (audit_log) d'un devis, affiché dans le rail
+ *  de l'éditeur. Donnée sérialisable partagée entre la couche serveur
+ *  (`listerHistoriqueDevis`) et le client (`DevisEditor`). */
+export type EvenementHistoriqueDevis = {
+  id: string;
+  action: 'insert' | 'update' | 'delete';
+  /** Statut avant/après (extrait du JSON before/after) pour distinguer les
+   *  changements de statut des autres modifications. */
+  statutAvant: StatutDevis | null;
+  statutApres: StatutDevis | null;
+  /** ISO 8601 — formaté côté client pour éviter tout mismatch d'hydratation. */
+  createdAt: string;
+  email: string | null;
+};
+
 export { TAUX_TVA_FR };

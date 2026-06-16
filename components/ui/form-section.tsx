@@ -9,7 +9,8 @@ const STORAGE_PREFIX = 'form-section:';
 
 type FormSectionProps = {
   number?: number;
-  title: string;
+  /** Titre de section. `ReactNode` pour autoriser un badge inline (ex. « proposé »). */
+  title: React.ReactNode;
   description?: string;
   rightSlot?: React.ReactNode;
   defaultOpen?: boolean;
@@ -17,6 +18,20 @@ type FormSectionProps = {
   collapsible?: boolean;
   className?: string;
   bodyClassName?: string;
+  /** Style inline posé sur le `<section>` (ex. variables CSS pour des offsets
+   *  sticky calculés). */
+  style?: React.CSSProperties;
+  /** Ref vers le `<section>` racine (ex. pour écrire des variables CSS). */
+  containerRef?: React.Ref<HTMLElement>;
+  /** Ref vers le `<div>` d'en-tête (ex. pour mesurer sa hauteur). */
+  headerRef?: React.Ref<HTMLDivElement>;
+  /** Classes additionnelles sur l'en-tête (ex. `sticky top-… bg-card` pour un
+   *  en-tête figé). Nécessite généralement `unclipped`. */
+  headerClassName?: string;
+  /** Retire `overflow-hidden` du `<section>` : indispensable pour qu'un
+   *  descendant `position: sticky` (en-tête, `thead`) puisse se caler sur le
+   *  viewport plutôt que d'être rogné par la carte. */
+  unclipped?: boolean;
   children: React.ReactNode;
 };
 
@@ -30,6 +45,11 @@ export function FormSection({
   collapsible = true,
   className,
   bodyClassName,
+  style,
+  containerRef,
+  headerRef,
+  headerClassName,
+  unclipped = false,
   children,
 }: FormSectionProps) {
   const [open, setOpen] = React.useState<boolean>(defaultOpen);
@@ -65,14 +85,20 @@ export function FormSection({
 
   return (
     <section
+      ref={containerRef}
       data-slot="form-section"
       data-open={open ? 'open' : 'closed'}
+      style={style}
       className={cn(
-        'overflow-hidden rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10',
+        'rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10',
+        !unclipped && 'overflow-hidden',
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4 px-4 py-3 sm:px-5">
+      <div
+        ref={headerRef}
+        className={cn('flex items-start justify-between gap-4 px-4 py-3 sm:px-5', headerClassName)}
+      >
         <button
           type="button"
           id={headerId}
@@ -97,9 +123,9 @@ export function FormSection({
               )}
             </span>
           ) : null}
-          <h2 className="font-heading text-base font-semibold leading-snug sm:text-lg">
+          <h2 className="font-heading text-base font-semibold leading-snug text-orange-700 sm:text-lg">
             {number !== undefined ? (
-              <span className="mr-1.5 text-muted-foreground">{number}.</span>
+              <span className="mr-1.5 text-orange-700/70">{number}.</span>
             ) : null}
             {title}
           </h2>
@@ -144,13 +170,15 @@ export function FormSubCard({
   return (
     <div
       data-slot="form-subcard"
-      className={cn('overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10', className)}
+      className={cn('rounded-lg border bg-muted/40 p-3 sm:p-4', className)}
     >
-      <div className="flex items-center justify-between gap-2 bg-slate-800 px-3 py-2 text-white">
-        <h3 className="text-sm font-semibold leading-snug">{title}</h3>
-        {action ? <div className="text-xs text-white/80">{action}</div> : null}
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {title}
+        </h3>
+        {action ? <div className="text-xs text-muted-foreground">{action}</div> : null}
       </div>
-      <div className={cn('space-y-3 p-3 sm:p-4', bodyClassName)}>{children}</div>
+      <div className={cn('space-y-3', bodyClassName)}>{children}</div>
     </div>
   );
 }

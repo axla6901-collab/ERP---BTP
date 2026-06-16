@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Devis — saisie (maquette dynamique) · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+
+      /* Pile de figés (band → toolbar → thead), calée sur le scroll de la page (un seul scroll) */
+      :root { --band-h: 100px; --lines-h: 50px; --act-w: 56px; }
+      body.plein { --band-h: 58px; --act-w: 210px; }
+
+      .app-sidebar { position: sticky; top: 0; align-self: flex-start; height: 100vh; }
+      .band { position: sticky; top: 0; z-index: 40; }
+      .lines-header { position: sticky; top: var(--band-h); z-index: 30; }
+      thead.sticky-head th { position: sticky; top: calc(var(--band-h) + var(--lines-h)); z-index: 20; background: #f8fafc; }
+
+      /* Plein écran : masque sidebar + rail + frise, élargit la colonne principale */
+      body.plein .hide-plein { display: none !important; }
+      body.plein .main-col { grid-column: span 12 / span 12 !important; }
+      .bottom-bar { display: none; }
+      body.plein .bottom-bar { display: flex; }
+      /* Montant dans le titre : seulement en plein écran, aligné sur la colonne Montant HT
+         (bord droit = largeur colonne Actions + padding px-3 de la colonne Montant) */
+      #head-total { position: absolute; top: 0; bottom: 0; right: calc(var(--act-w) + 12px); display: none; align-items: center; }
+      body.plein #head-total { display: flex; }
+
+      /* Actions de ligne : menu ⋮ en normal, icônes en ligne en plein écran */
+      .actions-inline { display: none; }
+      .actions-kebab { display: inline-block; }
+      body.plein .actions-inline { display: inline-flex; }
+      body.plein .actions-kebab { display: none; }
+      .act-col { width: var(--act-w); }
+
+      .ibtn { display: inline-flex; height: 1.9rem; width: 1.9rem; align-items: center; justify-content: center; border-radius: 0.375rem; color: #475569; transition: background 0.12s; }
+      .ibtn:hover { background: #f1f5f9; color: #0f172a; }
+      .ibtn[disabled] { opacity: 0.35; cursor: not-allowed; }
+      .ibtn[disabled]:hover { background: transparent; color: #475569; }
+      .ibtn-o { display: inline-flex; height: 1.9rem; width: 1.9rem; align-items: center; justify-content: center; border-radius: 0.5rem; border: 1px solid #e2e8f0; background: #fff; color: #334155; box-shadow: 0 1px 1px rgba(0,0,0,0.04); }
+      .ibtn-o:hover { background: #f8fafc; }
+      .cell-input { width: 100%; border-radius: 0.375rem; border: 1px solid #e2e8f0; padding: 0.3rem 0.5rem; font-size: 0.8rem; }
+      .cell-input:focus { outline: 2px solid #fbbf24; outline-offset: -1px; }
+      .toast { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 60; transform: translateY(0.5rem); opacity: 0; transition: all 0.2s; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-100 text-neutral-900">
+    <!-- Barre de présentation (défile) -->
+    <div class="border-b bg-white">
+      <div class="flex flex-wrap items-center gap-3 px-5 py-2.5">
+        <span class="grid size-6 place-items-center rounded bg-amber-500 text-xs font-bold text-white">B</span>
+        <span class="text-sm font-semibold">Devis — saisie (maquette dynamique)</span>
+        <span class="hidden text-xs text-neutral-400 sm:inline">Un seul scroll : bandeau, barre d'outils et titres de colonnes restent figés.</span>
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+          <input id="tgl-dpgf" type="checkbox" class="accent-amber-500" checked onchange="setDpgf(this.checked)" />
+          DPGF importé
+        </label>
+      </div>
+    </div>
+
+    <div class="flex">
+      <!-- Sidebar (figée, masquée en plein écran) -->
+      <aside class="app-sidebar hide-plein hidden w-56 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <div class="flex h-14 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="block rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">Tableau de bord</a>
+          <a class="block rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">Catalogue</a>
+          <a class="block rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">Commercial</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Clients</a>
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Devis</a>
+          </div>
+          <a class="block rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">Chantiers</a>
+          <a class="block rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">Facturation</a>
+        </nav>
+      </aside>
+
+      <!-- Contenu -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ===== BANDEAU FIGÉ ===== -->
+        <div class="band border-b bg-white/95 shadow-sm backdrop-blur">
+          <div class="flex h-[58px] flex-wrap items-center gap-3 px-5">
+            <a class="text-xs text-neutral-400 hover:text-neutral-700">‹ Devis</a>
+            <h2 class="text-lg font-semibold leading-tight">Devis DV-2026-042</h2>
+            <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-amber-300">Brouillon</span>
+            <span class="hidden text-xs text-neutral-400 xl:inline">· Mairie de Saint-Étienne</span>
+            <div class="ml-auto flex flex-wrap items-center gap-2">
+              <button id="btn-plein" onclick="togglePlein()" class="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-100" title="Agrandir la zone de saisie (masque le menu et le récap)">⛶ Plein écran</button>
+              <button class="inline-flex items-center gap-1.5 rounded-md border border-orange-300 px-2.5 py-1.5 text-sm text-orange-700 hover:bg-orange-50">⬆ Importer DPGF</button>
+              <button class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">⧉ Dupliquer</button>
+              <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button>
+            </div>
+          </div>
+          <div class="hide-plein flex items-center gap-2 overflow-x-auto border-t border-neutral-100 px-5 py-1.5 text-sm">
+            <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 ring-1 ring-emerald-200"><span class="grid size-4 place-items-center rounded-full bg-emerald-500 text-[10px] text-white">✓</span> Brouillon créé</span>
+            <span class="h-px w-5 shrink-0 bg-neutral-200"></span>
+            <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-blue-50 px-2.5 py-1 font-semibold text-blue-700 ring-1 ring-blue-300"><span class="size-2 rounded-full bg-blue-600"></span> En édition</span>
+            <span class="h-px w-5 shrink-0 bg-neutral-200"></span>
+            <button class="whitespace-nowrap rounded-full border border-dashed border-amber-400 px-2.5 py-1 font-medium text-amber-700 hover:bg-amber-50">→ Passer en validation</button>
+            <span class="h-px w-5 shrink-0 bg-neutral-200"></span>
+            <span class="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-400 ring-1 ring-dashed ring-slate-200">Validé</span>
+            <span class="h-px w-5 shrink-0 bg-neutral-200"></span>
+            <span class="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-400 ring-1 ring-dashed ring-slate-200">Envoyé</span>
+            <span class="h-px w-5 shrink-0 bg-neutral-200"></span>
+            <span class="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-400 ring-1 ring-dashed ring-slate-200">Gagné / Perdu</span>
+          </div>
+        </div>
+
+        <!-- ===== CORPS ===== -->
+        <div class="px-5 py-5">
+          <div class="grid grid-cols-12 gap-5">
+            <!-- Colonne principale (élargie : 9/12) -->
+            <div class="main-col col-span-12 lg:col-span-9">
+              <div class="rounded-xl bg-white ring-1 ring-black/10">
+                <!-- En-tête de section + Total HT (à droite, au-dessus de la colonne Montant) + toolbar -->
+                <div class="lines-header flex h-[50px] items-center gap-3 rounded-t-xl border-b bg-white px-5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">2.</span>Lignes du devis</h3>
+                  </div>
+                  <span id="head-total" class="whitespace-nowrap"></span>
+                  <div id="section-toolbar" class="ml-auto flex items-center gap-2"></div>
+                </div>
+
+                <table class="w-full text-sm">
+                  <thead class="sticky-head text-left text-[11px] uppercase tracking-wider text-neutral-500">
+                    <tr>
+                      <th class="px-4 py-2 font-medium">Désignation</th>
+                      <th class="px-2 py-2 text-right font-medium">Qté</th>
+                      <th class="px-2 py-2 font-medium">Unité</th>
+                      <th class="px-2 py-2 text-right font-medium">PU HT</th>
+                      <th class="px-2 py-2 font-medium">TVA</th>
+                      <th class="px-2 py-2 text-right font-medium">Rem.&nbsp;%</th>
+                      <th class="px-3 py-2 text-right font-medium">Montant HT</th>
+                      <th class="act-col px-2 py-2 text-center font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Rail réduit (3/12, masqué en plein écran) -->
+            <aside class="hide-plein col-span-12 space-y-5 lg:col-span-3">
+              <section class="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                <div class="px-4 pb-1 pt-3"><h3 class="font-semibold text-orange-700">Récapitulatif</h3></div>
+                <div class="space-y-1.5 border-t border-amber-200/70 px-4 py-3 text-sm">
+                  <div class="flex justify-between font-medium"><span>Total HT</span><span id="rec-ht" class="tabular-nums">—</span></div>
+                  <div id="rec-tva-rows" class="space-y-1.5 text-xs text-neutral-500"></div>
+                  <div class="flex justify-between border-t border-amber-200/70 pt-1.5 text-neutral-600"><span>Total TVA</span><span id="rec-tva-total" class="tabular-nums">—</span></div>
+                </div>
+                <div class="flex items-center justify-between border-t border-amber-200 px-4 py-3">
+                  <span class="text-sm font-semibold text-orange-800">TTC</span>
+                  <span id="rec-ttc" class="text-xl font-semibold tabular-nums text-orange-800">—</span>
+                </div>
+              </section>
+
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Chantier rattaché</h3></div>
+                <a class="m-3 mt-0 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3 hover:bg-amber-50">
+                  <span class="size-2 rounded-full bg-amber-500"></span>
+                  <span class="flex-1">
+                    <span class="block font-medium text-amber-900">École Marguerite</span>
+                    <span class="block text-xs text-amber-700/80">CH-2026-014 · 92 %</span>
+                  </span>
+                  <span class="text-amber-700">›</span>
+                </a>
+              </section>
+
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Estimation marge</h3></div>
+                <div class="border-t px-4 py-3">
+                  <div class="space-y-1 text-xs">
+                    <div class="flex justify-between"><span class="text-neutral-500">Vente HT</span><span id="mg-vente" class="font-semibold tabular-nums">—</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">Coût estimé</span><span class="font-semibold tabular-nums">13 240 €</span></div>
+                    <div class="flex justify-between"><span class="text-neutral-500">Marge</span><span id="mg-pct" class="font-semibold tabular-nums text-emerald-700">—</span></div>
+                  </div>
+                  <div class="mt-3 h-1.5 rounded bg-neutral-100"><div id="mg-bar" class="h-full rounded bg-emerald-500" style="width:0%"></div></div>
+                  <div id="mg-cible" class="mt-2 text-xs text-neutral-500">cible 20 %</div>
+                </div>
+              </section>
+
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Historique</h3></div>
+                <ul class="space-y-2.5 border-t px-4 py-3 text-xs">
+                  <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Ligne « Main d'œuvre » ajoutée<br /><span class="text-neutral-500">14:02 · Alex</span></span></li>
+                  <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Quantité béton modifiée (40 → 42)<br /><span class="text-neutral-500">10:11 · Alex</span></span></li>
+                  <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Devis créé depuis le chantier<br /><span class="text-neutral-500">23/05 · 18:02</span></span></li>
+                </ul>
+              </section>
+
+              <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Journal des actions</h3></div>
+                <ul id="action-log" class="max-h-56 space-y-1.5 overflow-y-auto border-t px-4 py-3 text-xs text-neutral-600">
+                  <li class="text-neutral-400">Clique sur les icônes…</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+
+          <!-- Légende -->
+          <div class="mt-6 rounded-xl border bg-white p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Que fait chaque icône ?</h2>
+            <div class="grid grid-cols-1 gap-5 text-sm md:grid-cols-3">
+              <div><div class="mb-2 font-medium text-neutral-800">Toolbar de la section (figée)</div><ul id="leg-toolbar" class="space-y-2 text-neutral-600"></ul></div>
+              <div><div class="mb-2 font-medium text-neutral-800">Actions d'une ligne (menu ⋮ en normal, icônes en plein écran)</div><ul id="leg-ligne" class="space-y-2 text-neutral-600"></ul></div>
+              <div><div class="mb-2 font-medium text-neutral-800">Ligne « section »</div><ul id="leg-section" class="space-y-2 text-neutral-600"></ul></div>
+            </div>
+            <p class="mt-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Colonne principale élargie (9/12), rail réduit (3/12). Le <b>Total HT</b> live est posé à droite de l'en-tête « Lignes du devis », au-dessus de la colonne Montant HT. Actions de ligne sous un menu <b>⋮</b> en normal → la place gagnée va à la Désignation ; icônes en ligne en plein écran.
+            </p>
+          </div>
+        </div>
+
+        <!-- Barre figée en bas (plein écran) -->
+        <div class="bottom-bar sticky bottom-0 z-40 items-center gap-4 border-t bg-white/95 px-5 py-2.5 shadow-[0_-1px_3px_rgba(0,0,0,0.06)] backdrop-blur">
+          <button onclick="togglePlein()" class="rounded-md border px-2.5 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">⤢ Quitter le plein écran</button>
+          <div class="ml-auto"><button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast rounded-lg bg-neutral-900 px-3 py-2 text-sm text-white shadow-lg"></div>
+
+    <script>
+      /* ---------- Icônes (tracés lucide) ---------- */
+      const P = {
+        chevronsUpDown: '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+        chevronsDownUp: '<path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/>',
+        chevronDown: '<path d="m6 9 6 6 6-6"/>',
+        chevronRight: '<path d="m9 18 6-6-6-6"/>',
+        bookOpen: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+        pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+        folderPlus: '<path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+        package: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+        trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
+      };
+      function svg(name, cls) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="' + (cls || 'h-4 w-4') + '">' + P[name] + '</svg>'; }
+      const dotsV = '<svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>';
+
+      /* ---------- Modèle ---------- */
+      const TVA = [20, 10, 5.5, 2.1, 0];
+      const UNITES = ['Ft', 'u', 'm²', 'm³', 'ml', 'h', 'kg'];
+      let seq = 1;
+      const uid = (p) => p + seq++;
+      const state = {
+        dpgf: true,
+        sections: [
+          { id: uid('s'), titre: '2.1 PRESTATIONS COMPLÉMENTAIRES', dpgf: true, replie: false, lignes: [
+            { id: uid('l'), type: 'catalogue', code: '', designation: "2.1.1 Études d'exécution", qte: 1, unite: 'Ft', pu: 1200, tva: 20, remise: 0, open: false, composants: [] },
+            { id: uid('l'), type: 'catalogue', code: '', designation: "2.1.2 État des lieux par constat d'Huissier", qte: 1, unite: 'Ft', pu: 650, tva: 20, remise: 0, open: false, composants: [] },
+          ] },
+          { id: uid('s'), titre: '2.2 INSTALLATIONS DE CHANTIER', dpgf: true, replie: false, lignes: [
+            { id: uid('l'), type: 'catalogue', code: 'MOR-001', designation: 'Mortier prêt à l’emploi', qte: 8, unite: 'm³', pu: 186.4, tva: 20, remise: 0, open: false, composants: [
+              { id: uid('c'), designation: 'Sable 0/4', qpu: 0.6, pu: 28, tva: 20, remise: 0 },
+              { id: uid('c'), designation: 'Ciment CEM II', qpu: 0.18, pu: 12.8, tva: 20, remise: 0 },
+            ] },
+            { id: uid('l'), type: 'catalogue', code: '', designation: '2.2.1 Installation de chantier', qte: 1, unite: 'Ft', pu: 3400, tva: 20, remise: 0, open: false, composants: [] },
+          ] },
+          { id: uid('s'), titre: '2.3 GROS-ŒUVRE', dpgf: true, replie: false, lignes: [
+            { id: uid('l'), type: 'catalogue', code: 'BTN-025', designation: 'Béton C25/30 — fondations', qte: 42, unite: 'm³', pu: 142, tva: 20, remise: 0, open: false, composants: [] },
+            { id: uid('l'), type: 'catalogue', code: 'PRP-020', designation: 'Parpaing creux 20 — élévation', qte: 1240, unite: 'u', pu: 1.8, tva: 20, remise: 0, open: false, composants: [] },
+            { id: uid('l'), type: 'libre', code: '', designation: 'Main d’œuvre maçon', qte: 120, unite: 'h', pu: 45, tva: 10, remise: 0, open: false, composants: [] },
+          ] },
+        ],
+      };
+
+      /* ---------- Calculs ---------- */
+      const fmt = (n) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
+      const fmtTaux = (t) => String(t).replace('.', ',');
+      const puEff = (l) => (l.composants.length ? l.composants.reduce((s, c) => s + c.qpu * c.pu, 0) : l.pu);
+      const montant = (l) => l.qte * puEff(l) * (1 - l.remise / 100);
+      const totalSection = (s) => s.lignes.reduce((sum, l) => sum + montant(l), 0);
+      const totalHT = () => state.sections.reduce((sum, s) => sum + totalSection(s), 0);
+
+      /* ---------- UI helpers ---------- */
+      function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 1800); }
+      function log(msg) {
+        const ul = document.getElementById('action-log');
+        if (ul.firstElementChild && ul.firstElementChild.classList.contains('text-neutral-400')) ul.innerHTML = '';
+        const li = document.createElement('li'); li.className = 'flex gap-2';
+        li.innerHTML = '<span class="mt-0.5 text-amber-500">›</span><span>' + msg + '</span>';
+        ul.prepend(li);
+      }
+      function findLigne(id) { for (const s of state.sections) { const l = s.lignes.find((x) => x.id === id); if (l) return { s, l }; } return {}; }
+
+      function togglePlein() {
+        const on = document.body.classList.toggle('plein');
+        document.getElementById('btn-plein').innerHTML = on ? '⤢ Quitter' : '⛶ Plein écran';
+        log(on ? 'Plein écran : sidebar + récap masqués, tableau élargi' : 'Sortie du plein écran');
+      }
+
+      /* ---------- Actions : SECTION toolbar ---------- */
+      let toutDeplie = true;
+      function toggleTout() { toutDeplie = !toutDeplie; state.sections.forEach((s) => (s.replie = !toutDeplie)); render(); log(toutDeplie ? 'Toutes les sections dépliées' : 'Toutes les sections repliées'); toast(toutDeplie ? 'Tout déplié' : 'Tout replié'); }
+      function ajouterSection() { state.sections.push({ id: uid('s'), titre: 'NOUVELLE SECTION', dpgf: false, replie: false, lignes: [] }); render(); log('Section ajoutée (non DPGF → supprimable)'); toast('Section ajoutée'); }
+      let menuOuvert = null;
+      function toggleMenu(kind) { menuOuvert = menuOuvert === kind ? null : kind; renderToolbar(); }
+      function ajouterLigne(kind, sectionId) {
+        const sec = sectionId ? state.sections.find((s) => s.id === sectionId) : state.sections[state.sections.length - 1];
+        if (!sec) { toast('Crée d’abord une section'); return; }
+        const base = { id: uid('l'), type: kind, code: '', qte: 1, unite: 'Ft', pu: 0, tva: 20, remise: 0, open: false, composants: [] };
+        base.designation = kind === 'catalogue' ? 'Nouvel article catalogue' : 'Nouvelle ligne libre';
+        sec.replie = false; sec.lignes.push(base); menuOuvert = null;
+        render(); log('Ligne <b>' + (kind === 'catalogue' ? 'catalogue' : 'libre') + '</b> ajoutée dans « ' + sec.titre + ' »'); toast('Ligne ajoutée');
+      }
+
+      /* ---------- Actions : LIGNE ---------- */
+      function setVal(id, field, raw) { const { l } = findLigne(id); if (!l) return; const v = parseFloat(String(raw).replace(',', '.')); l[field] = isNaN(v) ? 0 : v; refreshTotals(); }
+      function setUnite(id, v) { const { l } = findLigne(id); if (l) l.unite = v; }
+      function setSectionTitre(id, val) { const s = state.sections.find((x) => x.id === id); if (s) s.titre = val; }
+      function setLigneDesignation(id, val) { const { l } = findLigne(id); if (l) l.designation = val; }
+      function setCompDesignation(lid, cid, val) { const { l } = findLigne(lid); if (!l) return; const c = l.composants.find((x) => x.id === cid); if (c) c.designation = val; }
+      function toggleComp(id) { const { l } = findLigne(id); if (!l || l.composants.length === 0) return; l.open = !l.open; render(); log((l.open ? 'Composants affichés' : 'Composants masqués') + ' — ' + l.designation); }
+      function addComp(id, kind) { const { l } = findLigne(id); if (!l) return; l.composants.push({ id: uid('c'), designation: kind === 'catalogue' ? 'Composant catalogue' : 'Composant libre', qpu: 1, pu: 0, tva: 20, remise: 0 }); l.open = true; render(); log('Composant ' + kind + ' ajouté à « ' + l.designation + ' » → PU dérivé'); toast('Composant ajouté'); }
+      function viderComp(id) { const { l } = findLigne(id); if (!l || l.composants.length === 0) return; if (!confirm('Vider tous les composants de « ' + l.designation + ' » ?')) return; l.composants = []; l.open = false; render(); log('Composants vidés — ' + l.designation); toast('Composants vidés'); }
+      function supprComp(lid, cid) { const { l } = findLigne(lid); if (!l) return; l.composants = l.composants.filter((c) => c.id !== cid); if (!l.composants.length) l.open = false; render(); log('Composant supprimé'); toast('Composant supprimé'); }
+      function setCompVal(lid, cid, field, raw) {
+        const { l } = findLigne(lid); if (!l) return; const c = l.composants.find((x) => x.id === cid); if (!c) return;
+        const v = parseFloat(String(raw).replace(',', '.')); c[field] = isNaN(v) ? 0 : v;
+        const cs = document.getElementById('cs-' + c.id); if (cs) cs.textContent = fmt(c.qpu * c.pu) + ' €';
+        const pu = document.getElementById('pu-' + l.id); if (pu) pu.value = puEff(l).toFixed(2);
+        refreshTotals();
+      }
+      function supprLigne(id) { const { s, l } = findLigne(id); if (!l) return; if (!confirm('Supprimer la ligne « ' + l.designation + ' » ?')) return; s.lignes = s.lignes.filter((x) => x.id !== id); render(); log('Ligne supprimée — ' + l.designation); toast('Ligne supprimée'); }
+
+      /* ---------- Actions : SECTION row ---------- */
+      function toggleSection(id) { const s = state.sections.find((x) => x.id === id); if (s) { s.replie = !s.replie; render(); } }
+      function supprSection(id) { const s = state.sections.find((x) => x.id === id); if (!s || s.dpgf) return; if (!confirm('Supprimer la section « ' + s.titre + ' » et tout son contenu ?')) return; state.sections = state.sections.filter((x) => x.id !== id); render(); log('Section supprimée — ' + s.titre); toast('Section supprimée'); }
+      function setDpgf(v) { state.dpgf = v; render(); log('Mode DPGF importé : ' + (v ? 'activé' : 'désactivé')); }
+
+      /* ---------- Boutons ---------- */
+      function ibtn(name, title, onclick, opts) { opts = opts || {}; return '<button type="button" class="ibtn' + (opts.color ? ' ' + opts.color : '') + '" title="' + title + '" aria-label="' + title + '"' + (opts.disabled ? ' disabled' : '') + ' onclick="' + onclick + '">' + svg(name) + '</button>'; }
+      function ibtnO(name, title, onclick) { return '<button type="button" class="ibtn-o" title="' + title + '" aria-label="' + title + '" onclick="' + onclick + '">' + svg(name) + '</button>'; }
+
+      /* ---------- Toolbar de section ---------- */
+      function renderToolbar() {
+        const host = document.getElementById('section-toolbar');
+        let html = '';
+        if (state.sections.length > 0) html += ibtnO(toutDeplie ? 'chevronsDownUp' : 'chevronsUpDown', toutDeplie ? 'Tout replier' : 'Tout déplier', 'toggleTout()');
+        html += menuBtn('catalogue', 'bookOpen', 'Ajouter article catalogue');
+        html += menuBtn('libre', 'pencil', 'Ajouter article libre');
+        html += ibtnO('folderPlus', 'Ajouter une section', 'ajouterSection()');
+        host.innerHTML = html;
+      }
+      function menuBtn(kind, icon, title) {
+        const open = menuOuvert === kind;
+        let menu = '';
+        if (open) {
+          const items = state.sections.map((s) => '<button type="button" class="block w-full truncate rounded-sm px-2 py-1.5 text-left text-sm hover:bg-amber-50" onclick="ajouterLigne(\'' + kind + '\',\'' + s.id + '\')">' + s.titre + '</button>').join('');
+          menu = '<div class="absolute right-0 top-full z-50 mt-1 w-72 rounded-md border bg-white p-1 text-neutral-800 shadow-lg"><div class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-neutral-400">Emplacement</div><div class="max-h-56 overflow-y-auto">' + (items || '<div class="px-2 py-1 text-xs text-neutral-400">Aucune section</div>') + '</div><div class="my-1 border-t"></div><button type="button" class="block w-full rounded-sm px-2 py-1.5 text-left text-sm font-medium hover:bg-amber-50" onclick="ajouterLigne(\'' + kind + '\',null)">À la fin du devis</button></div>';
+        }
+        return '<div class="relative"><button type="button" class="ibtn-o' + (open ? ' ring-2 ring-amber-300' : '') + '" title="' + title + '" aria-label="' + title + '" onclick="toggleMenu(\'' + kind + '\')">' + svg(icon) + '</button>' + menu + '</div>';
+      }
+
+      /* ---------- Actions d'une ligne ---------- */
+      function clusterLigne(l) {
+        const showComp = state.dpgf || l.composants.length > 0;
+        const has = l.composants.length > 0;
+        let html = '<div class="flex items-center justify-center gap-0.5">';
+        if (showComp) {
+          html += ibtn('package', has ? (l.open ? 'Masquer les composants' : 'Afficher les composants') : 'Aucun composant — utiliser 📖 ou ✏️ pour en ajouter', 'toggleComp(\'' + l.id + '\')', { disabled: !has, color: has ? 'text-amber-600' : '' });
+          html += ibtn('bookOpen', 'Ajouter un composant article catalogue', 'addComp(\'' + l.id + '\',\'catalogue\')');
+          html += ibtn('pencil', 'Ajouter un composant libre', 'addComp(\'' + l.id + '\',\'libre\')');
+          html += ibtn('trash', 'Vider tous les composants', 'viderComp(\'' + l.id + '\')', { disabled: !has, color: 'text-neutral-400' });
+        }
+        html += ibtn('trash', 'Supprimer la ligne', 'supprLigne(\'' + l.id + '\')');
+        return html + '</div>';
+      }
+      function menuItem(icon, label, onclick, color) { return '<button type="button" class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-amber-50 ' + (color || 'text-neutral-700') + '" onclick="' + onclick + '">' + svg(icon, 'h-4 w-4') + '<span>' + label + '</span></button>'; }
+      function ligneMenuItems(l) {
+        const showComp = state.dpgf || l.composants.length > 0;
+        const has = l.composants.length > 0;
+        let it = '';
+        if (showComp) {
+          if (has) it += menuItem('package', l.open ? 'Masquer les composants' : 'Afficher les composants', 'toggleComp(\'' + l.id + '\')', 'text-amber-700');
+          it += menuItem('bookOpen', 'Ajouter un composant catalogue', 'addComp(\'' + l.id + '\',\'catalogue\')');
+          it += menuItem('pencil', 'Ajouter un composant libre', 'addComp(\'' + l.id + '\',\'libre\')');
+          if (has) it += menuItem('trash', 'Vider les composants', 'viderComp(\'' + l.id + '\')');
+          it += '<div class="my-1 border-t"></div>';
+        }
+        it += menuItem('trash', 'Supprimer la ligne', 'supprLigne(\'' + l.id + '\')', 'text-rose-600');
+        return it;
+      }
+      function actionsCell(l) {
+        return '<div class="actions-inline">' + clusterLigne(l) + '</div>' +
+          '<div class="actions-kebab relative inline-block text-left">' +
+          '<button type="button" class="ibtn" title="Actions de la ligne" aria-label="Actions de la ligne" onclick="toggleLigneMenu(event,\'' + l.id + '\')">' + dotsV + '</button>' +
+          '<div id="lmenu-' + l.id + '" class="ligne-menu hidden absolute right-0 top-full z-50 mt-1 w-60 rounded-md border bg-white p-1 shadow-lg">' + ligneMenuItems(l) + '</div>' +
+          '</div>';
+      }
+      function closeLigneMenus() { document.querySelectorAll('.ligne-menu').forEach((m) => m.classList.add('hidden')); }
+      function toggleLigneMenu(ev, lid) {
+        ev.stopPropagation();
+        const el = document.getElementById('lmenu-' + lid);
+        const willOpen = el.classList.contains('hidden');
+        closeLigneMenus();
+        if (menuOuvert) { menuOuvert = null; renderToolbar(); }
+        if (willOpen) el.classList.remove('hidden');
+      }
+
+      /* ---------- Rendu ---------- */
+      function selectUnite(l) { return '<select class="cell-input" onchange="setUnite(\'' + l.id + '\',this.value)">' + UNITES.map((u) => '<option' + (u === l.unite ? ' selected' : '') + '>' + u + '</option>').join('') + '</select>'; }
+      function selectTva(id, val, onch) { return '<select class="cell-input" onchange="' + onch + '">' + TVA.map((t) => '<option value="' + t + '"' + (t === val ? ' selected' : '') + '>' + fmtTaux(t) + ' %</option>').join('') + '</select>'; }
+      function ligneRow(l) {
+        const derive = l.composants.length > 0;
+        return (
+          '<tr class="border-b hover:bg-neutral-50">' +
+          '<td class="px-4 py-2"><input class="cell-input" value="' + l.designation.replace(/"/g, '&quot;') + '" oninput="setLigneDesignation(\'' + l.id + '\',this.value)" />' +
+            (derive ? '<div class="mt-1 pl-1 text-[11px] text-amber-700">📦 composition (' + l.composants.length + ') · PU dérivé</div>' : (l.code ? '<div class="mt-1 pl-1 text-[11px] text-neutral-400">' + l.code + '</div>' : '')) + '</td>' +
+          '<td class="px-2 py-2 w-[72px]"><input class="cell-input text-right" value="' + l.qte + '" oninput="setVal(\'' + l.id + '\',\'qte\',this.value)" /></td>' +
+          '<td class="px-2 py-2 w-[80px]">' + selectUnite(l) + '</td>' +
+          '<td class="px-2 py-2 w-[100px]"><input id="pu-' + l.id + '" class="cell-input text-right' + (derive ? ' bg-neutral-100 text-neutral-500' : '') + '" value="' + (derive ? puEff(l).toFixed(2) : l.pu) + '"' + (derive ? ' readonly title="Dérivé de la somme des composants"' : ' oninput="setVal(\'' + l.id + '\',\'pu\',this.value)"') + ' /></td>' +
+          '<td class="px-2 py-2 w-[90px]">' + selectTva(l.id, l.tva, 'setVal(\'' + l.id + '\',\'tva\',this.value)') + '</td>' +
+          '<td class="px-2 py-2 w-[72px]"><input class="cell-input text-right" value="' + l.remise + '" oninput="setVal(\'' + l.id + '\',\'remise\',this.value)" /></td>' +
+          '<td class="px-3 py-2 text-right tabular-nums w-[130px]"><span id="m-' + l.id + '">' + fmt(montant(l)) + ' €</span></td>' +
+          '<td class="act-col px-2 py-2 text-center">' + actionsCell(l) + '</td>' +
+          '</tr>' +
+          (l.open && l.composants.length ? l.composants.map((c) => compRow(l, c)).join('') : '')
+        );
+      }
+      function compRow(l, c) {
+        return (
+          '<tr class="border-b bg-neutral-50/50 text-xs">' +
+          '<td class="py-1.5 pl-9 pr-4"><div class="flex items-center gap-2">' + svg('package', 'h-3.5 w-3.5 text-neutral-400') +
+            '<input class="cell-input" value="' + c.designation.replace(/"/g, '&quot;') + '" oninput="setCompDesignation(\'' + l.id + '\',\'' + c.id + '\',this.value)" /></div></td>' +
+          '<td class="px-2 py-1.5"><input class="cell-input text-right" value="' + c.qpu + '" title="Quantité par unité de ligne" oninput="setCompVal(\'' + l.id + '\',\'' + c.id + '\',\'qpu\',this.value)" /></td>' +
+          '<td class="px-2 py-1.5 text-neutral-400">/u</td>' +
+          '<td class="px-2 py-1.5"><input class="cell-input text-right" value="' + c.pu + '" oninput="setCompVal(\'' + l.id + '\',\'' + c.id + '\',\'pu\',this.value)" /></td>' +
+          '<td class="px-2 py-1.5 text-[11px] text-neutral-400">hérite</td>' +
+          '<td class="px-2 py-1.5 text-[11px] text-neutral-400">hérite</td>' +
+          '<td id="cs-' + c.id + '" class="px-3 py-1.5 text-right tabular-nums text-neutral-500">' + fmt(c.qpu * c.pu) + ' €</td>' +
+          '<td class="act-col px-2 py-1.5 text-center">' + ibtn('trash', 'Supprimer ce composant', 'supprComp(\'' + l.id + '\',\'' + c.id + '\')') + '</td>' +
+          '</tr>'
+        );
+      }
+      function sectionRow(s) {
+        return (
+          '<tr class="bg-amber-50/60">' +
+          '<td colspan="6" class="px-3 py-1.5"><div class="flex items-center gap-2">' +
+            '<button type="button" class="ibtn h-6 w-6" title="' + (s.replie ? 'Déplier la section' : 'Replier la section') + '" onclick="toggleSection(\'' + s.id + '\')">' + svg(s.replie ? 'chevronRight' : 'chevronDown') + '</button>' +
+            '<input class="flex-1 border-0 bg-transparent text-sm font-bold uppercase tracking-wide focus:outline-none" value="' + s.titre.replace(/"/g, '&quot;') + '" oninput="setSectionTitre(\'' + s.id + '\',this.value)" />' +
+            '</div></td>' +
+          '<td class="px-3 py-1.5 text-right text-sm font-bold tabular-nums text-neutral-900"><span id="st-' + s.id + '">' + fmt(totalSection(s)) + ' €</span></td>' +
+          '<td class="act-col px-2 py-1.5 text-center">' + (s.dpgf ? '' : ibtn('trash', 'Supprimer la section', 'supprSection(\'' + s.id + '\')')) + '</td>' +
+          '</tr>' +
+          (s.replie ? '' : (s.lignes.length ? s.lignes.map(ligneRow).join('') : '<tr><td colspan="8" class="px-9 py-3 text-xs italic text-neutral-400">Aucune ligne — utilise 📖 ou ✏️ pour en ajouter.</td></tr>'))
+        );
+      }
+
+      function refreshTotals() {
+        state.sections.forEach((s) => {
+          s.lignes.forEach((l) => { const e = document.getElementById('m-' + l.id); if (e) e.textContent = fmt(montant(l)) + ' €'; });
+          const st = document.getElementById('st-' + s.id); if (st) st.textContent = fmt(totalSection(s)) + ' €';
+        });
+        const base = {};
+        state.sections.forEach((s) => s.lignes.forEach((l) => { base[l.tva] = (base[l.tva] || 0) + montant(l); }));
+        let tvaTotal = 0, rows = '';
+        Object.keys(base).map(Number).sort((a, b) => b - a).forEach((t) => {
+          const tv = base[t] * t / 100; tvaTotal += tv;
+          if (t > 0) rows += '<div class="flex justify-between"><span>TVA ' + fmtTaux(t) + ' %</span><span class="tabular-nums">' + fmt(tv) + ' €</span></div>';
+        });
+        const ht = totalHT();
+        // Total HT (seul) dans l'en-tête, à droite, au-dessus de la colonne Montant
+        const head = document.getElementById('head-total');
+        if (head) head.innerHTML = '<b class="text-base font-semibold text-orange-700">' + fmt(ht) + ' €</b>';
+        // Rail récap
+        document.getElementById('rec-ht').textContent = fmt(ht) + ' €';
+        document.getElementById('rec-tva-rows').innerHTML = rows;
+        document.getElementById('rec-tva-total').textContent = fmt(tvaTotal) + ' €';
+        document.getElementById('rec-ttc').textContent = fmt(ht + tvaTotal) + ' €';
+        // Estimation marge (coût estimé illustratif fixe ; vente + marge en direct)
+        const COUT = 13240;
+        const margePct = ht > 0 ? ((ht - COUT) / ht) * 100 : 0;
+        const ok = margePct >= 20;
+        const vEl = document.getElementById('mg-vente'); if (vEl) vEl.textContent = fmt(ht) + ' €';
+        const pEl = document.getElementById('mg-pct'); if (pEl) { pEl.textContent = fmtTaux(Math.round(margePct * 10) / 10) + ' %'; pEl.className = 'font-semibold tabular-nums ' + (ok ? 'text-emerald-700' : 'text-rose-600'); }
+        const barEl = document.getElementById('mg-bar'); if (barEl) { barEl.style.width = Math.max(0, Math.min(100, margePct / 0.3)) + '%'; barEl.className = 'h-full rounded ' + (ok ? 'bg-emerald-500' : 'bg-rose-500'); }
+        const cEl = document.getElementById('mg-cible'); if (cEl) cEl.textContent = (ok ? 'au-dessus' : 'en-dessous') + ' de la cible (20 %)';
+      }
+
+      function render() {
+        document.getElementById('tbody').innerHTML = state.sections.map(sectionRow).join('');
+        renderToolbar();
+        refreshTotals();
+      }
+
+      document.addEventListener('mousedown', (e) => { if (menuOuvert && !e.target.closest('#section-toolbar')) { menuOuvert = null; renderToolbar(); } });
+      document.addEventListener('click', (e) => { if (!e.target.closest('.actions-kebab')) closeLigneMenus(); });
+
+      const legRow = (name, txt, color) => '<li class="flex items-center gap-2"><span class="' + (color || 'text-neutral-500') + '">' + svg(name) + '</span><span>' + txt + '</span></li>';
+      document.getElementById('leg-toolbar').innerHTML =
+        legRow('chevronsUpDown', 'Tout déplier / replier les sections') +
+        legRow('bookOpen', 'Ajouter un article <b>catalogue</b> (menu Emplacement)') +
+        legRow('pencil', 'Ajouter un article <b>libre</b>') +
+        legRow('folderPlus', 'Ajouter une section');
+      document.getElementById('leg-ligne').innerHTML =
+        legRow('package', 'Afficher/masquer les composants (ambre si présents)', 'text-amber-600') +
+        legRow('bookOpen', 'Ajouter un composant catalogue') +
+        legRow('pencil', 'Ajouter un composant libre') +
+        legRow('trash', 'Vider tous les composants', 'text-neutral-400') +
+        legRow('trash', 'Supprimer la ligne');
+      document.getElementById('leg-section').innerHTML =
+        legRow('chevronDown', 'Déplier / replier cette section') +
+        legRow('trash', 'Supprimer la section (sauf si importée DPGF)') +
+        '<li class="text-xs text-neutral-400">Le titre de section est éditable en ligne.</li>';
+
+      render();
+    </script>
+  </body>
+</html>

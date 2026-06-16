@@ -1,7 +1,7 @@
 'use client';
 
-import { DownloadIcon, PlusIcon, Trash2Icon } from 'lucide-react';
-import { useRef, useState, useTransition } from 'react';
+import { PlusIcon } from 'lucide-react';
+import { useRef, useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -42,6 +43,13 @@ type Props = {
   peutEcrire: boolean;
   /** Date du jour (YYYY-MM-DD) calculée côté serveur — pour le statut d'expiration. */
   today: string;
+  /**
+   * En-tête de la zone (gabarit « Vigilance & pièces ») : titre + sous-titre à
+   * gauche, bouton « Téléverser un document » à droite. Fourni → le composant
+   * rend lui-même l'en-tête et un tableau bord-à-bord (border-t). Absent → mode
+   * autonome : pas d'en-tête, et le déclencheur d'ajout reste sous le tableau.
+   */
+  entete?: { titre: ReactNode; description: ReactNode };
   actions: {
     preparerUpload: (
       contentType: string,
@@ -77,25 +85,27 @@ function ajouterJours(iso: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-function StatutValidite({ dateValidite, today }: { dateValidite: string; today: string }) {
-  if (dateValidite < today) {
-    return (
-      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-        Expiré le {dateValidite}
-      </span>
-    );
-  }
-  if (dateValidite <= ajouterJours(today, 30)) {
-    return (
-      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-        Expire le {dateValidite}
-      </span>
-    );
-  }
-  return <span className="text-xs text-muted-foreground">valide jusqu&apos;au {dateValidite}</span>;
+/** Formate une date ISO (YYYY-MM-DD) en JJ/MM/AAAA, « — » si absente. */
+function formatDateFr(iso: string | null): string {
+  if (!iso) return '—';
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
 }
 
-export function DocumentsTierList({ items, peutEcrire, today, actions }: Props) {
+type StatutPiece = { libelle: string; classe: string; proche: boolean };
+
+/** Statut d'une pièce dérivé de sa date de validité (colonne « Statut » du tableau). */
+function statutPiece(dateValidite: string | null, today: string): StatutPiece {
+  if (dateValidite && dateValidite < today) {
+    return { libelle: 'Expiré', classe: 'bg-rose-100 text-rose-700', proche: true };
+  }
+  if (dateValidite && dateValidite <= ajouterJours(today, 30)) {
+    return { libelle: 'Expire bientôt', classe: 'bg-amber-100 text-amber-800', proche: true };
+  }
+  return { libelle: 'À jour', classe: 'bg-emerald-100 text-emerald-800', proche: false };
+}
+
+export function DocumentsTierList({ items, peutEcrire, today, entete, actions }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -205,65 +215,114 @@ export function DocumentsTierList({ items, peutEcrire, today, actions }: Props) 
     });
   }
 
+  const th = 'px-4 py-2.5 font-medium sm:px-5';
+  const td = 'px-4 py-3 sm:px-5';
+
   return (
-    <div className="space-y-3">
+    <div className={entete ? undefined : 'space-y-3'}>
+      {entete && (
+        <div className="flex flex-wrap items-end justify-between gap-2 px-4 py-3 sm:px-5">
+          <div>
+            <h3 className="font-heading font-semibold text-orange-700">{entete.titre}</h3>
+            <p className="text-xs text-muted-foreground">{entete.description}</p>
+          </div>
+          {peutEcrire && !showAdd && (
+            <Button variant="outline" size="sm" onClick={() => setShowAdd(true)}>
+              <PlusIcon className="mr-1 size-4" /> Téléverser un document
+            </Button>
+          )}
+        </div>
+      )}
+
       {items.length === 0 ? (
-        <p className="rounded border border-dashed p-4 text-center text-sm text-muted-foreground">
+        <p
+          className={cn(
+            'text-center text-sm text-muted-foreground',
+            entete ? 'border-t px-4 py-6 sm:px-5' : 'rounded border border-dashed p-4',
+          )}
+        >
           Aucun document.
         </p>
       ) : (
-        <ul className="divide-y rounded-md border">
-          {items.map((d) => (
-            <li key={d.id} className="flex items-start gap-3 p-3">
-              <div className="grow space-y-0.5">
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="font-medium">{d.libelle}</span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                    {LIBELLES_TYPE_DOCUMENT_TIER[d.type]}
-                  </span>
-                  {d.dateValidite && <StatutValidite dateValidite={d.dateValidite} today={today} />}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {d.mimeType} · {tailleHumaine(d.tailleBytes)}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  disabled={isPending}
-                  onClick={() => handleDownload(d.id)}
-                  title="Télécharger"
-                >
-                  <DownloadIcon className="size-3.5" />
-                </Button>
-                {peutEcrire && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                    disabled={isPending}
-                    onClick={() => handleDelete(d.id)}
-                    title="Supprimer"
-                  >
-                    <Trash2Icon className="size-3.5" />
-                  </Button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className={entete ? undefined : 'overflow-hidden rounded-md border'}>
+          <table className={cn('w-full text-sm', entete && 'border-t')}>
+            <thead className="bg-muted/40 text-left text-xs uppercase tracking-widest text-muted-foreground">
+              <tr>
+                <th className={th}>Document</th>
+                <th className={th}>Libellé / référence</th>
+                <th className={cn(th, 'text-right')}>Validité</th>
+                <th className={th}>Statut</th>
+                <th className={cn(th, 'text-right')}>Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {items.map((d) => {
+                const statut = statutPiece(d.dateValidite, today);
+                return (
+                  <tr key={d.id} className="hover:bg-muted/40">
+                    <td className={td}>{LIBELLES_TYPE_DOCUMENT_TIER[d.type]}</td>
+                    <td className={cn(td, 'text-muted-foreground')}>
+                      {d.libelle}
+                      <span className="block text-xs text-muted-foreground/80">
+                        {d.mimeType} · {tailleHumaine(d.tailleBytes)}
+                      </span>
+                    </td>
+                    <td
+                      className={cn(
+                        td,
+                        'text-right tabular-nums',
+                        statut.proche && 'text-destructive',
+                      )}
+                    >
+                      {formatDateFr(d.dateValidite)}
+                    </td>
+                    <td className={td}>
+                      <span
+                        className={cn('rounded px-2 py-0.5 text-xs font-medium', statut.classe)}
+                      >
+                        {statut.libelle}
+                      </span>
+                    </td>
+                    <td className={cn(td, 'whitespace-nowrap text-right')}>
+                      <button
+                        type="button"
+                        className="text-sm text-orange-700 hover:underline disabled:opacity-50"
+                        disabled={isPending}
+                        onClick={() => handleDownload(d.id)}
+                      >
+                        Voir
+                      </button>
+                      {peutEcrire && (
+                        <button
+                          type="button"
+                          className="ml-3 text-sm text-destructive hover:underline disabled:opacity-50"
+                          disabled={isPending}
+                          onClick={() => handleDelete(d.id)}
+                        >
+                          Supprimer
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {peutEcrire && (
         <>
           {!showAdd ? (
-            <Button variant="outline" size="sm" onClick={() => setShowAdd(true)}>
-              <PlusIcon className="mr-1 size-4" /> Ajouter un document
-            </Button>
+            !entete && (
+              <Button variant="outline" size="sm" onClick={() => setShowAdd(true)}>
+                <PlusIcon className="mr-1 size-4" /> Ajouter un document
+              </Button>
+            )
           ) : (
-            <div className="grid gap-3 rounded-md border p-4">
+            <div
+              className={cn('grid gap-3 p-4', entete ? 'border-t sm:px-5' : 'rounded-md border')}
+            >
               {erreur && (
                 <Alert variant="destructive">
                   <AlertTitle>Erreur</AlertTitle>

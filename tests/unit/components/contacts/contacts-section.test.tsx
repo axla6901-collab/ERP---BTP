@@ -60,11 +60,12 @@ describe('ContactsSection', () => {
     expect(screen.queryByRole('button', { name: /créer un contact/i })).not.toBeInTheDocument();
   });
 
-  it('liste les contacts avec les badges principal / inactif', () => {
+  it('liste les contacts en tableau avec les marqueurs principal / inactif', () => {
     render(<ContactsSection source="fournisseur" tiersId="t1" contacts={[PRINCIPAL, INACTIF]} />);
+    expect(screen.getByRole('table')).toBeInTheDocument();
     expect(screen.getByText('Durand Paul')).toBeInTheDocument();
     expect(screen.getByText('Commercial')).toBeInTheDocument();
-    expect(screen.getByText('Principal')).toBeInTheDocument();
+    expect(screen.getByTitle('Contact principal')).toBeInTheDocument();
     expect(screen.getByText('Albert')).toBeInTheDocument();
     expect(screen.getByText('Inactif')).toBeInTheDocument();
   });

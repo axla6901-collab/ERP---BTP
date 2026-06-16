@@ -1,6 +1,6 @@
 'use server';
 
-import { and, asc, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, inArray, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import {
@@ -9,6 +9,8 @@ import {
   type SousTraitant,
   type SousTraitantContact,
 } from '@/db/schema/tiers';
+import { auditLog } from '@/db/schema/audit';
+import { utilisateurs } from '@/db/schema/utilisateurs';
 import { compteProrataParticipants } from '@/db/schema/compte-prorata';
 import { raisonsSociales } from '@/db/schema/raisons-sociales';
 import { auditLogIn } from '@/lib/audit/log';
@@ -100,6 +102,69 @@ export async function lireSousTraitant(id: string): Promise<SousTraitantAvecNom 
       .limit(1),
   );
   return row ?? null;
+}
+
+/** Une entrée d'historique (audit_log) de la fiche sous-traitant. */
+export type EvenementHistoriqueST = {
+  id: string;
+  action: 'insert' | 'update' | 'delete';
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  createdAt: string;
+  email: string | null;
+};
+
+/**
+ * Derniers événements `audit_log` de la table `sous_traitants` pour cette fiche
+ * (timeline du rail). Lu sous contexte tenant : seules les entrées de
+ * l'entreprise courante remontent (RLS p_tenant). L'email de l'auteur est résolu
+ * via une jointure sur `utilisateurs`.
+ */
+export async function listerHistoriqueSousTraitant(
+  id: string,
+  limit = 8,
+): Promise<EvenementHistoriqueST[]> {
+  const ctx = await requireTenantContextWithMfa();
+  const rows = await withTenant(ctx.entreprise.id, (tx) =>
+    tx
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        before: auditLog.before,
+        after: auditLog.after,
+        createdAt: auditLog.createdAt,
+        email: utilisateurs.email,
+      })
+      .from(auditLog)
+      .leftJoin(utilisateurs, eq(utilisateurs.id, auditLog.utilisateurId))
+      .where(and(eq(auditLog.tableName, 'sous_traitants'), eq(auditLog.rowId, id)))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(limit),
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    action: r.action,
+    before: (r.before as Record<string, unknown> | null) ?? null,
+    after: (r.after as Record<string, unknown> | null) ?? null,
+    createdAt: r.createdAt.toISOString(),
+    email: r.email,
+  }));
+}
+
+/** Résout un ensemble d'identifiants utilisateur en emails (méta créé/modifié). */
+export async function resoudreEmailsUtilisateurs(
+  ids: (string | null | undefined)[],
+): Promise<Map<string, string>> {
+  const uniques = [...new Set(ids.filter((v): v is string => Boolean(v)))];
+  if (uniques.length === 0) return new Map();
+  const ctx = await requireTenantContextWithMfa();
+  const rows = await withTenant(ctx.entreprise.id, (tx) =>
+    tx
+      .select({ id: utilisateurs.id, email: utilisateurs.email })
+      .from(utilisateurs)
+      .where(inArray(utilisateurs.id, uniques)),
+  );
+  return new Map(rows.map((r) => [r.id, r.email]));
 }
 
 export async function listerSousTraitantContacts(

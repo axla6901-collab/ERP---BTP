@@ -363,4 +363,54 @@ describe('WorkflowDevis', () => {
       expect(screen.getByText('Brouillon')).toBeInTheDocument();
     });
   });
+
+  // ─── Bouton « Plein écran » + mode plein écran ──────────────────────
+
+  describe('plein écran', () => {
+    it('absent si onTogglePlein non fourni', () => {
+      renderAvec('brouillon');
+      expect(screen.queryByRole('button', { name: /Plein écran/ })).not.toBeInTheDocument();
+    });
+
+    it('rendu + clic appelle le callback quand onTogglePlein fourni', () => {
+      const onTogglePlein = vi.fn();
+      render(
+        <WorkflowDevis statutCourant="brouillon" devisId="devis-1" onTogglePlein={onTogglePlein} />,
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Plein écran' }));
+      expect(onTogglePlein).toHaveBeenCalledTimes(1);
+    });
+
+    it('pleinActif=true → libellé « Quitter le plein écran » + aria-pressed', () => {
+      render(
+        <WorkflowDevis
+          statutCourant="brouillon"
+          devisId="devis-1"
+          onTogglePlein={vi.fn()}
+          pleinActif
+        />,
+      );
+      const btn = screen.getByRole('button', { name: 'Quitter le plein écran' });
+      expect(btn).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('pleinActif=true → frise des statuts masquée (étapes non rendues)', () => {
+      render(
+        <WorkflowDevis
+          statutCourant="brouillon"
+          devisId="devis-1"
+          onTogglePlein={vi.fn()}
+          pleinActif
+        />,
+      );
+      // Les libellés d'étape de la frise disparaissent en plein écran.
+      expect(screen.queryByText('En validation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Validé')).not.toBeInTheDocument();
+    });
+
+    it('pleinActif=false (défaut) → frise visible', () => {
+      render(<WorkflowDevis statutCourant="brouillon" devisId="devis-1" onTogglePlein={vi.fn()} />);
+      expect(screen.getByText('En validation')).toBeInTheDocument();
+    });
+  });
 });

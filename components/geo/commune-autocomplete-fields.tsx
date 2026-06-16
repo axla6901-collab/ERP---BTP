@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   useController,
   useFormContext,
@@ -81,6 +82,34 @@ function ChampCommune({
   // Terme courant à rechercher (piloté par les frappes uniquement, pas par les
   // remplissages programmatiques, pour éviter de rouvrir la liste).
   const [terme, setTerme] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Position calculée de la bulle. La liste est rendue dans un PORTAIL
+  // (document.body) en `position: fixed` : elle échappe ainsi à tout ancêtre
+  // `overflow-hidden` (cartes, en-têtes arrondis) qui la tronquerait.
+  const [position, setPosition] = useState<{ top: number; left: number; width: number } | null>(
+    null,
+  );
+
+  const recalculerPosition = useCallback(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setPosition({ top: r.bottom + 4, left: r.left, width: r.width });
+  }, []);
+
+  // Recalcule la position à l'ouverture puis sur scroll/resize tant qu'elle est
+  // ouverte, pour que la bulle reste collée sous le champ.
+  useLayoutEffect(() => {
+    if (!ouvert || suggestions.length === 0) return;
+    recalculerPosition();
+    const handler = () => recalculerPosition();
+    window.addEventListener('scroll', handler, true);
+    window.addEventListener('resize', handler);
+    return () => {
+      window.removeEventListener('scroll', handler, true);
+      window.removeEventListener('resize', handler);
+    };
+  }, [ouvert, suggestions.length, recalculerPosition]);
 
   useEffect(() => {
     if (terme === null) return;
@@ -132,6 +161,7 @@ function ChampCommune({
         {label}
       </Label>
       <Input
+        ref={inputRef}
         id={inputId}
         value={value}
         placeholder={placeholder}
@@ -158,33 +188,48 @@ function ChampCommune({
         }}
         onKeyDown={onKeyDown}
       />
-      {ouvert && suggestions.length > 0 && (
-        <ul
-          id={listboxId}
-          role="listbox"
-          className="absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover py-1 text-popover-foreground shadow-md"
-        >
-          {suggestions.map((s, i) => (
-            <li
-              key={`${s.codePostal}-${s.codeInsee}`}
-              role="option"
-              aria-selected={i === indexActif}
-              className={cn(
-                'cursor-pointer px-3 py-1.5 text-sm',
-                i === indexActif ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/60',
-              )}
-              // onMouseDown (et non onClick) pour devancer le onBlur de l'input.
-              onMouseDown={(e) => {
-                e.preventDefault();
-                choisir(s);
-              }}
-              onMouseEnter={() => setIndexActif(i)}
-            >
-              {rendreOption(s)}
-            </li>
-          ))}
-        </ul>
-      )}
+      {ouvert &&
+        suggestions.length > 0 &&
+        position &&
+        createPortal(
+          <ul
+            id={listboxId}
+            role="listbox"
+            // Portail en `position: fixed` ancré sous le champ : la bulle
+            // échappe aux ancêtres `overflow-hidden` (cartes/en-têtes arrondis)
+            // qui la tronquaient. `min-width` = largeur du champ, et elle
+            // s'élargit au contenu (chaque suggestion sur UNE ligne via
+            // `whitespace-nowrap`), bornée pour ne pas déborder de l'écran.
+            style={{
+              position: 'fixed',
+              top: position.top,
+              left: position.left,
+              minWidth: position.width,
+            }}
+            className="z-50 max-h-60 w-max max-w-[min(90vw,26rem)] overflow-auto rounded-md border bg-popover py-1 text-popover-foreground shadow-md"
+          >
+            {suggestions.map((s, i) => (
+              <li
+                key={`${s.codePostal}-${s.codeInsee}`}
+                role="option"
+                aria-selected={i === indexActif}
+                className={cn(
+                  'cursor-pointer whitespace-nowrap px-3 py-1.5 text-sm',
+                  i === indexActif ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/60',
+                )}
+                // onMouseDown (et non onClick) pour devancer le onBlur de l'input.
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  choisir(s);
+                }}
+                onMouseEnter={() => setIndexActif(i)}
+              >
+                {rendreOption(s)}
+              </li>
+            ))}
+          </ul>,
+          document.body,
+        )}
       {erreur && <p className="text-sm text-destructive">{erreur}</p>}
     </div>
   );
@@ -227,7 +272,7 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
   const valeurVille = (ville.field.value as string | null) ?? '';
 
   return (
-    <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3', className)}>
+    <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-3', className)}>
       <ChampCommune
         label="Code postal"
         placeholder="69001"
@@ -238,11 +283,11 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
         onChange={cp.field.onChange}
         onBlur={cp.field.onBlur}
         onSelectionner={remplir}
-        rendreOption={(s) => `${s.codePostal} — ${s.commune}`}
+        rendreOption={(s) => `${s.codePostal} ${s.commune}`}
         erreur={cp.fieldState.error?.message}
       />
       <ChampCommune
-        className="lg:col-span-2"
+        className="sm:col-span-2"
         label="Ville"
         placeholder="Lyon"
         maxLength={100}

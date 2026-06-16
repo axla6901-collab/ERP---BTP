@@ -29,18 +29,14 @@ describe('AppHeader', () => {
     expect(getByText('A')).toBeInTheDocument(); // initiale avatar
   });
 
-  it('rend le fil d’Ariane à partir du pathname (slug skippé)', () => {
-    const { getByText, queryByText } = render(<AppHeader email="a@b.c" entrepriseSlug="acme" />);
-    expect(getByText('Facturation')).toBeInTheDocument();
-    expect(getByText('Factures')).toBeInTheDocument();
-    expect(queryByText('acme')).not.toBeInTheDocument();
-  });
-
-  it('skippe les segments d’identifiant', () => {
-    mockPathname = '/acme/commercial/devis/11111111-2222-3333-4444-555555555555';
-    const { queryByText, getByText } = render(<AppHeader email="a@b.c" entrepriseSlug="acme" />);
-    expect(getByText('Devis')).toBeInTheDocument();
-    expect(queryByText(/1111/)).not.toBeInTheDocument();
+  it('n’affiche plus de fil d’Ariane (retiré du header)', () => {
+    mockPathname = '/acme/facturation/factures';
+    const { queryByText, queryByLabelText } = render(
+      <AppHeader email="a@b.c" entrepriseSlug="acme" />,
+    );
+    expect(queryByLabelText("Fil d'Ariane")).not.toBeInTheDocument();
+    expect(queryByText('Facturation')).not.toBeInTheDocument();
+    expect(queryByText('Factures')).not.toBeInTheDocument();
   });
 
   it('expose recherche, notifications et lien profil', () => {

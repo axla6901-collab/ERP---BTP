@@ -16,6 +16,7 @@ import * as commercial from '@/db/schema/commercial';
 import * as employes from '@/db/schema/employes';
 import * as entreprises from '@/db/schema/entreprises';
 import * as facturation from '@/db/schema/facturation';
+import * as flotte from '@/db/schema/flotte';
 import * as geo from '@/db/schema/geo';
 import * as numerotation from '@/db/schema/numerotation';
 import * as pointages from '@/db/schema/pointages';
@@ -103,6 +104,7 @@ const SCHEMAS_PAR_MODULE: Partial<Record<McdModuleId, Record<string, unknown>>> 
   tiers: { ...tiers, ...societes, ...referentielTiers, ...tiersRegistre, ...raisonsSociales },
   facturation,
   'sous-traitance': sousTraitance,
+  flotte,
 };
 
 function getColumnSqlType(col: PgColumn): string {

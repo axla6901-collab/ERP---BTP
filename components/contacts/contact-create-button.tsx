@@ -10,6 +10,8 @@ import type { SourceContact } from '@/lib/contacts/types';
 type Props = {
   source: SourceContact;
   tiersId: string;
+  /** Libellé du bouton (ex. « Ajouter un contact » dans l'en-tête de la zone Contacts). */
+  label?: string;
 };
 
 /**
@@ -18,7 +20,7 @@ type Props = {
  * d'ouverture : il peut donc être passé en slot à un formulaire (Server → Client)
  * sans partager d'état avec le reste de la page.
  */
-export function ContactCreateButton({ source, tiersId }: Props) {
+export function ContactCreateButton({ source, tiersId, label = 'Créer un contact' }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,7 +33,7 @@ export function ContactCreateButton({ source, tiersId }: Props) {
         onClick={() => setOpen(true)}
       >
         <UserPlusIcon className="size-4" aria-hidden="true" />
-        Créer un contact
+        {label}
       </Button>
       <ContactDialog source={source} tiersId={tiersId} open={open} onOpenChange={setOpen} />
     </>

@@ -20,18 +20,20 @@ export async function GET(request: NextRequest) {
   }
 
   const q = request.nextUrl.searchParams.get('q') ?? '';
-  const limitParam = Number(request.nextUrl.searchParams.get('limit'));
+  const limitRaw = request.nextUrl.searchParams.get('limit');
+  const limitParam = limitRaw === null ? undefined : Number(limitRaw);
   const resultats = await rechercherCommunes(
     q,
-    Number.isFinite(limitParam) ? limitParam : undefined,
+    Number.isFinite(limitParam) && (limitParam as number) > 0 ? limitParam : undefined,
   );
 
   return NextResponse.json(
     { resultats },
     {
-      // Référentiel stable et non tenant : un cache privé court limite la charge
-      // pendant la frappe sans risque de fuite inter-tenant.
-      headers: { 'Cache-Control': 'private, max-age=3600' },
+      // Référentiel non tenant : un cache privé COURT dédoublonne les frappes
+      // répétées sans risque de fuite inter-tenant. Volontairement bref (60 s) :
+      // un cache long laissait des résultats périmés après un re-seed.
+      headers: { 'Cache-Control': 'private, max-age=60, must-revalidate' },
     },
   );
 }

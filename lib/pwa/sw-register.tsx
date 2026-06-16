@@ -31,8 +31,22 @@ export function ServiceWorkerRegistrar() {
       });
     };
 
-    // En dev : pas de SW, mais on tente quand même un flush au chargement.
+    // En dev : pas de SW. On désinscrit aussi tout SW résiduel (laissé par un
+    // `next build && next start` local ou un déploiement sur le même origin),
+    // qui sinon sert les chunks `/_next/static` en CacheFirst et fige le
+    // hot-reload — rendu périmé alors que le code est à jour, insensible au
+    // Ctrl+Maj+R. On purge au passage les caches `erp-btp-*`.
     if (process.env.NODE_ENV !== 'production') {
+      void navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const reg of regs) void reg.unregister();
+      });
+      if (typeof caches !== 'undefined') {
+        void caches.keys().then((keys) => {
+          for (const key of keys) {
+            if (key.startsWith('erp-btp-')) void caches.delete(key);
+          }
+        });
+      }
       if (navigator.onLine) tryFlush();
       window.addEventListener('online', tryFlush);
       return () => window.removeEventListener('online', tryFlush);

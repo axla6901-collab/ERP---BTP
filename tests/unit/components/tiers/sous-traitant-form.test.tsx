@@ -100,3 +100,27 @@ describe('SousTraitantForm — bandeau d’actions', () => {
     expect(getAllByText('Agréé').length).toBeGreaterThan(0);
   });
 });
+
+describe('SousTraitantForm — sections (gabarit maquette)', () => {
+  it('expose la section « Comptabilité » (proposé) à la place de la saisie conformité', () => {
+    const { getByText, queryByText } = render(
+      <SousTraitantForm titre="Nouveau sous-traitant" onSubmit={onSubmit} successRedirect="/x" />,
+    );
+    // Section 3 = Comptabilité (proposé), comme la fiche fournisseur.
+    expect(getByText(/Comptabilité/)).toBeInTheDocument();
+    expect(getByText('Compte général de rattachement')).toBeInTheDocument();
+    // La conformité n'est plus saisie dans la colonne (elle vit en zone Vigilance).
+    expect(queryByText(/Assurance décennale/)).not.toBeInTheDocument();
+    expect(queryByText(/Agrément DC4/)).not.toBeInTheDocument();
+    expect(queryByText(/Attestation URSSAF/)).not.toBeInTheDocument();
+  });
+
+  it('présente les sous-cartes Adresse et Contact générique dans Coordonnées', () => {
+    const { getAllByText, getByText } = render(
+      <SousTraitantForm titre="Nouveau sous-traitant" onSubmit={onSubmit} successRedirect="/x" />,
+    );
+    // « Adresse » apparaît aussi dans les libellés de AdresseFields (ligne 1/2).
+    expect(getAllByText(/^Adresse/).length).toBeGreaterThan(0);
+    expect(getByText('Contact générique')).toBeInTheDocument();
+  });
+});

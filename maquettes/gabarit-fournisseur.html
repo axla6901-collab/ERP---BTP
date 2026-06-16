@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fournisseur — fiche (gabarit unifié) · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      /* Contour d'annotation (cf. gabarit-ecran-unifie.html) : on positionne chaque
+         zone séparément pour ne pas écraser le sticky de la sidebar / du bandeau. */
+      .zone {
+        outline: 1px dashed rgba(217, 119, 6, 0.45);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+      }
+      .zone > .zone-tag {
+        position: absolute;
+        top: -0.7rem;
+        left: 0.5rem;
+        z-index: 6;
+        font-size: 10px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: #d97706;
+        color: #fff;
+        padding: 0.18rem 0.45rem;
+        border-radius: 9999px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      }
+      body.clean .zone {
+        outline: none;
+      }
+      body.clean .zone > .zone-tag {
+        display: none;
+      }
+      /* Sidebar figée comme dans le devis : pleine page, un seul scroll (la page). */
+      .app-sidebar {
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-100 text-neutral-900">
+    <!-- Barre de présentation (défile, hors application) -->
+    <div class="border-b bg-white">
+      <div class="flex flex-wrap items-center gap-3 px-5 py-3">
+        <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+        <div>
+          <h1 class="text-base font-semibold leading-tight">Fournisseur — fiche, gabarit unifié appliqué</h1>
+          <p class="text-xs text-neutral-500">
+            Le même gabarit que la fiche sous-traitant (sidebar + bandeau figés, un seul scroll), appliqué à « Modifier
+            le fournisseur ». Hook du rail : la <b>relation d'achat</b> (grilles tarifaires &amp; prix négociés).
+          </p>
+        </div>
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+          <input type="checkbox" class="accent-amber-500" onchange="document.body.classList.toggle('clean', this.checked)" />
+          Masquer les annotations (rendu propre)
+        </label>
+      </div>
+    </div>
+
+    <div class="flex">
+      <!-- ============ ZONE A · SIDEBAR (figée) ============ -->
+      <aside class="zone app-sidebar hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <span class="zone-tag">A · Sidebar (figée)</span>
+        <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <div class="border-b border-orange-200 p-3">
+          <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+            <span class="truncate">Compte-R BTP</span><span>▾</span>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Catalogue</a>
+          <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Tiers</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Clients</a>
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Fournisseurs</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Sous-traitants</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Contacts</a>
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Référencement</a>
+          </div>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Commercial</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH &amp; Pointage</a>
+        </nav>
+        <div class="border-t border-orange-200 p-3 text-sm">
+          <div class="font-medium text-orange-900">axla6901@gmail.com</div>
+          <div class="text-xs text-orange-700">Administrateur</div>
+          <button class="mt-2 w-full rounded-md border border-orange-300 bg-white/60 px-2 py-1 text-xs text-orange-800">Se déconnecter</button>
+        </div>
+      </aside>
+
+      <!-- ============ COLONNE CONTENU ============ -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ZONE B · BANDEAU UNIQUE (figé) -->
+        <div class="zone sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+          <span class="zone-tag">B · Bandeau figé (titre + statuts + actions)</span>
+          <div class="px-5 pb-3 pt-2.5">
+            <a class="mb-0.5 inline-block text-xs text-neutral-400 hover:text-neutral-700">‹ Fournisseurs</a>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="truncate text-lg font-semibold leading-tight">POINT.P Distribution SAS</h2>
+                  <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span>
+                  <span class="rounded-full bg-orange-100 px-2 py-0.5 text-[11px] font-medium text-orange-800 ring-1 ring-orange-300">
+                    Préféré · 12 articles
+                  </span>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-amber-300">
+                    <span class="size-1.5 rounded-full bg-amber-500"></span>Vigilance
+                  </span>
+                </div>
+                <p class="mt-0.5 text-xs text-neutral-500">
+                  <span class="font-mono">POINTP</span> · SIRET 562&nbsp;105&nbsp;395&nbsp;00012 · modifié il y a 2 h par Alex Lambert
+                </p>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">Désactiver</button>
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">Annuler</button>
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50">↧ Import catalogue</button>
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50">+ Créer un contact</button>
+                <button class="rounded-md border px-2 py-1.5 text-sm text-amber-500 hover:bg-amber-50" title="Favori">★</button>
+                <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CORPS (pleine page, un seul scroll) -->
+        <div class="px-5 py-5">
+          <div class="space-y-5">
+            <!-- Grille 12 col : MAIN (8) + RAIL (4) -->
+            <div class="grid grid-cols-12 gap-5">
+              <!-- ZONE C · COLONNE PRINCIPALE -->
+              <div class="zone relative col-span-12 space-y-5 lg:col-span-8">
+                <span class="zone-tag">C · Colonne principale (saisie)</span>
+
+                <!-- 1. Identification -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">1.</span>Identification</h3>
+                  </button>
+                  <div class="space-y-4 border-t px-5 py-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Code</label>
+                        <input value="POINTP" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                        <p class="mt-1 text-xs text-neutral-500">Code interne unique (majuscules, 2 à 32 car.).</p>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Raison sociale</label>
+                        <input value="POINT.P Distribution SAS" list="raisons-sociales-connues" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        <datalist id="raisons-sociales-connues">
+                          <option value="Saint-Gobain Distribution"></option>
+                          <option value="Cedeo SAS"></option>
+                          <option value="Rexel France"></option>
+                        </datalist>
+                        <p class="mt-1 text-xs text-neutral-500">Référentiel central des raisons sociales (anti-doublon).</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">SIRET <span class="font-normal text-neutral-400">(optionnel)</span></label>
+                        <input value="56210539500012" maxlength="14" placeholder="14 chiffres" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                        <p class="mt-1 text-xs text-neutral-500">14 chiffres sans espace.</p>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">
+                          N° TVA intracom
+                          <span class="ml-1 rounded bg-neutral-100 px-1 py-0.5 text-[10px] font-medium text-neutral-500 ring-1 ring-neutral-200">proposé</span>
+                        </label>
+                        <input value="FR56562105395" placeholder="FR12345678901" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 2. Coordonnées -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">2.</span>Coordonnées</h3>
+                  </button>
+                  <div class="grid grid-cols-1 gap-4 border-t px-5 py-4 lg:grid-cols-2">
+                    <div class="rounded-lg border bg-neutral-50/60 p-4">
+                      <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">Adresse</h4>
+                      <div class="space-y-4">
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Adresse ligne 1</label>
+                          <input value="2 boulevard de la Libération" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Adresse ligne 2</label>
+                          <input value="Agence Lyon-Est" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Code postal</label>
+                            <input value="69003" list="codes-postaux" class="w-full rounded-md border px-3 py-2 text-sm" />
+                            <datalist id="codes-postaux"><option value="69003"></option></datalist>
+                          </div>
+                          <div class="sm:col-span-2">
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Ville</label>
+                            <input value="Lyon" list="villes" class="w-full rounded-md border px-3 py-2 text-sm" />
+                            <datalist id="villes"><option value="Lyon"></option></datalist>
+                          </div>
+                        </div>
+                        <p class="text-xs text-neutral-500">Code postal ↔ ville auto-complétés (référentiel La Poste).</p>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Pays</label>
+                          <input value="France" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="rounded-lg border bg-neutral-50/60 p-4">
+                      <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">Contact générique</h4>
+                      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Email</label>
+                          <input type="email" value="agence.lyon@pointp.fr" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Téléphone</label>
+                          <input value="04 72 00 11 22" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                      </div>
+                      <p class="mt-3 text-xs text-neutral-500">Adresse e-mail / standard de l'agence. Les interlocuteurs sont gérés dans Contacts.</p>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 3. Conditions d'achat (proposé) -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">3.</span>Conditions d'achat
+                      <span class="ml-1 rounded bg-neutral-100 px-1.5 py-0.5 align-middle text-[10px] font-medium text-neutral-500 ring-1 ring-neutral-200">proposé</span>
+                    </h3>
+                  </button>
+                  <div class="space-y-4 border-t px-5 py-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Devise</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                          <option selected>EUR — Euro (€)</option>
+                          <option>CHF — Franc suisse</option>
+                          <option>GBP — Livre sterling</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Délai de règlement</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                          <option>Comptant</option>
+                          <option>30 jours nets</option>
+                          <option selected>45 jours fin de mois</option>
+                          <option>60 jours nets (max légal)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Mode de règlement</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                          <option selected>Virement</option>
+                          <option>Prélèvement</option>
+                          <option>Chèque</option>
+                          <option>Carte</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Franco de port (€ HT)</label>
+                        <input type="number" value="800" min="0" step="1" inputmode="decimal" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        <p class="mt-1 text-xs text-neutral-500">Montant de commande au-delà duquel le port est offert.</p>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Minimum de commande (€ HT)</label>
+                        <input type="number" value="150" min="0" step="1" inputmode="decimal" class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                    </div>
+                    <p class="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      Conditions commerciales reprises à la création des commandes d'achat. Champs proposés — module Achats (ADR à venir).
+                    </p>
+                  </div>
+                </section>
+
+                <!-- 4. Comptabilité (proposé) -->
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">4.</span>Comptabilité
+                      <span class="ml-1 rounded bg-neutral-100 px-1.5 py-0.5 align-middle text-[10px] font-medium text-neutral-500 ring-1 ring-neutral-200">proposé</span>
+                    </h3>
+                  </button>
+                  <div class="space-y-4 border-t px-5 py-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Compte général de rattachement</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                          <option selected>607100 — Achats de marchandises</option>
+                          <option>601000 — Achats de matières premières</option>
+                          <option>604000 — Achats d'études et de prestations</option>
+                        </select>
+                        <p class="mt-1 text-xs text-neutral-500">Compte de charge (PCG BTP) des écritures d'achat.</p>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Compte auxiliaire (tiers)</label>
+                        <input value="401POINTP" maxlength="18" class="w-full rounded-md border px-3 py-2 font-mono text-sm" />
+                        <p class="mt-1 text-xs text-neutral-500">Compte tiers repris dans les exports Cegid / Sage / FEC. Dérivé du code par défaut.</p>
+                      </div>
+                    </div>
+                    <p class="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      Repris à la génération des écritures : facture fournisseur → compte 607, TVA déductible → 44566. Champ proposé — module export comptable (ADR-005).
+                    </p>
+                  </div>
+                </section>
+              </div>
+
+              <!-- ZONE D · RAIL CONTEXTUEL (défile avec la colonne centrale) -->
+              <aside class="zone relative col-span-12 space-y-5 lg:col-span-4">
+                <span class="zone-tag">D · Rail contextuel (tarifaire, statut, contacts, conformité, historique)</span>
+                <div class="space-y-5">
+                  <!-- Carte mise en avant : SYNTHÈSE TARIFAIRE (jamais de la conformité ici) -->
+                  <section class="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                    <div class="flex items-center justify-between px-4 pb-1 pt-3">
+                      <h3 class="font-semibold text-orange-700">Synthèse tarifaire</h3>
+                      <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 ring-1 ring-amber-300">relation d'achat</span>
+                    </div>
+                    <div class="px-4 pb-2 pt-1">
+                      <div class="text-3xl font-semibold tabular-nums text-amber-700">2 grilles en vigueur</div>
+                      <p class="mt-1 text-xs text-amber-800/80">48 articles tarifés · dernière mise à jour le 02/06/2026.</p>
+                    </div>
+                    <ul class="space-y-2 px-4 pb-3 text-sm">
+                      <li class="flex items-start gap-2">
+                        <span class="mt-1 size-1.5 shrink-0 rounded-full bg-emerald-500"></span>
+                        <span>Fournisseur préféré<br /><span class="text-xs text-neutral-500">de 12 articles du catalogue</span></span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="mt-1 size-1.5 shrink-0 rounded-full bg-emerald-500"></span>
+                        <span>Grille générale 2026<br /><span class="text-xs text-neutral-500">36 articles · jusqu'au 31/12/2026</span></span>
+                      </li>
+                      <li class="flex items-start gap-2">
+                        <span class="mt-1 size-1.5 shrink-0 rounded-full bg-amber-500"></span>
+                        <span>Grille chantier « Tour Oxygène »<br /><span class="text-xs text-neutral-500">12 articles · expire le 30/06/2026</span></span>
+                      </li>
+                    </ul>
+                    <p class="border-t border-amber-100 px-4 py-2 text-xs text-amber-800/80">
+                      Synthèse dérivée des grilles tarifaires — non saisissable.
+                    </p>
+                  </section>
+
+                  <!-- Statut & méta -->
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="flex items-center justify-between px-4 py-3">
+                      <h3 class="font-semibold text-orange-700">Statut &amp; méta</h3>
+                      <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span>
+                    </div>
+                    <div class="space-y-2 border-t px-4 py-3 text-xs text-neutral-500">
+                      <div class="flex items-center justify-between gap-2">
+                        <span>Fournisseur préféré</span>
+                        <span class="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800 ring-1 ring-orange-300">12 articles</span>
+                      </div>
+                      <p class="text-[11px] text-neutral-400">Le statut technique = archivage (soft-delete), distinct du référencement catalogue.</p>
+                      <div class="flex justify-between gap-2 border-t pt-2"><span>Créé</span><span class="text-right text-neutral-700">08/01/2026 · Alex Lambert</span></div>
+                      <div class="flex justify-between gap-2"><span>Modifié</span><span class="text-right text-neutral-700">15/06/2026 · Alex Lambert</span></div>
+                    </div>
+                  </section>
+
+                  <!-- Contacts -->
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="flex items-center justify-between px-4 py-3">
+                      <h3 class="font-semibold text-orange-700">Contacts</h3>
+                      <span class="text-xs text-neutral-500"><span class="font-medium text-neutral-700">2</span> actifs / 3</span>
+                    </div>
+                    <ul class="space-y-2 border-t px-4 py-3 text-sm">
+                      <li class="flex items-center justify-between gap-2">
+                        <span>Laure Vidal <span class="text-xs text-neutral-500">· Responsable de compte</span></span>
+                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">principal</span>
+                      </li>
+                      <li class="flex items-center justify-between gap-2 text-neutral-600">
+                        <span>Hugo Mercier <span class="text-xs text-neutral-500">· Comptoir / devis</span></span>
+                      </li>
+                    </ul>
+                    <div class="border-t px-4 py-2.5">
+                      <button class="text-sm font-medium text-orange-700 hover:underline">Gérer les contacts →</button>
+                    </div>
+                  </section>
+
+                  <!-- Conformité achat (secondaire pour un fournisseur) -->
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="flex items-center justify-between px-4 py-3">
+                      <h3 class="font-semibold text-orange-700">Conformité achat</h3>
+                      <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 ring-1 ring-amber-300">
+                        <span class="size-1.5 rounded-full bg-amber-500"></span>Vigilance
+                      </span>
+                    </div>
+                    <div class="space-y-2 border-t px-4 py-3 text-sm">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-neutral-600">Attestation URSSAF</span>
+                        <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Expire bientôt</span>
+                      </div>
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="text-neutral-600">RIB</span>
+                        <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span>
+                      </div>
+                      <p class="pt-1 text-xs text-amber-800/80">
+                        Vigilance L.8222-1 : exigible pour tout contrat ≥ 5 000 € HT. Détail dans le bloc « Pièces administratives ».
+                      </p>
+                    </div>
+                  </section>
+
+                  <!-- Historique -->
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Historique</h3></div>
+                    <ul class="space-y-2.5 border-t px-4 py-3 text-xs">
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Grille « Tour Oxygène » importée (12 articles)<br /><span class="text-neutral-500">02/06 · 14:10 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Désigné fournisseur préféré de 4 articles<br /><span class="text-neutral-500">22/05 · 09:30 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Attestation URSSAF mise à jour<br /><span class="text-neutral-500">11/03 · 16:40 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Fournisseur créé<br /><span class="text-neutral-500">08/01 · 10:22</span></span></li>
+                    </ul>
+                  </section>
+                </div>
+              </aside>
+            </div>
+
+            <!-- ZONE E · BLOC PLEINE LARGEUR #1 — Grilles tarifaires (source unique, fil rouge) -->
+            <section class="zone relative overflow-hidden rounded-xl bg-white ring-1 ring-amber-200">
+              <span class="zone-tag">E · Bloc pleine largeur (grilles tarifaires — fil rouge de la fiche fournisseur)</span>
+              <div class="flex flex-wrap items-end justify-between gap-2 px-5 py-3">
+                <div>
+                  <h3 class="font-semibold text-orange-700">Grilles tarifaires &amp; prix négociés</h3>
+                  <p class="text-xs text-neutral-500">Source unique de la relation d'achat : prix négociés par article, période et chantier. La synthèse du rail en découle.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">↧ Import catalogue</button>
+                  <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Nouvelle grille</button>
+                </div>
+              </div>
+              <table class="w-full border-t text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Libellé</th>
+                    <th class="px-5 py-2.5 font-medium">Portée</th>
+                    <th class="px-5 py-2.5 font-medium">Période</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Articles</th>
+                    <th class="px-5 py-2.5 font-medium">État</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3 font-medium">Tarif POINT.P 2026</td>
+                    <td class="px-5 py-3 text-neutral-600">Générale</td>
+                    <td class="px-5 py-3 text-neutral-600 tabular-nums">01/01/2026 → 31/12/2026</td>
+                    <td class="px-5 py-3 text-right tabular-nums">36</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">En vigueur</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                  <tr class="bg-amber-50/40 hover:bg-amber-50">
+                    <td class="px-5 py-3 font-medium">Conditions chantier « Tour Oxygène »</td>
+                    <td class="px-5 py-3 text-neutral-600">Chantier · Tour Oxygène</td>
+                    <td class="px-5 py-3 tabular-nums text-amber-700">01/04/2026 → 30/06/2026</td>
+                    <td class="px-5 py-3 text-right tabular-nums">12</td>
+                    <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Expire bientôt</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3 font-medium">Tarif négocié T3 2026</td>
+                    <td class="px-5 py-3 text-neutral-600">Générale</td>
+                    <td class="px-5 py-3 text-neutral-600 tabular-nums">01/07/2026 → 30/09/2026</td>
+                    <td class="px-5 py-3 text-right tabular-nums">18</td>
+                    <td class="px-5 py-3"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">À venir</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                  <tr class="text-neutral-400 hover:bg-neutral-50">
+                    <td class="px-5 py-3 font-medium">Tarif POINT.P 2025</td>
+                    <td class="px-5 py-3">Générale</td>
+                    <td class="px-5 py-3 tabular-nums">01/01/2025 → 31/12/2025</td>
+                    <td class="px-5 py-3 text-right tabular-nums">31</td>
+                    <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Expirée</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Consulter</button></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="border-t bg-neutral-50/60">
+                    <td colspan="6" class="px-5 py-2.5 text-xs text-neutral-500">
+                      Les prix d'une grille alimentent le calcul du prix de revient (fonction <code class="rounded bg-neutral-200/70 px-1">prix_courant_article</code>) — le moins cher l'emporte.
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </section>
+
+            <!-- ZONE E · BLOC PLEINE LARGEUR #2 — Contacts du fournisseur -->
+            <section class="zone relative overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+              <span class="zone-tag">E · Bloc pleine largeur (contacts)</span>
+              <div class="flex flex-wrap items-end justify-between gap-2 px-5 py-3">
+                <div>
+                  <h3 class="font-semibold text-orange-700">Contacts du fournisseur</h3>
+                  <p class="text-xs text-neutral-500">2 actifs sur 3 · enregistrement immédiat via la frame contacts.</p>
+                </div>
+                <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Ajouter un contact</button>
+              </div>
+              <table class="w-full border-t text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Nom</th>
+                    <th class="px-5 py-2.5 font-medium">Fonction</th>
+                    <th class="px-5 py-2.5 font-medium">Email</th>
+                    <th class="px-5 py-2.5 font-medium">Téléphone</th>
+                    <th class="px-5 py-2.5 font-medium">Principal</th>
+                    <th class="px-5 py-2.5 font-medium">Actif</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Laure Vidal</td>
+                    <td class="px-5 py-3 text-neutral-600">Responsable de compte</td>
+                    <td class="px-5 py-3 text-neutral-600">l.vidal@pointp.fr</td>
+                    <td class="px-5 py-3 tabular-nums text-neutral-600">06 11 22 33 44</td>
+                    <td class="px-5 py-3"><span class="size-2 rounded-full bg-amber-500" title="Contact principal"></span></td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Hugo Mercier</td>
+                    <td class="px-5 py-3 text-neutral-600">Comptoir / devis</td>
+                    <td class="px-5 py-3 text-neutral-600">h.mercier@pointp.fr</td>
+                    <td class="px-5 py-3 tabular-nums text-neutral-600">04 72 00 11 23</td>
+                    <td class="px-5 py-3 text-neutral-300">—</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                  <tr class="text-neutral-400 hover:bg-neutral-50">
+                    <td class="px-5 py-3">Nadia Roche</td>
+                    <td class="px-5 py-3">Comptabilité fournisseurs</td>
+                    <td class="px-5 py-3">compta@pointp.fr</td>
+                    <td class="px-5 py-3 tabular-nums">—</td>
+                    <td class="px-5 py-3">—</td>
+                    <td class="px-5 py-3"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Inactif</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Modifier</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <!-- ZONE E · BLOC PLEINE LARGEUR #3 — Pièces administratives & vigilance -->
+            <section class="zone relative overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+              <span class="zone-tag">E · Bloc pleine largeur (pièces administratives — vigilance L.8222-1)</span>
+              <div class="flex flex-wrap items-end justify-between gap-2 px-5 py-3">
+                <div>
+                  <h3 class="font-semibold text-orange-700">Pièces administratives <span class="font-normal text-neutral-400">(vigilance L.8222-1)</span></h3>
+                  <p class="text-xs text-neutral-500">Obligation de vigilance pour tout contrat ≥ 5 000 € HT. Chaque pièce porte sa référence, son échéance et son statut.</p>
+                </div>
+                <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Téléverser un document</button>
+              </div>
+              <table class="w-full border-t text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Document</th>
+                    <th class="px-5 py-2.5 font-medium">Libellé / référence</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Validité</th>
+                    <th class="px-5 py-2.5 font-medium">Statut</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Extrait K-BIS</td>
+                    <td class="px-5 py-3 text-neutral-600">RCS Nanterre 562 105 395</td>
+                    <td class="px-5 py-3 text-right tabular-nums">20/01/2026</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Attestation de vigilance URSSAF</td>
+                    <td class="px-5 py-3 text-neutral-600">Att. du 11/03/2026</td>
+                    <td class="px-5 py-3 text-right tabular-nums text-amber-700">30/06/2026</td>
+                    <td class="px-5 py-3"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Expire bientôt</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Remplacer</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Attestation de régularité fiscale</td>
+                    <td class="px-5 py-3 text-neutral-600">Exercice 2025</td>
+                    <td class="px-5 py-3 text-right tabular-nums">30/06/2026</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">RIB</td>
+                    <td class="px-5 py-3 text-neutral-600">FR76 ••• 0451</td>
+                    <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                    <td class="px-5 py-3"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">À jour</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Voir</button></td>
+                  </tr>
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3">Liste nominative des salariés étrangers</td>
+                    <td class="px-5 py-3 text-neutral-400">—</td>
+                    <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                    <td class="px-5 py-3"><span class="rounded bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-600">Manquant</span></td>
+                    <td class="px-5 py-3 text-right"><button class="text-sm text-orange-700 hover:underline">Téléverser</button></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="border-t bg-neutral-50/60">
+                    <td colspan="5" class="px-5 py-2.5 text-xs text-neutral-500">
+                      Pièces partagées avec les sous-traitants (table <code class="rounded bg-neutral-200/70 px-1">documents_tiers</code>) — type « Autre » disponible au téléversement. Process URSSAF manuel assisté.
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </section>
+          </div>
+
+          <!-- ===================== LÉGENDE & MAPPING ===================== -->
+          <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <section class="rounded-xl border bg-white p-5">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Mapping du gabarit → fiche fournisseur</h2>
+              <ol class="space-y-2.5 text-sm text-neutral-700">
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">A</span>
+                  <span><b>Sidebar figée.</b> Tiers ▸ Fournisseurs actif. Un seul scroll, pas de fil d'Ariane.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">B</span>
+                  <span><b>Bandeau figé.</b> Retour + raison sociale + <b>3 badges</b> (technique, « fournisseur préféré » de N articles, conformité). Actions à droite (dont <span class="font-medium">Import catalogue</span>), <span class="font-medium text-amber-600">Enregistrer</span> en dernier.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">C</span>
+                  <span><b>Colonne principale (8/12).</b> <b>4 sections</b> : Identification, Coordonnées, Conditions d'achat <i>(proposé)</i>, Comptabilité <i>(proposé)</i>. Le tarif n'est pas saisi ici : il vit dans le tableau Grilles (zone E).</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">D</span>
+                  <span><b>Rail contextuel (4/12), collant.</b> Carte mise en avant = <b>synthèse tarifaire</b> (jamais une pièce administrative), puis statut/méta, contacts, conformité achat, historique.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">E</span>
+                  <span><b>Blocs pleine largeur (12/12).</b> <b>Grilles tarifaires</b> (fil rouge, liseré ambre) + Contacts + Pièces administratives : tableaux sous la grille, jamais comprimés dans 8 colonnes.</span>
+                </li>
+              </ol>
+              <p class="mt-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Différence avec le sous-traitant : le fil rouge n'est plus la conformité (loi 75-1334) mais la <b>relation d'achat</b>. Les grilles tarifaires prennent la place du tableau Vigilance comme bloc accentué ; la conformité L.8222-1 reste présente mais secondaire.
+              </p>
+            </section>
+
+            <section class="space-y-5">
+              <div class="rounded-xl border bg-white p-5">
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Tokens couleur</h2>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#f59e0b"></span> Primaire actions · <code>amber-500</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#ffedd5"></span> Sidebar · <code>orange-100</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#c2410c"></span> Titres section · <code>orange-700</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#fffbeb"></span> Carte mise en avant · <code>amber-50/200</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#d1fae5"></span> En vigueur / OK · <code>emerald-100/800</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#e0f2fe"></span> À venir · <code>sky-100/800</code></div>
+                </div>
+              </div>
+
+              <div class="rounded-xl border bg-white p-5">
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">États d'une grille tarifaire</h2>
+                <ul class="space-y-2 text-sm text-neutral-700">
+                  <li class="flex items-center gap-2"><span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">En vigueur</span> active, période en cours</li>
+                  <li class="flex items-center gap-2"><span class="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">À venir</span> début de validité &gt; aujourd'hui</li>
+                  <li class="flex items-center gap-2"><span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Expire bientôt</span> fin de validité &lt; 30 j</li>
+                  <li class="flex items-center gap-2"><span class="rounded bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-500">Expirée / Inactive</span> hors période ou archivée</li>
+                </ul>
+                <p class="mt-3 text-xs text-neutral-500">
+                  Le prix de revient retient toujours le tarif le moins cher parmi les grilles en vigueur (générale ou chantier).
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

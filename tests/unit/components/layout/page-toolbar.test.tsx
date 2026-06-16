@@ -24,12 +24,29 @@ describe('PageToolbar', () => {
     expect(getByText('centre')).toBeInTheDocument();
   });
 
-  it('est sticky sous le header (top-14) et pleine largeur', () => {
+  it('est sticky en haut (top-0) et pleine largeur', () => {
     const { container } = render(<PageToolbar title="X" />);
     const root = container.firstElementChild as HTMLElement;
     expect(root.className).toContain('sticky');
-    expect(root.className).toContain('top-14');
+    expect(root.className).toContain('top-0');
     expect(root.className).toContain('-mx-4');
     expect(root.className).toContain('lg:-mx-8');
+  });
+
+  it('rend un lien retour au-dessus du titre quand backHref est fourni', () => {
+    const { getByRole } = render(
+      <PageToolbar
+        title="Modifier l'article"
+        backHref="/catalogue/articles"
+        backLabel="Articles"
+      />,
+    );
+    const link = getByRole('link', { name: /Articles/ });
+    expect(link).toHaveAttribute('href', '/catalogue/articles');
+  });
+
+  it('n’affiche pas de lien retour sans backHref', () => {
+    const { queryByRole } = render(<PageToolbar title="X" />);
+    expect(queryByRole('link')).not.toBeInTheDocument();
   });
 });

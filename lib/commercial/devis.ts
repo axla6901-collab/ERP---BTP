@@ -25,10 +25,13 @@ import {
   type PosteInterne,
   type RepartitionPosteInterne,
 } from '@/db/schema/commercial';
+import { auditLog } from '@/db/schema/audit';
+import { utilisateurs } from '@/db/schema/utilisateurs';
 import {
   devisSchema,
   TRANSITIONS_STATUT_DEVIS,
   type DevisInput,
+  type EvenementHistoriqueDevis,
   type LigneDevisInput,
   type PosteInterneFormInput,
   type StatutDevis,
@@ -176,6 +179,48 @@ export async function listerDevis(): Promise<DevisAvecClient[]> {
     clientCode: r.client?.code ?? '',
     clientNom: r.client ? libelleClient({ ...r.client, raisonSociale: r.clientRaisonSociale }) : '',
   }));
+}
+
+/**
+ * Derniers événements `audit_log` de la table `devis` pour cette fiche
+ * (timeline du rail de l'éditeur). Calque de `listerHistoriqueClient` :
+ * l'email de l'auteur est résolu via jointure sur `utilisateurs`, et le statut
+ * avant/après est extrait du JSON `before`/`after` pour distinguer les
+ * changements de statut des simples modifications.
+ */
+export async function listerHistoriqueDevis(
+  id: string,
+  limit = 8,
+): Promise<EvenementHistoriqueDevis[]> {
+  const ctx = await requireTenantContextWithMfa();
+  const rows = await withTenant(ctx.entreprise.id, (tx) =>
+    tx
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        before: auditLog.before,
+        after: auditLog.after,
+        createdAt: auditLog.createdAt,
+        email: utilisateurs.email,
+      })
+      .from(auditLog)
+      .leftJoin(utilisateurs, eq(utilisateurs.id, auditLog.utilisateurId))
+      .where(and(eq(auditLog.tableName, 'devis'), eq(auditLog.rowId, id)))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(limit),
+  );
+  return rows.map((r) => {
+    const before = (r.before as Record<string, unknown> | null) ?? null;
+    const after = (r.after as Record<string, unknown> | null) ?? null;
+    return {
+      id: r.id,
+      action: r.action as EvenementHistoriqueDevis['action'],
+      statutAvant: (before?.statut as StatutDevis | undefined) ?? null,
+      statutApres: (after?.statut as StatutDevis | undefined) ?? null,
+      createdAt: r.createdAt.toISOString(),
+      email: r.email,
+    };
+  });
 }
 
 export async function lireDevis(id: string): Promise<DevisHydrate | null> {

@@ -395,7 +395,7 @@ export function CompteProrataTab({
   return (
     <div className="space-y-4">
       {/* Bandeau d'actions figé */}
-      <div className="sticky top-14 z-10 -mx-4 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8">
+      <div className="sticky top-0 z-10 -mx-4 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <CalculatorIcon className="size-5 text-amber-600" />

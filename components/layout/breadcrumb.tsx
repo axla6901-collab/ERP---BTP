@@ -25,7 +25,7 @@ export function Breadcrumb({ entrepriseSlug }: { entrepriseSlug: string }) {
   return (
     <nav
       aria-label="Fil d'Ariane"
-      className="sticky top-14 z-10 border-b bg-muted px-4 py-3 text-sm shadow-sm lg:px-8"
+      className="sticky top-0 z-10 border-b bg-muted px-4 py-3 text-sm shadow-sm lg:px-8"
     >
       <ol className="flex flex-wrap items-center gap-1 text-muted-foreground">
         <li className="flex items-center">

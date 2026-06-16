@@ -1,10 +1,9 @@
 'use client';
 
-import { BellIcon, ChevronRightIcon, SearchIcon } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { BellIcon, SearchIcon } from 'lucide-react';
 
 import { GuardedLink } from '@/components/layout/guarded-link';
-import { buildCrumbs } from '@/lib/navigation/breadcrumbs';
+import { useSidebarOptional } from '@/components/layout/sidebar-context';
 
 type AppHeaderProps = {
   email: string;
@@ -14,18 +13,20 @@ type AppHeaderProps = {
 /**
  * Header figé global (maquettes) : présent en haut de toutes les pages tenant.
  * Hauteur `h-14`, sticky `top-0`. Décalé de la sidebar (`lg:pl-64` posé par le
- * layout). Contient le logo « B » amber + le fil d'Ariane inline + recherche
- * (⌘K, placeholder) + notifications (placeholder) + avatar (lien profil).
+ * layout). Contient le logo « B » amber + recherche (⌘K, placeholder) +
+ * notifications (placeholder) + avatar (lien profil).
  *
  * Le sélecteur d'entreprise et la déconnexion restent dans la sidebar.
  *
- * Responsive : on masque le fil d'Ariane et la recherche en mobile pour éviter
- * tout débordement horizontal ; `pl-12` laisse la place au burger flottant.
+ * Responsive : on masque la recherche en mobile pour éviter tout débordement
+ * horizontal ; `pl-12` laisse la place au burger flottant.
  */
 export function AppHeader({ email, entrepriseSlug }: AppHeaderProps) {
-  const pathname = usePathname();
-  const crumbs = buildCrumbs(pathname, entrepriseSlug);
+  const focusMode = useSidebarOptional()?.focusMode ?? false;
   const initiale = email.charAt(0).toUpperCase();
+
+  // Mode plein écran (éditeur de devis) : header masqué pour un mode immersif.
+  if (focusMode) return null;
 
   return (
     <header className="sticky top-0 z-20 border-b bg-card">
@@ -42,29 +43,6 @@ export function AppHeader({ email, entrepriseSlug }: AppHeaderProps) {
             ERP BTP
           </GuardedLink>
         </div>
-
-        {/* Fil d'Ariane inline */}
-        {crumbs.length > 0 && (
-          <nav
-            aria-label="Fil d'Ariane"
-            className="ml-1 hidden min-w-0 items-center gap-1.5 text-xs text-muted-foreground md:flex"
-          >
-            {crumbs.map((c, i) => (
-              <span key={`${c.label}-${i}`} className="flex min-w-0 items-center gap-1.5">
-                {i > 0 && <ChevronRightIcon className="size-3 shrink-0" aria-hidden="true" />}
-                {c.href ? (
-                  <GuardedLink href={c.href} className="truncate hover:text-foreground">
-                    {c.label}
-                  </GuardedLink>
-                ) : (
-                  <span aria-current="page" className="truncate font-medium text-foreground">
-                    {c.label}
-                  </span>
-                )}
-              </span>
-            ))}
-          </nav>
-        )}
 
         <div className="flex-1" />
 

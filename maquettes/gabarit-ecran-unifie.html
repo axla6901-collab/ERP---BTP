@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gabarit d'écran unifié · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      /* Contour d'annotation (SANS position : on positionne chaque zone séparément
+         pour ne pas écraser le sticky de la sidebar / du bandeau). */
+      .zone {
+        outline: 1px dashed rgba(217, 119, 6, 0.45);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+      }
+      .zone > .zone-tag {
+        position: absolute;
+        top: -0.7rem;
+        left: 0.5rem;
+        z-index: 6;
+        font-size: 10px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: #d97706;
+        color: #fff;
+        padding: 0.18rem 0.45rem;
+        border-radius: 9999px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      }
+      body.clean .zone {
+        outline: none;
+      }
+      body.clean .zone > .zone-tag {
+        display: none;
+      }
+      /* Sidebar figée comme dans le devis : pleine page, un seul scroll (la page). */
+      .app-sidebar {
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-100 text-neutral-900">
+    <!-- Barre de présentation (défile, hors application) -->
+    <div class="border-b bg-white">
+      <div class="flex flex-wrap items-center gap-3 px-5 py-3">
+        <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+        <div>
+          <h1 class="text-base font-semibold leading-tight">Gabarit d'écran unifié — proposition</h1>
+          <p class="text-xs text-neutral-500">
+            Même principe que les devis : pleine page, un seul scroll, sidebar + bandeau figés. Démo sur « Modifier l'article ».
+          </p>
+        </div>
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+          <input type="checkbox" class="accent-amber-500" onchange="document.body.classList.toggle('clean', this.checked)" />
+          Masquer les annotations (rendu propre)
+        </label>
+      </div>
+    </div>
+
+    <div class="flex">
+      <!-- ============ ZONE A · SIDEBAR (figée) ============ -->
+      <aside class="zone app-sidebar hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+        <span class="zone-tag">A · Sidebar (figée)</span>
+        <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+          <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+          <span class="text-lg font-semibold">ERP BTP</span>
+        </div>
+        <div class="border-b border-orange-200 p-3">
+          <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+            <span class="truncate">Compte-R BTP</span><span>▾</span>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+          <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Catalogue</a>
+          <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+            <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Familles</a>
+            <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Articles</a>
+          </div>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Commercial</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+          <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH & Pointage</a>
+        </nav>
+        <div class="border-t border-orange-200 p-3 text-sm">
+          <div class="font-medium text-orange-900">axla6901@gmail.com</div>
+          <div class="text-xs text-orange-700">Administrateur</div>
+          <button class="mt-2 w-full rounded-md border border-orange-300 bg-white/60 px-2 py-1 text-xs text-orange-800">Se déconnecter</button>
+        </div>
+      </aside>
+
+      <!-- ============ COLONNE CONTENU ============ -->
+      <div class="min-w-0 flex-1 bg-neutral-50">
+        <!-- ZONE B · BANDEAU UNIQUE (figé) -->
+        <div class="zone sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
+          <span class="zone-tag">B · Bandeau figé (titre + actions)</span>
+          <div class="px-5 pb-3 pt-2.5">
+            <a class="mb-0.5 inline-block text-xs text-neutral-400 hover:text-neutral-700">‹ Articles</a>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold leading-tight">Modifier l'article</h2>
+                <p class="text-xs text-neutral-500">
+                  <span class="font-mono">ART001</span> · Article composé · modifié il y a 3 h
+                </p>
+              </div>
+              <div class="ml-auto flex items-center gap-2">
+                <button class="rounded-md border px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">Annuler</button>
+                <button class="rounded-md border px-2 py-1.5 text-sm text-amber-500 hover:bg-amber-50" title="Favori">☆</button>
+                <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CORPS (pleine page, un seul scroll) -->
+        <div class="px-5 py-5">
+          <div class="space-y-5">
+            <!-- Grille 12 col : MAIN (8) + RAIL (4) -->
+            <div class="grid grid-cols-12 gap-5">
+              <!-- ZONE C · COLONNE PRINCIPALE -->
+              <div class="zone relative col-span-12 space-y-5 lg:col-span-8">
+                <span class="zone-tag">C · Colonne principale (saisie)</span>
+
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">1.</span>Identification</h3>
+                  </button>
+                  <div class="space-y-4 border-t px-5 py-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Code</label>
+                        <input value="ART001" class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Type</label>
+                        <select class="w-full rounded-md border bg-white px-3 py-2 text-sm"><option>Article composé</option></select>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Libellé</label>
+                      <input value="Mur agglo 20×20×50" class="w-full rounded-md border px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label class="mb-1 block text-sm font-medium text-neutral-700">Famille</label>
+                      <select class="w-full rounded-md border bg-white px-3 py-2 text-sm"><option>OUV-MURAGGLO — Mur d'agglo</option></select>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">2.</span>Caractéristiques physiques</h3>
+                  </button>
+                  <div class="space-y-4 border-t px-5 py-4">
+                    <p class="-mt-1 text-sm text-neutral-500">Optionnel — utile pour conversion cross-type.</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Densité</label>
+                        <input placeholder="ex : 7.85" class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Épaisseur (mm)</label>
+                        <input class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Longueur (m)</label>
+                        <input class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-sm font-medium text-neutral-700">Largeur (m)</label>
+                        <input class="w-full rounded-md border px-3 py-2 text-sm" />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                  <button class="flex w-full items-center gap-2 px-5 py-3 text-left">
+                    <span class="text-neutral-400">⌄</span>
+                    <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">3.</span>Description</h3>
+                  </button>
+                  <div class="space-y-2 border-t px-5 py-4">
+                    <label class="mb-1 block text-sm font-medium text-neutral-700">Description (optionnel)</label>
+                    <textarea rows="3" class="w-full rounded-md border px-3 py-2 text-sm"></textarea>
+                  </div>
+                </section>
+              </div>
+
+              <!-- ZONE D · RAIL CONTEXTUEL (collant) -->
+              <aside class="zone relative col-span-12 space-y-5 lg:col-span-4">
+                <span class="zone-tag">D · Rail contextuel (collant : résumé, méta, statut)</span>
+                <div class="space-y-5 lg:sticky lg:top-24">
+                  <section class="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                    <div class="flex items-center justify-between px-4 pb-1 pt-3">
+                      <h3 class="font-semibold text-orange-700">Prix de revient calculé</h3>
+                      <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 ring-1 ring-amber-300">officiel · v1</span>
+                    </div>
+                    <div class="px-4 pb-4 pt-1">
+                      <div class="text-3xl font-semibold tabular-nums text-orange-800">0,86 €</div>
+                      <p class="mt-1 text-xs text-amber-800/80">Dérivé de la composition (récursif) — non saisissable.</p>
+                    </div>
+                  </section>
+
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Unités</h3></div>
+                    <div class="grid grid-cols-3 gap-3 border-t px-4 py-4 text-sm">
+                      <div>
+                        <label class="mb-1 block text-xs font-medium text-neutral-500">Achat</label>
+                        <select class="w-full rounded-md border bg-white px-2 py-1.5 text-sm"><option>U</option></select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-medium text-neutral-500">Stock</label>
+                        <select class="w-full rounded-md border bg-white px-2 py-1.5 text-sm"><option>U</option></select>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-xs font-medium text-neutral-500">Vente</label>
+                        <select class="w-full rounded-md border bg-white px-2 py-1.5 text-sm"><option>U</option></select>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="flex items-center justify-between px-4 py-3">
+                      <h3 class="font-semibold text-orange-700">Statut</h3>
+                      <span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Actif</span>
+                    </div>
+                    <div class="space-y-2 border-t px-4 py-3 text-xs text-neutral-500">
+                      <div class="flex justify-between gap-2"><span>Créé</span><span class="text-right text-neutral-700">12/03/2026 · Alex Lambert</span></div>
+                      <div class="flex justify-between gap-2"><span>Modifié</span><span class="text-right text-neutral-700">15/06/2026 · Alex Lambert</span></div>
+                    </div>
+                  </section>
+
+                  <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                    <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Historique</h3></div>
+                    <ul class="space-y-2.5 border-t px-4 py-3 text-xs">
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Prix de revient recalculé (0,86 €)<br /><span class="text-neutral-500">15/06 · 09:14 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Composant « Moellon 20×20×50 » ajouté<br /><span class="text-neutral-500">14/06 · 16:40 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Famille changée → Mur d'agglo<br /><span class="text-neutral-500">12/03 · 10:25 · Alex</span></span></li>
+                      <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Article créé<br /><span class="text-neutral-500">12/03 · 10:22</span></span></li>
+                    </ul>
+                  </section>
+                </div>
+              </aside>
+            </div>
+
+            <!-- ZONE E · BLOC PLEINE LARGEUR (tableaux, composition) -->
+            <section class="zone relative overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+              <span class="zone-tag">E · Bloc pleine largeur (tableaux, composition)</span>
+              <div class="flex flex-wrap items-end justify-between gap-2 px-5 py-3">
+                <div>
+                  <h3 class="font-semibold text-orange-700">Composition — prix de référence calculé</h3>
+                  <p class="text-xs text-neutral-500">1 composant · calculé via le prix retenu de chaque composant.</p>
+                </div>
+                <button class="rounded-md border px-2.5 py-1.5 text-xs hover:bg-neutral-50">+ Ajouter un composant</button>
+              </div>
+              <table class="w-full border-t text-sm">
+                <thead class="bg-neutral-50/60 text-left text-xs uppercase tracking-widest text-neutral-500">
+                  <tr>
+                    <th class="px-5 py-2.5 font-medium">Composant</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Quantité</th>
+                    <th class="px-5 py-2.5 font-medium">Unité</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Perte</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Prix unit.</th>
+                    <th class="px-5 py-2.5 text-right font-medium">Sous-total</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="hover:bg-neutral-50">
+                    <td class="px-5 py-3"><span class="font-mono text-xs text-neutral-500">MOE202050</span> Moellon 20×20×50</td>
+                    <td class="px-5 py-3 text-right tabular-nums">1</td>
+                    <td class="px-5 py-3 text-neutral-600">u</td>
+                    <td class="px-5 py-3 text-right text-neutral-400">—</td>
+                    <td class="px-5 py-3 text-right tabular-nums">0,86 €</td>
+                    <td class="px-5 py-3 text-right tabular-nums">0,86 €</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="border-t bg-neutral-50/60">
+                    <td colspan="5" class="px-5 py-3 text-right text-sm text-neutral-600">Total estimé (prix réf. + composition récursive)</td>
+                    <td class="px-5 py-3 text-right font-bold tabular-nums text-neutral-900">0,86 €</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </section>
+          </div>
+
+          <!-- ===================== LÉGENDE & RÈGLES ===================== -->
+          <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <section class="rounded-xl border bg-white p-5">
+              <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Règles du gabarit (tous écrans)</h2>
+              <ol class="space-y-2.5 text-sm text-neutral-700">
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">A</span>
+                  <span><b>Sidebar figée, pleine page.</b> Comme le devis : un seul scroll (la page), la sidebar (orange-100) reste collée. Pas de barre du haut ni fil d'Ariane.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">B</span>
+                  <span><b>Bandeau figé.</b> Lien retour + titre (<code class="rounded bg-neutral-100 px-1">h2</code>) + méta à gauche, actions à droite (primaire <span class="font-medium text-amber-600">amber-500</span>). Reste collé en haut au scroll.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">C</span>
+                  <span><b>Colonne principale (8/12).</b> La saisie. Sections = <code class="rounded bg-neutral-100 px-1">FormSection</code> repliable, titre <span class="font-medium text-orange-700">orange-700</span> numéroté. Champs en grille <code class="rounded bg-neutral-100 px-1">grid-cols-1 sm:grid-cols-2</code>.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">D</span>
+                  <span><b>Rail contextuel (4/12), collant.</b> Résumé/calculs, statut, méta, unités. <i>Jamais</i> les champs primaires. Passe sous la colonne en mobile.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-orange-600 text-xs font-bold text-white">E</span>
+                  <span><b>Bloc pleine largeur (12/12).</b> Tableaux, compositions : sous la grille, jamais comprimés dans 8 colonnes.</span>
+                </li>
+              </ol>
+              <p class="mt-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Layout pleine page identique au devis (sidebar + bandeau figés, un seul ascenseur). Mode « plein écran » volontairement absent ici — inutile sur un écran de fiche.
+              </p>
+            </section>
+
+            <section class="space-y-5">
+              <div class="rounded-xl border bg-white p-5">
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Tokens couleur</h2>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#f59e0b"></span> Primaire actions · <code>amber-500</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#ffedd5"></span> Sidebar · <code>orange-100</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#c2410c"></span> Titres section · <code>orange-700</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#fffbeb"></span> Carte mise en avant · <code>amber-50/200</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#d1fae5"></span> Statut OK · <code>emerald-100/800</code></div>
+                  <div class="flex items-center gap-2"><span class="size-6 rounded ring-1 ring-black/10" style="background:#ffe4e6"></span> Alerte · <code>rose-100/600</code></div>
+                </div>
+              </div>
+
+              <div class="rounded-xl border bg-white p-5">
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Même gabarit → écran « Liste »</h2>
+                <div class="overflow-hidden rounded-lg border">
+                  <div class="flex items-center justify-between border-b bg-white px-3 py-2">
+                    <span class="text-sm font-semibold">Catalogue articles <span class="text-xs font-normal text-neutral-400">· 142 réf.</span></span>
+                    <span class="rounded bg-amber-500 px-2 py-1 text-[11px] font-medium text-white">+ Nouvel article</span>
+                  </div>
+                  <div class="grid grid-cols-12 gap-3 p-3">
+                    <div class="col-span-4 space-y-2">
+                      <div class="rounded-md bg-orange-50 px-2 py-1 text-[11px] font-medium text-orange-800">Familles ▸</div>
+                      <div class="h-2 rounded bg-neutral-100"></div>
+                      <div class="h-2 w-2/3 rounded bg-neutral-100"></div>
+                      <div class="h-2 w-5/6 rounded bg-neutral-100"></div>
+                    </div>
+                    <div class="col-span-8 space-y-1.5">
+                      <div class="h-3 rounded bg-neutral-100"></div>
+                      <div class="h-3 rounded bg-amber-50"></div>
+                      <div class="h-3 rounded bg-neutral-100"></div>
+                      <div class="h-3 rounded bg-neutral-100"></div>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 text-xs text-neutral-500">
+                  Le rail (D) devient le <b>FilterRail</b> et la colonne principale (C) accueille la <b>DataTable</b>. Mêmes zones, même chrome, même scroll.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

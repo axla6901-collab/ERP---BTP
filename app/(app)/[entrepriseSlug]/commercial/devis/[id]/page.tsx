@@ -9,13 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { aPermission, requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerArticlesAvecPrix } from '@/lib/catalogue/articles';
 import { listerUnites } from '@/lib/catalogue/unites';
-import { creerChantierDepuisDevis } from '@/lib/chantiers/chantiers';
+import { creerChantierDepuisDevis, lireChantier } from '@/lib/chantiers/chantiers';
 import { peutEcrireChantier } from '@/lib/chantiers/permissions';
 import { listerClients } from '@/lib/commercial/clients';
 import {
   changerStatutDevis,
   dupliquerDevis,
   lireDevis,
+  listerHistoriqueDevis,
   mettreAJourDevis,
 } from '@/lib/commercial/devis';
 import { analyserClasseurDpgf, importerAvecMappingDpgf } from '@/lib/commercial/import-dpgf';
@@ -153,15 +154,30 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
   const peutFacturer = peutEcrireFacturation(utilisateur.role);
   const chantierLie = devis.chantierId ?? null;
 
-  const [clients, articles, unites, peutImporterDpgf, peutGererPostesInternes, peutVersionner] =
-    await Promise.all([
-      listerClients(),
-      listerArticlesAvecPrix(),
-      listerUnites(),
-      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_IMPORT_DPGF'),
-      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_POSTES_INTERNES'),
-      aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_VERSION'),
-    ]);
+  const [
+    clients,
+    articles,
+    unites,
+    peutImporterDpgf,
+    peutGererPostesInternes,
+    peutVersionner,
+    historique,
+  ] = await Promise.all([
+    listerClients(),
+    listerArticlesAvecPrix(),
+    listerUnites(),
+    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_IMPORT_DPGF'),
+    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_POSTES_INTERNES'),
+    aPermission(utilisateur.roleId, 'COMMERCIAL_DEVIS_VERSION'),
+    listerHistoriqueDevis(id),
+  ]);
+
+  // Chantier rattaché (rail de l'éditeur). Chargé seulement si le devis est lié.
+  const chantierRattache = chantierLie
+    ? await lireChantier(chantierLie).then((c) =>
+        c ? { id: c.id, numero: c.numero, libelle: c.libelle } : undefined,
+      )
+    : undefined;
 
   const changerStatutAction = async (devisId: string, nouveau: StatutDevis) => {
     'use server';
@@ -278,6 +294,8 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
             'use server';
             return dupliquerDevis(id, mode);
           }}
+          chantierRattache={chantierRattache}
+          historique={historique}
         />
       ) : (
         <Card>

@@ -27,6 +27,8 @@ export type EntrepriseActive = {
   tiersReferencementActive: boolean;
   /** Feature flag : module Compte prorata (NF P03-001) activé. */
   compteProrataActive: boolean;
+  /** Feature flag : module Flotte automobile activé. */
+  flotteAutomobileActive: boolean;
 };
 
 export type TenantContext = {
@@ -62,6 +64,7 @@ export const getTenantContext = cache(async (): Promise<TenantContext | null> =>
       planningActive: entreprises.planningActive,
       tiersReferencementActive: entreprises.tiersReferencementActive,
       compteProrataActive: entreprises.compteProrataActive,
+      flotteAutomobileActive: entreprises.flotteAutomobileActive,
     })
     .from(entreprises)
     .innerJoin(utilisateurEntreprises, eq(utilisateurEntreprises.entrepriseId, entreprises.id))
@@ -87,6 +90,7 @@ export const getTenantContext = cache(async (): Promise<TenantContext | null> =>
       planningActive: row.planningActive,
       tiersReferencementActive: row.tiersReferencementActive,
       compteProrataActive: row.compteProrataActive,
+      flotteAutomobileActive: row.flotteAutomobileActive,
     },
   };
 });
@@ -141,6 +145,7 @@ export async function resolveTenantFromUrl(urlSlug: string): Promise<TenantConte
       planningActive: entreprises.planningActive,
       tiersReferencementActive: entreprises.tiersReferencementActive,
       compteProrataActive: entreprises.compteProrataActive,
+      flotteAutomobileActive: entreprises.flotteAutomobileActive,
     })
     .from(entreprises)
     .innerJoin(utilisateurEntreprises, eq(utilisateurEntreprises.entrepriseId, entreprises.id))
@@ -166,6 +171,7 @@ export async function resolveTenantFromUrl(urlSlug: string): Promise<TenantConte
       planningActive: row.planningActive,
       tiersReferencementActive: row.tiersReferencementActive,
       compteProrataActive: row.compteProrataActive,
+      flotteAutomobileActive: row.flotteAutomobileActive,
     },
   };
 }

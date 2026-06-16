@@ -52,6 +52,16 @@ describe('FormSection', () => {
     expect(screen.getByText('contenu')).toBeVisible();
   });
 
+  it('rend le titre de section en orange (orange-700)', () => {
+    render(
+      <FormSection number={1} title="Affaire / Client">
+        <p>contenu</p>
+      </FormSection>,
+    );
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveClass('text-orange-700');
+  });
+
   it('rend le slot droit (rightSlot)', () => {
     render(
       <FormSection

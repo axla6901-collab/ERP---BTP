@@ -18,3 +18,4 @@ export * from './facturation';
 export * from './compte-prorata';
 export * from './sous-traitance';
 export * from './geo';
+export * from './flotte';

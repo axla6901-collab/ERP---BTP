@@ -10,6 +10,7 @@ import {
   HardHatIcon,
   HandshakeIcon,
   LayoutDashboardIcon,
+  TruckIcon,
   MenuIcon,
   PanelLeftCloseIcon,
   PanelLeftOpenIcon,
@@ -29,7 +30,7 @@ import { LIBELLES_ROLE, type Role } from '@/lib/auth/rbac';
 import { cn } from '@/lib/utils';
 
 /** Feature flags activables par entreprise. Étendre l'union quand on en ajoute. */
-export type FeatureFlag = 'planning' | 'tiers-referencement' | 'compte-prorata';
+export type FeatureFlag = 'planning' | 'tiers-referencement' | 'compte-prorata' | 'flotte';
 
 type NavChild = {
   href: string;
@@ -103,6 +104,17 @@ const NAV_ITEMS: NavItem[] = [
     featureFlag: 'compte-prorata',
   },
   {
+    href: '/flotte',
+    label: 'Flotte',
+    icon: TruckIcon,
+    featureFlag: 'flotte',
+    children: [
+      { href: '/flotte', label: 'Tableau de bord' },
+      { href: '/flotte/vehicules', label: 'Véhicules' },
+      { href: '/flotte/echeancier', label: 'Échéancier' },
+    ],
+  },
+  {
     href: '/facturation',
     label: 'Facturation',
     icon: FileTextIcon,
@@ -174,10 +186,14 @@ export function AppSidebar({
   features,
 }: AppSidebarProps) {
   const pathname = usePathname();
-  const { collapsed, toggle } = useSidebar();
+  const { collapsed, toggle, focusMode } = useSidebar();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const initiale = email.charAt(0).toUpperCase();
+
+  // Mode plein écran (éditeur de devis) : on retire entièrement la sidebar
+  // (et le burger mobile) pour laisser toute la largeur à la zone de saisie.
+  if (focusMode) return null;
 
   /** Préfixe un href avec le slug tenant, sauf si l'entrée est marquée `absolu`. */
   const resolveHref = (item: Pick<NavItem, 'href' | 'absolu'>) =>

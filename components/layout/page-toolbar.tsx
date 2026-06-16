@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -7,6 +8,10 @@ type PageToolbarProps = {
   title?: React.ReactNode;
   /** Sous-contexte optionnel (compteur, statut…). */
   subtitle?: React.ReactNode;
+  /** Lien retour optionnel rendu au-dessus du titre (« ‹ Articles »). */
+  backHref?: string | undefined;
+  /** Libellé du lien retour (par défaut « Retour »). */
+  backLabel?: React.ReactNode;
   /** Actions alignées à droite. */
   actions?: React.ReactNode;
   /** Contenu central libre (ex. onglets, étapes de workflow). */
@@ -16,22 +21,38 @@ type PageToolbarProps = {
 
 /**
  * Bandeau d'actions figé réutilisable, cohérent avec `workflow-devis` et les
- * maquettes : sticky sous le header (`top-14`), pleine largeur (marges
+ * maquettes : sticky en haut (`top-0`), pleine largeur (marges
  * négatives qui annulent le padding du `<main>`), titre à gauche, actions à
  * droite. À utiliser en tête des pages de section (remplace l'en-tête de
  * section `<h1 text-3xl>`).
  */
-export function PageToolbar({ title, subtitle, actions, children, className }: PageToolbarProps) {
+export function PageToolbar({
+  title,
+  subtitle,
+  backHref,
+  backLabel = 'Retour',
+  actions,
+  children,
+  className,
+}: PageToolbarProps) {
   return (
     <div
       className={cn(
-        'sticky top-14 z-10 -mx-4 -mt-6 mb-6 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8',
+        'sticky top-0 z-10 -mx-4 -mt-6 mb-6 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8',
         className,
       )}
     >
       <div className="flex flex-wrap items-center gap-3">
-        {(title || subtitle) && (
+        {(title || subtitle || backHref) && (
           <div className="flex min-w-0 flex-col">
+            {backHref && (
+              <Link
+                href={backHref}
+                className="mb-0.5 inline-block max-w-fit truncate text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                ‹ {backLabel}
+              </Link>
+            )}
             {title && <h2 className="truncate text-lg font-semibold tracking-tight">{title}</h2>}
             {subtitle && <span className="truncate text-xs text-muted-foreground">{subtitle}</span>}
           </div>

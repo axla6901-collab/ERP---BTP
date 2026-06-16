@@ -1,8 +1,9 @@
 'use server';
 
-import { and, asc, count, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, getTableColumns, isNull, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
+import { auditLog } from '@/db/schema/audit';
 import {
   articles,
   fournisseurContacts,
@@ -13,6 +14,7 @@ import {
   type FournisseurContact,
 } from '@/db/schema/catalogue';
 import { raisonsSociales } from '@/db/schema/raisons-sociales';
+import { utilisateurs } from '@/db/schema/utilisateurs';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
@@ -113,6 +115,66 @@ export async function listerFournisseurContacts(
         sql`${fournisseurContacts.principal} DESC, ${fournisseurContacts.actif} DESC, ${fournisseurContacts.nom} ASC`,
       ),
   );
+}
+
+/**
+ * Nombre d'articles du catalogue dont ce fournisseur est le « fournisseur
+ * préféré » (articles.fournisseur_prefere_id). Alimente le badge du bandeau
+ * et la carte « Statut & méta » du rail de la fiche.
+ */
+export async function compterArticlesPreferesFournisseur(id: string): Promise<number> {
+  const ctx = await requireTenantContextWithMfa();
+  const [row] = await withTenant(ctx.entreprise.id, (tx) =>
+    tx.select({ n: count() }).from(articles).where(eq(articles.fournisseurPrefereId, id)),
+  );
+  return row?.n ?? 0;
+}
+
+/** Une entrée d'historique (audit_log) de la fiche fournisseur. */
+export type EvenementHistoriqueFournisseur = {
+  id: string;
+  action: 'insert' | 'update' | 'delete';
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  createdAt: string;
+  email: string | null;
+};
+
+/**
+ * Derniers événements `audit_log` de la table `fournisseurs` pour cette fiche
+ * (timeline du rail). Lu sous contexte tenant (RLS p_tenant) ; l'email de
+ * l'auteur est résolu via une jointure sur `utilisateurs`. Calque de
+ * `listerHistoriqueSousTraitant`.
+ */
+export async function listerHistoriqueFournisseur(
+  id: string,
+  limit = 8,
+): Promise<EvenementHistoriqueFournisseur[]> {
+  const ctx = await requireTenantContextWithMfa();
+  const rows = await withTenant(ctx.entreprise.id, (tx) =>
+    tx
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        before: auditLog.before,
+        after: auditLog.after,
+        createdAt: auditLog.createdAt,
+        email: utilisateurs.email,
+      })
+      .from(auditLog)
+      .leftJoin(utilisateurs, eq(utilisateurs.id, auditLog.utilisateurId))
+      .where(and(eq(auditLog.tableName, 'fournisseurs'), eq(auditLog.rowId, id)))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(limit),
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    action: r.action,
+    before: (r.before as Record<string, unknown> | null) ?? null,
+    after: (r.after as Record<string, unknown> | null) ?? null,
+    createdAt: r.createdAt.toISOString(),
+    email: r.email,
+  }));
 }
 
 export async function creerFournisseur(

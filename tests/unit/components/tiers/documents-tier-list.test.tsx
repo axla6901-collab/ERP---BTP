@@ -56,12 +56,13 @@ describe('DocumentsTierList', () => {
     expect(getByRole('button', { name: /ajouter un document/i })).toBeInTheDocument();
   });
 
-  it('affiche le libellé et le type lisible du document', () => {
-    const { getByText } = render(
+  it('affiche le libellé et le type lisible du document (colonnes du tableau)', () => {
+    const { getByText, getByRole } = render(
       <DocumentsTierList items={[doc()]} peutEcrire={false} today={TODAY} actions={noopActions} />,
     );
+    expect(getByRole('table')).toBeInTheDocument();
     expect(getByText('Extrait K-BIS')).toBeInTheDocument();
-    expect(getByText('Extrait K-BIS', { selector: 'span.rounded-full' })).toBeTruthy();
+    expect(getByText('K-BIS Société Dupont')).toBeInTheDocument();
   });
 
   it('marque un document expiré', () => {
@@ -73,7 +74,8 @@ describe('DocumentsTierList', () => {
         actions={noopActions}
       />,
     );
-    expect(getByText(/expiré le 2026-01-01/i)).toBeInTheDocument();
+    expect(getByText('Expiré')).toBeInTheDocument();
+    expect(getByText('01/01/2026')).toBeInTheDocument();
   });
 
   it('marque un document qui expire bientôt (≤ 30 jours)', () => {
@@ -85,10 +87,11 @@ describe('DocumentsTierList', () => {
         actions={noopActions}
       />,
     );
-    expect(getByText(/expire le 2026-06-20/i)).toBeInTheDocument();
+    expect(getByText('Expire bientôt')).toBeInTheDocument();
+    expect(getByText('20/06/2026')).toBeInTheDocument();
   });
 
-  it('affiche la validité simple pour un document loin de l’expiration', () => {
+  it('marque « À jour » un document loin de l’expiration', () => {
     const { getByText } = render(
       <DocumentsTierList
         items={[doc({ dateValidite: '2027-01-01' })]}
@@ -97,21 +100,22 @@ describe('DocumentsTierList', () => {
         actions={noopActions}
       />,
     );
-    expect(getByText(/valide jusqu’au 2027-01-01|valide jusqu'au 2027-01-01/i)).toBeInTheDocument();
+    expect(getByText('À jour')).toBeInTheDocument();
+    expect(getByText('01/01/2027')).toBeInTheDocument();
   });
 
-  it('propose le téléchargement mais pas la suppression en lecture seule', () => {
-    const { getByTitle, queryByTitle } = render(
+  it('propose « Voir » mais pas « Supprimer » en lecture seule', () => {
+    const { getByRole, queryByRole } = render(
       <DocumentsTierList items={[doc()]} peutEcrire={false} today={TODAY} actions={noopActions} />,
     );
-    expect(getByTitle('Télécharger')).toBeInTheDocument();
-    expect(queryByTitle('Supprimer')).not.toBeInTheDocument();
+    expect(getByRole('button', { name: 'Voir' })).toBeInTheDocument();
+    expect(queryByRole('button', { name: 'Supprimer' })).not.toBeInTheDocument();
   });
 
-  it('propose la suppression quand l’écriture est autorisée', () => {
-    const { getByTitle } = render(
+  it('propose « Supprimer » quand l’écriture est autorisée', () => {
+    const { getByRole } = render(
       <DocumentsTierList items={[doc()]} peutEcrire today={TODAY} actions={noopActions} />,
     );
-    expect(getByTitle('Supprimer')).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Supprimer' })).toBeInTheDocument();
   });
 });

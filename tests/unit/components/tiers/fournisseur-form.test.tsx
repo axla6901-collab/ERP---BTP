@@ -134,3 +134,65 @@ describe('FournisseurForm — barre d’actions', () => {
     expect(getByRole('button', { name: 'Activer' })).toBeInTheDocument();
   });
 });
+
+describe('FournisseurForm — slots du gabarit', () => {
+  it('rend le fil d’Ariane, le sous-titre, les badges et le rail', () => {
+    const { getByText, getByRole } = render(
+      <FournisseurForm
+        titre="POINT.P"
+        fournisseurId="f1"
+        onSubmit={onSubmit}
+        successRedirect="/x"
+        retourHref="/tiers/fournisseurs"
+        sousTitre={<span>POINTP · SIRET 562…</span>}
+        badges={<span>Préféré · 12 articles</span>}
+        rail={<aside>Synthèse tarifaire</aside>}
+      />,
+    );
+    expect(getByRole('link', { name: /fournisseurs/i })).toHaveAttribute(
+      'href',
+      '/tiers/fournisseurs',
+    );
+    expect(getByText('POINTP · SIRET 562…')).toBeInTheDocument();
+    expect(getByText('Préféré · 12 articles')).toBeInTheDocument();
+    expect(getByText('Synthèse tarifaire')).toBeInTheDocument();
+  });
+
+  it('place les champs Email / Téléphone dans la section Coordonnées', () => {
+    const { getByText } = render(
+      <FournisseurForm titre="Nouveau fournisseur" onSubmit={onSubmit} successRedirect="/x" />,
+    );
+    expect(getByText('Coordonnées')).toBeInTheDocument();
+    expect(getByText('Contact générique')).toBeInTheDocument();
+  });
+});
+
+describe('FournisseurForm — sections « proposé » (aperçu, non enregistré)', () => {
+  it('rend les sections Conditions d’achat et Comptabilité avec leurs badges « proposé »', () => {
+    const { getByText, getAllByText } = render(
+      <FournisseurForm titre="Nouveau fournisseur" onSubmit={onSubmit} successRedirect="/x" />,
+    );
+    expect(getByText(/Conditions d.achat/)).toBeInTheDocument();
+    expect(getByText('Comptabilité')).toBeInTheDocument();
+    // 3 badges « proposé » : N° TVA intracom + Conditions d’achat + Comptabilité.
+    expect(getAllByText('proposé')).toHaveLength(3);
+  });
+
+  it('affiche le champ N° TVA intracom dérivé du SIRET, en lecture seule', () => {
+    const { getByText, getByDisplayValue } = render(
+      <FournisseurForm
+        titre="POINT.P"
+        defaultValues={{ siret: '56210539500012', code: 'POINTP' }}
+        onSubmit={onSubmit}
+        successRedirect="/x"
+      />,
+    );
+    expect(getByText('N° TVA intracom')).toBeInTheDocument();
+    // SIREN 562105395 → clé INSEE (12 + 3·95) mod 97 = 06 → FR06562105395
+    // (champ désactivé, non soumis).
+    const tva = getByDisplayValue('FR06562105395') as HTMLInputElement;
+    expect(tva).toBeDisabled();
+    // Compte auxiliaire dérivé du code : 401 + POINTP.
+    expect(getByDisplayValue('401POINTP')).toBeDisabled();
+  });
+});

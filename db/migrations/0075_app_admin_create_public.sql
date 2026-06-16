@@ -1,0 +1,32 @@
+-- =================================================================
+-- 0075 — Correctif : app_admin doit pouvoir CREATE dans le schéma public.
+--
+-- BUG (régression introduite par 0057) : `generate_numero` est SECURITY DEFINER
+-- et a été ré-attribuée à `app_admin` (BYPASSRLS) en 0057 pour qu'elle lise les
+-- modèles de numérotation configurés (0046/0048) sans être filtrée par la RLS.
+--
+-- Mais le corps de la fonction exécute, à chaque appel :
+--   CREATE SEQUENCE IF NOT EXISTS seq_<type>_<entreprise>_<annee> ...
+-- pour matérialiser la séquence par tenant et par année. Depuis PostgreSQL 15,
+-- le schéma `public` n'accorde plus CREATE à PUBLIC, et `app_admin` n'a jamais
+-- reçu ce droit (seul `app_migrator` l'a — il a d'ailleurs créé toutes les
+-- séquences existantes). Résultat : tout appel à `generate_numero` échoue avec
+-- « permission denied for schema public » — y compris quand la séquence existe
+-- déjà, car `CREATE ... IF NOT EXISTS` vérifie le privilège CREATE sur le
+-- schéma AVANT le test d'existence.
+--
+-- Symptôme : impossible de créer un devis / facture / chantier dès qu'une
+-- nouvelle séquence doit (être vérifiée pour) exister — typiquement au passage
+-- à une nouvelle année (ex. 2026) ou pour une nouvelle entreprise.
+--
+-- FIX : accorder CREATE sur le schéma public à `app_admin`. C'est déjà le rôle
+-- le plus privilégié (BYPASSRLS, propriétaire des objets applicatifs) ; ce droit
+-- n'élargit PAS le runtime `app_rw` (qui reste sans CREATE sur public) — seule
+-- la fonction SECURITY DEFINER, étroitement bornée à son paramètre entreprise,
+-- crée des séquences.
+--
+-- ⚠️ Appliquer en superuser (erpbtp) ou membre d'app_admin — un GRANT sur le
+-- schéma public exige d'en être propriétaire ou superuser. Idempotent.
+-- =================================================================
+
+GRANT CREATE ON SCHEMA public TO app_admin;

@@ -10,12 +10,13 @@ import { useSidebar } from './sidebar-context';
  * se déploie (`w-64`). En mobile, aucun décalage (sidebar off-canvas).
  */
 export function TenantContentShell({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
+  const { collapsed, focusMode } = useSidebar();
   return (
     <div
       className={cn(
         'min-h-screen bg-background transition-[padding] duration-200',
-        collapsed ? 'lg:pl-16' : 'lg:pl-64',
+        // En mode plein écran la sidebar est démontée : aucun décalage gauche.
+        focusMode ? 'lg:pl-0' : collapsed ? 'lg:pl-16' : 'lg:pl-64',
       )}
     >
       {children}

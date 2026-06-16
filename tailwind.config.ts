@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
   darkMode: ['class'],
@@ -47,7 +48,19 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    // Variantes d'état des composants Base UI (Switch, Checkbox…) : ces composants
+    // exposent des attributs booléens `data-checked` / `data-unchecked` / `data-disabled`.
+    // Tailwind v3 ne connaît pas ces variantes « nues » par défaut (seulement la forme
+    // `data-[checked]:`) — sans cet enregistrement, `data-checked:bg-primary` etc. ne
+    // génèrent rien et les interrupteurs restent invisibles (rail transparent).
+    plugin(({ addVariant }) => {
+      addVariant('data-checked', '&[data-checked]');
+      addVariant('data-unchecked', '&[data-unchecked]');
+      addVariant('data-disabled', '&[data-disabled]');
+    }),
+  ],
 };
 
 export default config;

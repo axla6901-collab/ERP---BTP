@@ -122,7 +122,7 @@ export function TierForm({
 
   return (
     <Form {...form}>
-      <div className="sticky top-0 z-10 -mx-4 mb-6 flex flex-wrap items-center justify-between gap-3 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8">
+      <div className="sticky top-0 z-10 -mx-4 -mt-6 mb-6 flex flex-wrap items-center justify-between gap-3 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8">
         <h2 className="text-xl font-medium">{titre}</h2>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Button

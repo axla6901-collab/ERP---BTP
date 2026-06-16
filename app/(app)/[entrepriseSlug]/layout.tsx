@@ -1,4 +1,3 @@
-import { AppHeader } from '@/components/layout/app-header';
 import { AppSidebar } from '@/components/layout/app-sidebar';
 import { SidebarProvider } from '@/components/layout/sidebar-context';
 import { TenantContentShell } from '@/components/layout/tenant-content-shell';
@@ -36,10 +35,10 @@ export default async function TenantLayout({
           planning: ctx.entreprise.planningActive,
           'tiers-referencement': ctx.entreprise.tiersReferencementActive,
           'compte-prorata': ctx.entreprise.compteProrataActive,
+          flotte: ctx.entreprise.flotteAutomobileActive,
         }}
       />
       <TenantContentShell>
-        <AppHeader email={ctx.utilisateur.email} entrepriseSlug={ctx.entreprise.slug} />
         <main className="min-w-0 overflow-x-clip">
           <div className="px-4 py-6 lg:px-8">{children}</div>
         </main>

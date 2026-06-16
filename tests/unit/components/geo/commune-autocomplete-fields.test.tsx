@@ -56,7 +56,7 @@ describe('CommuneAutocompleteFields', () => {
     render(<Harness />);
     fireEvent.change(screen.getByLabelText('Code postal'), { target: { value: '690' } });
 
-    const option = await waitFor(() => screen.getByText('69001 — LYON'));
+    const option = await waitFor(() => screen.getByText('69001 LYON'));
     fireEvent.mouseDown(option);
 
     expect(screen.getByTestId('cp')).toHaveTextContent('69001');

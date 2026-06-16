@@ -1,6 +1,14 @@
 'use client';
 
-import { BanIcon, CheckIcon, CopyIcon, UploadIcon, XIcon } from 'lucide-react';
+import {
+  BanIcon,
+  CheckIcon,
+  CopyIcon,
+  Maximize2Icon,
+  Minimize2Icon,
+  UploadIcon,
+  XIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
@@ -73,6 +81,12 @@ type Props = {
   /** Callback du bouton « Dupliquer » (ouvre le dialog de duplication).
    *  Si non fourni, le bouton n'est pas rendu. */
   onDupliquer?: (() => void) | undefined;
+  /** Bascule le mode plein écran (immersif). Si non fourni, le bouton est
+   *  masqué (ex. hors d'un `<SidebarProvider>`, en tests). */
+  onTogglePlein?: (() => void) | undefined;
+  /** Mode plein écran actif : masque la frise des statuts et fige le bandeau
+   *  en haut de viewport (`top-0`) puisque le header global est démonté. */
+  pleinActif?: boolean | undefined;
 };
 
 export function WorkflowDevis({
@@ -85,6 +99,8 @@ export function WorkflowDevis({
   enregistrerDisabled = false,
   onImporterDpgf,
   onDupliquer,
+  onTogglePlein,
+  pleinActif = false,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -160,7 +176,14 @@ export function WorkflowDevis({
   }
 
   return (
-    <div className="sticky top-14 z-10 -mx-4 -mt-6 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8">
+    <div
+      data-devis-band
+      className={cn(
+        // Plus de header global (AppHeader retiré) → le bandeau se colle
+        // toujours en haut du viewport.
+        'sticky top-0 z-10 -mx-4 -mt-6 border-b bg-card px-4 py-3 lg:-mx-8 lg:px-8',
+      )}
+    >
       <div className="flex flex-wrap items-end gap-3">
         {numero && (
           <div className="flex shrink-0 flex-col">
@@ -170,105 +193,137 @@ export function WorkflowDevis({
             <div aria-hidden="true" className="mt-2 h-0 w-full border-t-2 border-transparent" />
           </div>
         )}
-        <ol className="flex min-w-0 flex-1 items-end">
-          {ETAPES_FIXES.map((etape) => {
-            const etat = etatPourEtape(etape);
-            const peutCliquer = peutCliquerLabel(etape);
-            const libelle = LIBELLES_STATUT_DEVIS[etape];
+        {/* Frise des statuts : masquée en plein écran (gain de hauteur pour la
+         *  saisie), remplacée par un espace flexible qui pousse les actions à droite. */}
+        {pleinActif ? (
+          <div className="min-w-0 flex-1" aria-hidden="true" />
+        ) : (
+          <ol className="flex min-w-0 flex-1 items-end">
+            {ETAPES_FIXES.map((etape) => {
+              const etat = etatPourEtape(etape);
+              const peutCliquer = peutCliquerLabel(etape);
+              const libelle = LIBELLES_STATUT_DEVIS[etape];
 
-            return (
-              <li key={etape} className="flex min-w-0 flex-1 flex-col items-center">
-                <button
-                  type="button"
-                  disabled={!peutCliquer}
-                  onClick={() => declencher(etape)}
-                  aria-current={etat === 'courante' ? 'step' : undefined}
-                  className={classesEtape(etat, peutCliquer)}
-                >
-                  {etat === 'franchie' && (
+              return (
+                <li key={etape} className="flex min-w-0 flex-1 flex-col items-center">
+                  <button
+                    type="button"
+                    disabled={!peutCliquer}
+                    onClick={() => declencher(etape)}
+                    aria-current={etat === 'courante' ? 'step' : undefined}
+                    className={classesEtape(etat, peutCliquer)}
+                  >
+                    {etat === 'franchie' && (
+                      <CheckIcon
+                        className="size-3.5 shrink-0 text-emerald-600"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="truncate">{libelle}</span>
+                  </button>
+                  <div aria-hidden="true" className={classesSoulignement(etat)} />
+                </li>
+              );
+            })}
+
+            {/* 5e étape dynamique : Gagné / Perdu */}
+            <li className="flex min-w-0 flex-1 flex-col items-center">
+              {cinqDecidee === 'gagne' ? (
+                <>
+                  <div
+                    aria-current="step"
+                    className="inline-flex max-w-full items-center gap-1.5 truncate px-1 text-sm font-semibold text-emerald-700"
+                  >
                     <CheckIcon className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
-                  )}
-                  <span className="truncate">{libelle}</span>
-                </button>
-                <div aria-hidden="true" className={classesSoulignement(etat)} />
-              </li>
-            );
-          })}
-
-          {/* 5e étape dynamique : Gagné / Perdu */}
-          <li className="flex min-w-0 flex-1 flex-col items-center">
-            {cinqDecidee === 'gagne' ? (
-              <>
-                <div
-                  aria-current="step"
-                  className="inline-flex max-w-full items-center gap-1.5 truncate px-1 text-sm font-semibold text-emerald-700"
-                >
-                  <CheckIcon className="size-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
-                  <span className="truncate">Gagné</span>
-                </div>
-                <div
-                  aria-hidden="true"
-                  className="mt-2 h-0 w-full border-t-2 border-solid border-emerald-500"
-                />
-              </>
-            ) : cinqDecidee === 'perdu' ? (
-              <>
-                <div
-                  aria-current="step"
-                  className="inline-flex max-w-full items-center gap-1.5 truncate px-1 text-sm font-semibold text-red-700"
-                >
-                  <XIcon className="size-3.5 shrink-0 text-red-600" aria-hidden="true" />
-                  <span className="truncate">Perdu</span>
-                </div>
-                <div
-                  aria-hidden="true"
-                  className="mt-2 h-0 w-full border-t-2 border-solid border-red-500"
-                />
-              </>
-            ) : (
-              <>
-                <div className="inline-flex max-w-full items-center gap-1 text-sm">
-                  <button
-                    type="button"
-                    disabled={readOnly || !transitionsPossibles.includes('gagne') || isPending}
-                    onClick={() => declencher('gagne')}
-                    className={cn(
-                      'px-1 transition-colors',
-                      !readOnly && transitionsPossibles.includes('gagne')
-                        ? 'cursor-pointer font-medium text-slate-600 hover:text-emerald-700'
-                        : 'cursor-default font-medium text-slate-500',
-                    )}
+                    <span className="truncate">Gagné</span>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="mt-2 h-0 w-full border-t-2 border-solid border-emerald-500"
+                  />
+                </>
+              ) : cinqDecidee === 'perdu' ? (
+                <>
+                  <div
+                    aria-current="step"
+                    className="inline-flex max-w-full items-center gap-1.5 truncate px-1 text-sm font-semibold text-red-700"
                   >
-                    Gagné
-                  </button>
-                  <span aria-hidden="true" className="text-slate-300">
-                    /
-                  </span>
-                  <button
-                    type="button"
-                    disabled={readOnly || !transitionsPossibles.includes('perdu') || isPending}
-                    onClick={() => declencher('perdu')}
-                    className={cn(
-                      'px-1 transition-colors',
-                      !readOnly && transitionsPossibles.includes('perdu')
-                        ? 'cursor-pointer font-medium text-slate-600 hover:text-red-700'
-                        : 'cursor-default font-medium text-slate-500',
-                    )}
-                  >
-                    Perdu
-                  </button>
-                </div>
-                <div
-                  aria-hidden="true"
-                  className="mt-2 h-0 w-full border-t-2 border-dashed border-slate-300"
-                />
-              </>
-            )}
-          </li>
-        </ol>
+                    <XIcon className="size-3.5 shrink-0 text-red-600" aria-hidden="true" />
+                    <span className="truncate">Perdu</span>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="mt-2 h-0 w-full border-t-2 border-solid border-red-500"
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="inline-flex max-w-full items-center gap-1 text-sm">
+                    <button
+                      type="button"
+                      disabled={readOnly || !transitionsPossibles.includes('gagne') || isPending}
+                      onClick={() => declencher('gagne')}
+                      className={cn(
+                        'px-1 transition-colors',
+                        !readOnly && transitionsPossibles.includes('gagne')
+                          ? 'cursor-pointer font-medium text-slate-600 hover:text-emerald-700'
+                          : 'cursor-default font-medium text-slate-500',
+                      )}
+                    >
+                      Gagné
+                    </button>
+                    <span aria-hidden="true" className="text-slate-300">
+                      /
+                    </span>
+                    <button
+                      type="button"
+                      disabled={readOnly || !transitionsPossibles.includes('perdu') || isPending}
+                      onClick={() => declencher('perdu')}
+                      className={cn(
+                        'px-1 transition-colors',
+                        !readOnly && transitionsPossibles.includes('perdu')
+                          ? 'cursor-pointer font-medium text-slate-600 hover:text-red-700'
+                          : 'cursor-default font-medium text-slate-500',
+                      )}
+                    >
+                      Perdu
+                    </button>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="mt-2 h-0 w-full border-t-2 border-dashed border-slate-300"
+                  />
+                </>
+              )}
+            </li>
+          </ol>
+        )}
 
-        {/* Toolbar d'actions à droite, ordre : Importer DPGF · Dupliquer · Enregistrer · Refuser · Annulé */}
+        {/* Toolbar d'actions à droite, ordre : Plein écran · Importer DPGF · Dupliquer · Enregistrer · Refuser · Annulé */}
         <div className="flex shrink-0 flex-wrap items-center gap-2 pb-0.5">
+          {onTogglePlein && (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={onTogglePlein}
+              disabled={isPending}
+              aria-pressed={pleinActif}
+              title={
+                pleinActif
+                  ? 'Quitter le plein écran'
+                  : 'Agrandir la zone de saisie (masque le menu et le récapitulatif)'
+              }
+              className="gap-1.5 border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+            >
+              {pleinActif ? (
+                <Minimize2Icon className="size-4" aria-hidden="true" />
+              ) : (
+                <Maximize2Icon className="size-4" aria-hidden="true" />
+              )}
+              {pleinActif ? 'Quitter le plein écran' : 'Plein écran'}
+            </Button>
+          )}
           {onImporterDpgf && (
             <Button
               variant="outline"

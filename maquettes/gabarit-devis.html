@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestion des devis — gabarit unifié · ERP BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      .zone {
+        position: relative;
+        outline: 1px dashed rgba(217, 119, 6, 0.45);
+        outline-offset: 3px;
+        border-radius: 0.5rem;
+      }
+      .zone > .zone-tag {
+        position: absolute;
+        top: -0.7rem;
+        left: 0.5rem;
+        z-index: 6;
+        font-size: 10px;
+        line-height: 1;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: #d97706;
+        color: #fff;
+        padding: 0.18rem 0.45rem;
+        border-radius: 9999px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      }
+      body.clean .zone {
+        outline: none;
+      }
+      body.clean .zone > .zone-tag {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-neutral-100 text-neutral-900">
+    <!-- Barre de présentation (hors application) -->
+    <div class="border-b bg-white">
+      <div class="mx-auto flex max-w-[1500px] flex-wrap items-center gap-3 px-6 py-3">
+        <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+        <div>
+          <h1 class="text-base font-semibold leading-tight">Gestion des devis — gabarit unifié</h1>
+          <p class="text-xs text-neutral-500">
+            Bandeau supérieur figé (workflow + actions réelles) · grille colonne principale + rail ·
+            sans barre du haut ni fil d'Ariane.
+          </p>
+        </div>
+        <label class="ml-auto flex cursor-pointer items-center gap-2 text-xs text-neutral-600">
+          <input type="checkbox" class="accent-amber-500" onchange="document.body.classList.toggle('clean', this.checked)" />
+          Masquer les annotations
+        </label>
+      </div>
+    </div>
+
+    <div class="mx-auto max-w-[1500px] px-6 py-6">
+      <div class="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div class="flex min-h-[820px]">
+          <!-- ============ SIDEBAR (chrome figé) ============ -->
+          <aside class="hidden w-60 shrink-0 flex-col border-r border-orange-200 bg-orange-100 lg:flex">
+            <div class="flex h-16 items-center gap-2 border-b border-orange-200 px-3">
+              <span class="grid size-7 place-items-center rounded bg-amber-500 text-sm font-bold text-white">B</span>
+              <span class="text-lg font-semibold">ERP BTP</span>
+            </div>
+            <div class="border-b border-orange-200 p-3">
+              <button class="flex w-full items-center justify-between rounded-md border border-orange-200 bg-white/70 px-2.5 py-1.5 text-xs text-orange-900">
+                <span class="truncate">Compte-R BTP</span><span>▾</span>
+              </button>
+            </div>
+            <nav class="flex-1 space-y-1 overflow-y-auto p-3 text-sm">
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tableau de bord</a>
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Catalogue</a>
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Tiers</a>
+              <a class="flex items-center gap-3 rounded-md bg-orange-500 px-3 py-2 font-medium text-white shadow-sm">▣ Commercial</a>
+              <div class="ml-5 space-y-0.5 border-l border-orange-200 pl-4">
+                <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Aperçu</a>
+                <a class="block rounded-md px-3 py-1.5 text-orange-900/70 hover:bg-orange-200/70">Clients</a>
+                <a class="block rounded-md bg-orange-500 px-3 py-1.5 font-medium text-white shadow-sm">Devis</a>
+              </div>
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Chantiers</a>
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ Facturation</a>
+              <a class="flex items-center gap-3 rounded-md px-3 py-2 text-orange-900/70 hover:bg-orange-200/70">▢ RH & Pointage</a>
+            </nav>
+            <div class="border-t border-orange-200 p-3 text-sm">
+              <div class="font-medium text-orange-900">axla6901@gmail.com</div>
+              <div class="text-xs text-orange-700">Administrateur</div>
+              <button class="mt-2 w-full rounded-md border border-orange-300 bg-white/60 px-2 py-1 text-xs text-orange-800">Se déconnecter</button>
+            </div>
+          </aside>
+
+          <!-- ============ COLONNE CONTENU ============ -->
+          <div class="flex min-w-0 flex-1 flex-col bg-neutral-50">
+            <!-- ZONE B · BANDEAU FIGÉ (workflow + actions réelles) -->
+            <div class="zone sticky top-0 z-10 border-b bg-white/95 backdrop-blur">
+              <span class="zone-tag">B · Bandeau figé (workflow + actions)</span>
+
+              <!-- Sous-ligne 1 : retour + titre + statut · actions à droite -->
+              <div class="flex flex-wrap items-center gap-3 px-5 pb-2.5 pt-3">
+                <a class="text-xs text-neutral-400 hover:text-neutral-700">‹ Devis</a>
+                <h2 class="text-lg font-semibold leading-tight">Devis DV-2026-042</h2>
+                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-amber-300">Brouillon</span>
+                <span class="hidden text-xs text-neutral-400 sm:inline">· Mairie de Saint-Étienne · modifié il y a 12 min</span>
+
+                <div class="ml-auto flex flex-wrap items-center gap-2">
+                  <button class="inline-flex items-center gap-1.5 rounded-md border border-orange-300 px-2.5 py-1.5 text-sm text-orange-700 hover:bg-orange-50">
+                    ⬆ Importer DPGF
+                  </button>
+                  <button class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-sm text-neutral-600 hover:bg-neutral-50">
+                    ⧉ Dupliquer
+                  </button>
+                  <button class="inline-flex items-center gap-1.5 rounded-md border border-rose-300 px-2.5 py-1.5 text-sm text-rose-600 hover:bg-rose-50">
+                    ⊘ Annuler le devis
+                  </button>
+                  <button class="rounded-md bg-amber-500 px-4 py-1.5 text-sm font-medium text-white hover:bg-amber-600">
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sous-ligne 2 : frise des statuts (cliquable pour transition) -->
+              <div class="border-t border-neutral-100 px-5 py-2">
+                <ol class="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs">
+                  <!-- franchie -->
+                  <li class="flex items-center gap-1.5 text-emerald-700">
+                    <span class="grid size-4 place-items-center rounded-full bg-emerald-500 text-[9px] text-white">✓</span>
+                    <span class="border-b-2 border-emerald-500 pb-0.5 font-medium">Brouillon créé</span>
+                  </li>
+                  <li class="mx-1.5 h-px w-6 bg-neutral-200"></li>
+                  <!-- courant -->
+                  <li class="flex items-center gap-1.5 text-blue-700">
+                    <span class="grid size-4 place-items-center rounded-full bg-blue-600 text-[9px] text-white">●</span>
+                    <span class="border-b-2 border-blue-600 pb-0.5 font-semibold">En édition</span>
+                  </li>
+                  <li class="mx-1.5 h-px w-6 bg-neutral-200"></li>
+                  <!-- futurs cliquables -->
+                  <li>
+                    <button class="rounded border border-dashed border-slate-300 px-2 py-0.5 text-slate-500 hover:border-amber-400 hover:text-amber-700">
+                      → En validation
+                    </button>
+                  </li>
+                  <li class="mx-1.5 h-px w-6 bg-neutral-200"></li>
+                  <li class="text-slate-400"><span class="border-b-2 border-dashed border-slate-300 pb-0.5">Validé</span></li>
+                  <li class="mx-1.5 h-px w-6 bg-neutral-200"></li>
+                  <li class="text-slate-400"><span class="border-b-2 border-dashed border-slate-300 pb-0.5">Envoyé</span></li>
+                  <li class="mx-1.5 h-px w-6 bg-neutral-200"></li>
+                  <li class="text-slate-400">
+                    <span class="border-b-2 border-dashed border-slate-300 pb-0.5">Gagné</span>
+                    <span class="text-slate-300"> / </span>
+                    <span class="border-b-2 border-dashed border-slate-300 pb-0.5">Perdu</span>
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- ZONE CONTENU -->
+            <main class="flex-1 overflow-y-auto px-5 py-5">
+              <div class="mx-auto max-w-[1320px]">
+                <div class="grid grid-cols-12 gap-5">
+                  <!-- ZONE C · COLONNE PRINCIPALE -->
+                  <div class="zone col-span-12 space-y-5 lg:col-span-8">
+                    <span class="zone-tag">C · Colonne principale (saisie du devis)</span>
+
+                    <!-- Section 1 · Affaire & client -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="flex items-center gap-2 px-5 py-3">
+                        <span class="text-neutral-400">⌄</span>
+                        <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">1.</span>Affaire &amp; client</h3>
+                      </div>
+                      <div class="space-y-4 border-t px-5 py-4">
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Client</label>
+                          <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                            <option>CLI-0031 — Mairie de Saint-Étienne</option>
+                          </select>
+                          <div class="mt-2 rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-600 ring-1 ring-black/5">
+                            Service Marchés Publics · 2 av. Grüner, 42000 Saint-Étienne ·
+                            <a class="text-amber-700 hover:underline">contact@st-etienne.fr</a>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Date du devis</label>
+                            <input type="date" value="2026-05-23" class="w-full rounded-md border px-3 py-2 text-sm" />
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Valable jusqu'au</label>
+                            <input type="date" value="2026-06-22" class="w-full rounded-md border px-3 py-2 text-sm" />
+                          </div>
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Objet <span class="font-normal text-neutral-400">(optionnel)</span></label>
+                          <input placeholder="Rénovation cuisine, agrandissement…" value="Construction école Marguerite — lot gros-œuvre" class="w-full rounded-md border px-3 py-2 text-sm" />
+                        </div>
+                      </div>
+                    </section>
+
+                    <!-- Section 2 · Lignes du devis -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
+                        <div class="flex items-center gap-2">
+                          <span class="text-neutral-400">⌄</span>
+                          <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">2.</span>Lignes du devis</h3>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                          <button class="text-neutral-500 hover:text-neutral-900">Tout déplier</button>
+                          <span class="text-neutral-300">·</span>
+                          <button class="text-neutral-500 hover:text-neutral-900">Tout replier</button>
+                          <button class="ml-1 rounded-md border px-2 py-1 hover:bg-neutral-50">+ Section</button>
+                          <button class="rounded-md bg-amber-500 px-2.5 py-1 font-medium text-white hover:bg-amber-600">+ Article</button>
+                        </div>
+                      </div>
+                      <div class="overflow-x-auto border-t">
+                        <table class="w-full min-w-[680px] text-sm">
+                          <thead class="bg-neutral-50/70 text-left text-[11px] uppercase tracking-wider text-neutral-500">
+                            <tr>
+                              <th class="px-4 py-2 font-medium">Désignation</th>
+                              <th class="px-2 py-2 text-right font-medium">Qté</th>
+                              <th class="px-2 py-2 font-medium">Unité</th>
+                              <th class="px-2 py-2 text-right font-medium">PU HT</th>
+                              <th class="px-2 py-2 text-right font-medium">TVA</th>
+                              <th class="px-2 py-2 text-right font-medium">Rem.&nbsp;%</th>
+                              <th class="px-3 py-2 text-right font-medium">Montant HT</th>
+                              <th class="w-8"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Chapitre -->
+                            <tr class="bg-amber-50/50">
+                              <td colspan="6" class="px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-800">▼ 1. Gros-œuvre</td>
+                              <td class="px-3 py-1.5 text-right text-xs font-semibold tabular-nums text-amber-800">9 687,20 €</td>
+                              <td></td>
+                            </tr>
+                            <tr class="border-b hover:bg-neutral-50">
+                              <td class="px-4 py-2.5">
+                                <div class="font-medium">Béton C25/30 — fondations</div>
+                                <div class="text-xs text-neutral-500">BTN-025</div>
+                              </td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">42</td>
+                              <td class="px-2 py-2.5 text-neutral-600">m³</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">142,00</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-500">20 %</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">—</td>
+                              <td class="px-3 py-2.5 text-right font-medium tabular-nums">5 964,00 €</td>
+                              <td class="px-2 py-2.5 text-neutral-400">⋮</td>
+                            </tr>
+                            <tr class="border-b hover:bg-neutral-50">
+                              <td class="px-4 py-2.5">
+                                <div class="font-medium">Parpaing creux 20 — élévation</div>
+                                <div class="text-xs text-neutral-500">PRP-020</div>
+                              </td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">1 240</td>
+                              <td class="px-2 py-2.5 text-neutral-600">u</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">1,80</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-500">20 %</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">—</td>
+                              <td class="px-3 py-2.5 text-right font-medium tabular-nums">2 232,00 €</td>
+                              <td class="px-2 py-2.5 text-neutral-400">⋮</td>
+                            </tr>
+                            <!-- Ligne avec composants (sous-lignes) -->
+                            <tr class="border-b hover:bg-neutral-50">
+                              <td class="px-4 py-2.5">
+                                <div class="font-medium">Mortier prêt à l'emploi</div>
+                                <div class="text-xs text-amber-700">📦 MOR-001 · composition (3 composants) — PU dérivé</div>
+                              </td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">8</td>
+                              <td class="px-2 py-2.5 text-neutral-600">m³</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">186,40</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-500">20 %</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">—</td>
+                              <td class="px-3 py-2.5 text-right font-medium tabular-nums">1 491,20 €</td>
+                              <td class="px-2 py-2.5 text-neutral-400">⋮</td>
+                            </tr>
+                            <tr class="border-b bg-neutral-50/40 text-xs text-neutral-500">
+                              <td class="py-1.5 pl-9 pr-4" colspan="8">
+                                └ Sable 0/4 · 0,6 m³/u — Ciment CEM II · 35 kg/u — Eau · forfait
+                              </td>
+                            </tr>
+
+                            <!-- Chapitre 2 -->
+                            <tr class="bg-amber-50/50">
+                              <td colspan="6" class="px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-800">▼ 2. Couverture</td>
+                              <td class="px-3 py-1.5 text-right text-xs font-semibold tabular-nums text-amber-800">7 268,00 €</td>
+                              <td></td>
+                            </tr>
+                            <tr class="border-b hover:bg-neutral-50">
+                              <td class="px-4 py-2.5">
+                                <div class="font-medium">Tuile romane</div>
+                                <div class="text-xs text-neutral-500">TUI-001</div>
+                              </td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">2 800</td>
+                              <td class="px-2 py-2.5 text-neutral-600">u</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">0,95</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-500">20 %</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">—</td>
+                              <td class="px-3 py-2.5 text-right font-medium tabular-nums">2 660,00 €</td>
+                              <td class="px-2 py-2.5 text-neutral-400">⋮</td>
+                            </tr>
+                            <tr class="hover:bg-neutral-50">
+                              <td class="px-4 py-2.5">
+                                <div class="font-medium">Main d'œuvre couvreur</div>
+                                <div class="text-xs text-neutral-500">MO-COUV · taux 48 €/h</div>
+                              </td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">96</td>
+                              <td class="px-2 py-2.5 text-neutral-600">h</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums">48,00</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-500">10 %</td>
+                              <td class="px-2 py-2.5 text-right tabular-nums text-neutral-400">—</td>
+                              <td class="px-3 py-2.5 text-right font-medium tabular-nums">4 608,00 €</td>
+                              <td class="px-2 py-2.5 text-neutral-400">⋮</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+
+                    <!-- Section 3 · Remise globale & postes internes -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="flex items-center gap-2 px-5 py-3">
+                        <span class="text-neutral-400">⌄</span>
+                        <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">3.</span>Remise globale &amp; postes internes</h3>
+                      </div>
+                      <div class="space-y-4 border-t px-5 py-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Type de remise globale</label>
+                            <select class="w-full rounded-md border bg-white px-3 py-2 text-sm">
+                              <option>Aucune remise</option>
+                              <option selected>Pourcentage (%)</option>
+                              <option>Montant (€)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-sm font-medium text-neutral-700">Remise (%)</label>
+                            <input value="3" class="w-full rounded-md border px-3 py-2 text-sm" />
+                            <p class="mt-1 text-xs text-neutral-500">Appliquée sur le total HT, ventilée par taux de TVA.</p>
+                          </div>
+                        </div>
+                        <!-- Postes internes (encart amber, non imprimé client) -->
+                        <div class="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+                          <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-semibold text-amber-800">Postes internes ventilés <span class="font-normal text-amber-700/70">(non visibles sur le devis client)</span></h4>
+                            <button class="rounded-md border border-amber-300 bg-white px-2 py-1 text-xs text-amber-800 hover:bg-amber-100">+ Poste</button>
+                          </div>
+                          <div class="mt-3 flex items-center gap-3 rounded-md bg-white px-3 py-2 text-sm ring-1 ring-amber-100">
+                            <span class="flex-1 font-medium">Aléas &amp; frais généraux</span>
+                            <span class="text-neutral-500">portée : devis entier</span>
+                            <span class="font-medium tabular-nums">+ 850,00 €</span>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <!-- Section 4 · Notes & conditions -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="flex items-center gap-2 px-5 py-3">
+                        <span class="text-neutral-400">⌄</span>
+                        <h3 class="font-semibold text-orange-700"><span class="mr-1.5 text-orange-700/70">4.</span>Notes &amp; conditions</h3>
+                      </div>
+                      <div class="grid grid-cols-1 gap-4 border-t px-5 py-4 sm:grid-cols-2">
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Conditions générales <span class="font-normal text-neutral-400">(imprimées)</span></label>
+                          <textarea rows="3" class="w-full rounded-md border px-3 py-2 text-sm">Acompte de 30 % à la commande. Validité 30 jours.</textarea>
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-sm font-medium text-neutral-700">Notes internes <span class="font-normal text-neutral-400">(non imprimées)</span></label>
+                          <textarea rows="3" class="w-full rounded-md border px-3 py-2 text-sm" placeholder="Visible uniquement en interne…"></textarea>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <!-- ZONE D · RAIL CONTEXTUEL -->
+                  <aside class="zone col-span-12 space-y-5 lg:col-span-4">
+                    <span class="zone-tag">D · Rail (récap · contexte)</span>
+
+                    <!-- Récapitulatif (carte mise en avant, teinte ambre) -->
+                    <section class="overflow-hidden rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                      <div class="px-4 pb-1 pt-3">
+                        <h3 class="font-semibold text-orange-700">Récapitulatif</h3>
+                      </div>
+                      <div class="space-y-1.5 border-t border-amber-200/70 px-4 py-3 text-sm">
+                        <div class="flex justify-between text-neutral-600"><span>Total HT brut</span><span class="tabular-nums">16 955,20 €</span></div>
+                        <div class="flex justify-between text-neutral-600"><span>Postes internes</span><span class="tabular-nums">+ 850,00 €</span></div>
+                        <div class="flex justify-between text-rose-600"><span>Remise globale −3 %</span><span class="tabular-nums">− 534,16 €</span></div>
+                        <div class="flex justify-between border-t border-amber-200/70 pt-1.5 font-medium"><span>Total HT net</span><span class="tabular-nums">17 271,04 €</span></div>
+                        <div class="flex justify-between text-neutral-500"><span>TVA 20 % sur 12 663 €</span><span class="tabular-nums">2 532,69 €</span></div>
+                        <div class="flex justify-between text-neutral-500"><span>TVA 10 % sur 4 608 €</span><span class="tabular-nums">460,80 €</span></div>
+                        <div class="flex justify-between text-neutral-600"><span>Total TVA</span><span class="tabular-nums">2 993,49 €</span></div>
+                      </div>
+                      <div class="flex items-center justify-between border-t border-amber-200 px-4 py-3">
+                        <span class="text-sm font-semibold text-orange-800">Total TTC</span>
+                        <span class="text-2xl font-semibold tabular-nums text-orange-800">20 264,53 €</span>
+                      </div>
+                    </section>
+
+                    <!-- Chantier rattaché -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Chantier rattaché</h3></div>
+                      <a class="m-3 mt-0 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3 hover:bg-amber-50">
+                        <span class="size-2 rounded-full bg-amber-500"></span>
+                        <span class="flex-1">
+                          <span class="block font-medium text-amber-900">École Marguerite</span>
+                          <span class="block text-xs text-amber-700/80">CH-2026-014 · 92 % avancement</span>
+                        </span>
+                        <span class="text-amber-700">›</span>
+                      </a>
+                    </section>
+
+                    <!-- Estimation marge -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Estimation marge</h3></div>
+                      <div class="border-t px-4 py-3">
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                          <div><div class="text-neutral-500">Vente HT</div><div class="font-semibold tabular-nums">17 271 €</div></div>
+                          <div><div class="text-neutral-500">Coût estimé</div><div class="font-semibold tabular-nums">13 240 €</div></div>
+                          <div><div class="text-neutral-500">Marge</div><div class="font-semibold tabular-nums text-emerald-700">23,3 %</div></div>
+                        </div>
+                        <div class="mt-3 h-1.5 rounded bg-neutral-100"><div class="h-full w-[80%] rounded bg-emerald-500"></div></div>
+                        <div class="mt-2 text-xs text-neutral-500">au-dessus de la cible (20 %)</div>
+                      </div>
+                    </section>
+
+                    <!-- Historique -->
+                    <section class="overflow-hidden rounded-xl bg-white ring-1 ring-black/10">
+                      <div class="px-4 py-3"><h3 class="font-semibold text-orange-700">Historique</h3></div>
+                      <ul class="space-y-2.5 border-t px-4 py-3 text-xs">
+                        <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Ligne « Main d'œuvre » ajoutée<br /><span class="text-neutral-500">14:02 · Alex</span></span></li>
+                        <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-amber-500"></span><span>Quantité béton modifiée (40 → 42)<br /><span class="text-neutral-500">10:11 · Alex</span></span></li>
+                        <li class="flex items-start gap-2"><span class="mt-1 size-1.5 rounded-full bg-emerald-500"></span><span>Devis créé depuis le chantier<br /><span class="text-neutral-500">23/05 · 18:02</span></span></li>
+                      </ul>
+                    </section>
+                  </aside>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== LÉGENDE ===================== -->
+      <div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <section class="rounded-xl border bg-white p-5">
+          <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Bandeau figé — actions par statut</h2>
+          <p class="mb-3 text-sm text-neutral-600">
+            Le bandeau supérieur (zone B) <b>reste figé (sticky)</b> tant qu'il porte des boutons d'action.
+            Son contenu change selon le statut — voici les actions réelles du code :
+          </p>
+          <table class="w-full text-xs">
+            <thead class="border-b text-left text-neutral-500">
+              <tr><th class="py-1.5 pr-2 font-medium">Statut</th><th class="py-1.5 font-medium">Actions disponibles</th></tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800">Brouillon</span></td><td class="py-1.5">Enregistrer · Importer DPGF · Dupliquer · → En validation · Annuler</td></tr>
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-blue-100 px-1.5 py-0.5 font-medium text-blue-800">En validation</span></td><td class="py-1.5">→ Validé · Refuser <span class="text-neutral-400">(valideur)</span> · Dupliquer · Annuler</td></tr>
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-indigo-100 px-1.5 py-0.5 font-medium text-indigo-800">Validé</span></td><td class="py-1.5">→ Envoyé · Dupliquer · Annuler</td></tr>
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-violet-100 px-1.5 py-0.5 font-medium text-violet-800">Envoyé</span></td><td class="py-1.5">→ Gagné · → Perdu · Annuler</td></tr>
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-emerald-100 px-1.5 py-0.5 font-medium text-emerald-800">Gagné</span></td><td class="py-1.5">Créer le chantier · Créer une situation <span class="text-neutral-400">(si chantier lié)</span></td></tr>
+              <tr><td class="py-1.5 pr-2"><span class="rounded bg-neutral-200 px-1.5 py-0.5 font-medium text-neutral-700">Perdu / Annulé</span></td><td class="py-1.5 text-neutral-500">Lecture seule (terminal)</td></tr>
+            </tbody>
+          </table>
+          <p class="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            La saisie n'est éditable qu'en <b>Brouillon</b> (et après « Refuser », qui repasse en brouillon). Les autres statuts affichent l'écran en lecture seule.
+          </p>
+        </section>
+
+        <section class="space-y-5">
+          <div class="rounded-xl border bg-white p-5">
+            <h2 class="mb-3 text-sm font-semibold uppercase tracking-widest text-neutral-500">Choix de présentation</h2>
+            <ul class="space-y-2 text-sm text-neutral-700">
+              <li class="flex gap-2"><span class="text-amber-600">•</span><span><b>Pas de barre du haut, pas de fil d'Ariane.</b> Navigation par la sidebar ; un simple lien <span class="rounded bg-neutral-100 px-1">‹ Devis</span> assure le retour à la liste.</span></li>
+              <li class="flex gap-2"><span class="text-amber-600">•</span><span><b>Frise des statuts intégrée au bandeau figé</b> (au lieu d'une carte timeline séparée) — toujours visible en scrollant la longue liste de lignes. Les étapes futures sont cliquables pour faire avancer le devis.</span></li>
+              <li class="flex gap-2"><span class="text-amber-600">•</span><span><b>Récapitulatif TVA dans le rail</b> (carte ambre, plus de gris) : total HT, postes internes, remise globale ventilée, TVA par taux, Total TTC.</span></li>
+              <li class="flex gap-2"><span class="text-amber-600">•</span><span><b>Tableau des lignes</b> avec chapitres dépliables, sous-lignes de composition (PU dérivé) et remise par ligne — fidèle à l'éditeur réel.</span></li>
+              <li class="flex gap-2"><span class="text-amber-600">•</span><span>Conteneur élargi <code class="rounded bg-neutral-100 px-1">max-w-[1320px]</code> (vs 1240 pour un formulaire simple) pour laisser respirer le tableau 8 colonnes.</span></li>
+            </ul>
+          </div>
+          <div class="rounded-xl border border-rose-200 bg-rose-50/50 p-5">
+            <h2 class="mb-2 text-sm font-semibold uppercase tracking-widest text-rose-700">Actions volontairement absentes</h2>
+            <p class="text-sm text-rose-900/80">
+              « Aperçu PDF », « Envoyer au client » et « Relancer » n'existent pas encore dans le code (contrairement à l'ancienne maquette 08). Je ne les ai pas inventées. Dis-moi si on doit les prévoir comme évolution — je les placerai dans le bandeau figé selon le statut.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
