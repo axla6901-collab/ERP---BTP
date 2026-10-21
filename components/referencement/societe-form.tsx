@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
 import { societeSchema, type SocieteInput } from '@/lib/validation/referencement-tiers';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -47,6 +48,7 @@ export function SocieteForm({
   raisonsSocialesConnues = [],
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export function SocieteForm({
       return;
     }
     toast.success('Société enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

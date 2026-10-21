@@ -8,6 +8,7 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -85,7 +86,8 @@ describe('ArticleForm — barre d’actions sticky', () => {
       />,
     );
     const back = getByRole('link', { name: /Articles/ });
-    expect(back).toHaveAttribute('href', '/catalogue/articles');
+    // backHref legacy reçu de la page : préfixé par le slug au rendu.
+    expect(back).toHaveAttribute('href', '/acme/catalogue/articles');
     expect(getByText('ART001 · Article composé')).toBeInTheDocument();
   });
 

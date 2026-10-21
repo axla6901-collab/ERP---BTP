@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { DeleteButton } from '@/components/catalogue/delete-button';
@@ -31,6 +30,8 @@ import {
   type LigneFactureInput,
   type StatutFacture,
 } from '@/lib/validation/facturation';
+import { LienTenant } from '@/components/layout/lien-tenant';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 function libelleClient(c: {
   type: string;
@@ -42,6 +43,9 @@ function libelleClient(c: {
   return [c.prenom, c.nom].filter(Boolean).join(' ') || '?';
 }
 
+const MESSAGE_FACTURX_BROUILLON =
+  'Le Factur-X (PDF/A-3 + XML EN 16931) se génère une fois la facture émise : il porte le numéro légal, attribué à l’émission.';
+
 function formatMontant(m: string | null): string {
   if (!m) return '—';
   const n = Number(m);
@@ -49,8 +53,12 @@ function formatMontant(m: string | null): string {
   return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export default async function FactureDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function FactureDetailPage({
+  params,
+}: {
+  params: Promise<{ entrepriseSlug: string; id: string }>;
+}) {
+  const { entrepriseSlug, id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const peutEcrire = peutEcrireFacturation(utilisateur.role);
 
@@ -81,7 +89,8 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
       <div className="max-w-3xl space-y-6">
         <div className="flex items-baseline justify-between">
           <h2 className="text-xl font-medium">
-            Facture <span className="font-mono">{facture.numero}</span>
+            Facture{' '}
+            {facture.numero ? <span className="font-mono">{facture.numero}</span> : 'brouillon'}
           </h2>
           <span className="rounded-full bg-muted px-3 py-1 text-xs">
             {LIBELLES_STATUT_FACTURE[facture.statut as StatutFacture]}
@@ -158,22 +167,28 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
             <CardTitle className="text-base">Facturation électronique</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Génère le Factur-X (PDF/A-3 + XML EN&nbsp;16931) de cette facture, archivé et
-              horodaté. Format conforme à la facturation électronique.
-            </p>
-            <FactureFacturXButton
-              factureId={id}
-              dejaGenere={dejaFacturX}
-              generer={async (fid) => {
-                'use server';
-                return genererFacturX(fid);
-              }}
-              telecharger={async (fid) => {
-                'use server';
-                return urlTelechargementFacturX(fid);
-              }}
-            />
+            {facture.numero ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Génère le Factur-X (PDF/A-3 + XML EN&nbsp;16931) de cette facture, archivé et
+                  horodaté. Format conforme à la facturation électronique.
+                </p>
+                <FactureFacturXButton
+                  factureId={id}
+                  dejaGenere={dejaFacturX}
+                  generer={async (fid) => {
+                    'use server';
+                    return genererFacturX(fid);
+                  }}
+                  telecharger={async (fid) => {
+                    'use server';
+                    return urlTelechargementFacturX(fid);
+                  }}
+                />
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{MESSAGE_FACTURX_BROUILLON}</p>
+            )}
           </CardContent>
         </Card>
 
@@ -188,18 +203,18 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
           />
         )}
 
-        <Link
+        <LienTenant
           href="/facturation/factures"
           className="text-sm text-muted-foreground underline underline-offset-4"
         >
           ← Retour aux factures
-        </Link>
+        </LienTenant>
       </div>
     );
   }
 
   // Mode édition (brouillon + peutEcrire)
-  if (!peutEcrire) redirect('/facturation/factures');
+  if (!peutEcrire) redirect(cheminTenant(entrepriseSlug, '/facturation/factures'));
 
   const [clients, chantiers, devis, articles] = await Promise.all([
     listerClients(),
@@ -256,15 +271,23 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-xl font-medium">
-          Modifier la facture <span className="font-mono">{facture.numero}</span>
-        </h2>
-        <Link
+        <div>
+          <h2 className="text-xl font-medium">
+            Modifier la facture{' '}
+            {facture.numero ? <span className="font-mono">{facture.numero}</span> : 'brouillon'}
+          </h2>
+          {!facture.numero && (
+            <p className="text-sm text-muted-foreground">
+              Le numéro légal sera attribué à l&apos;émission.
+            </p>
+          )}
+        </div>
+        <LienTenant
           href="/facturation/factures"
           className={buttonVariants({ variant: 'ghost', size: 'sm' })}
         >
           ← Retour
-        </Link>
+        </LienTenant>
       </div>
 
       <FactureEditor
@@ -305,22 +328,28 @@ export default async function FactureDetailPage({ params }: { params: Promise<{ 
 
       <div className="border-t pt-6">
         <h3 className="mb-2 text-sm font-medium">Facturation électronique</h3>
-        <p className="mb-3 text-sm text-muted-foreground">
-          Aperçu du Factur-X (PDF/A-3 + XML EN&nbsp;16931). Régénérez après chaque modification ; le
-          document est archivé à l&apos;émission.
-        </p>
-        <FactureFacturXButton
-          factureId={id}
-          dejaGenere={dejaFacturX}
-          generer={async (fid) => {
-            'use server';
-            return genererFacturX(fid);
-          }}
-          telecharger={async (fid) => {
-            'use server';
-            return urlTelechargementFacturX(fid);
-          }}
-        />
+        {facture.numero ? (
+          <>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Aperçu du Factur-X (PDF/A-3 + XML EN&nbsp;16931). Régénérez après chaque modification
+              ; le document est archivé à l&apos;émission.
+            </p>
+            <FactureFacturXButton
+              factureId={id}
+              dejaGenere={dejaFacturX}
+              generer={async (fid) => {
+                'use server';
+                return genererFacturX(fid);
+              }}
+              telecharger={async (fid) => {
+                'use server';
+                return urlTelechargementFacturX(fid);
+              }}
+            />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">{MESSAGE_FACTURX_BROUILLON}</p>
+        )}
       </div>
 
       <div className="max-w-xl border-t pt-6">

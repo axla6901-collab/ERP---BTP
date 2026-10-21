@@ -58,6 +58,8 @@ export const entreprises = pgTable(
     sousTraitanceActive: boolean('sous_traitance_active').notNull().default(false),
     /** Option Flotte automobile (parc véhicules, échéances, entretiens…). Bascule par l'admin tenant — cf. migration 0076. */
     flotteAutomobileActive: boolean('flotte_automobile_active').notNull().default(false),
+    /** Option Test SIRH (SIRH complet d'après le périmètre Factorial). Bascule par l'admin tenant — cf. migration 0079. */
+    testSirhActive: boolean('test_sirh_active').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

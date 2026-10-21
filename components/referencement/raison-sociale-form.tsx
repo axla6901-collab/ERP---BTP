@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
 import { raisonSocialeSchema, type RaisonSocialeInput } from '@/lib/validation/raisons-sociales';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -39,6 +40,7 @@ type Props = {
 
 export function RaisonSocialeForm({ defaultValues, onSubmit, successRedirect, titre }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function RaisonSocialeForm({ defaultValues, onSubmit, successRedirect, ti
       return;
     }
     toast.success('Raison sociale enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

@@ -224,7 +224,11 @@ export const fournisseurs = pgTable(
     index('idx_fournisseurs_actif').on(t.actif),
     index('idx_fournisseurs_ville').on(t.ville),
     index('idx_fournisseurs_raison_sociale').on(t.raisonSocialeId),
-    check('chk_fournisseurs_cp', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
+    // 5 chiffres en France, format libre (2-10 caractères) à l'étranger (0081).
+    check(
+      'chk_fournisseurs_cp',
+      sql`code_postal IS NULL OR (lower(btrim(pays)) IN ('france', 'fr', 'fra') AND code_postal ~ '^[0-9]{5}$') OR (lower(btrim(pays)) NOT IN ('france', 'fr', 'fra') AND code_postal ~ '^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$')`,
+    ),
   ],
 );
 

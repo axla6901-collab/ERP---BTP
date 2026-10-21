@@ -34,6 +34,7 @@ import {
   tierSchema,
   type TierInput,
 } from '@/lib/validation/referencement-tiers';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -62,6 +63,7 @@ export function TierForm({
   titre,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export function TierForm({
       return;
     }
     toast.success('Tier enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

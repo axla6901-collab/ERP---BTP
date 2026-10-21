@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type Props = {
   /** Server Action à appeler pour supprimer (soft delete). */
@@ -25,6 +26,7 @@ export function DeleteButton({
   redirectTo,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [confirm, setConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -34,7 +36,7 @@ export function DeleteButton({
       if (result.ok) {
         toast.success('Suppression effectuée');
         if (redirectTo) {
-          router.push(redirectTo);
+          router.push(versTenant(redirectTo));
         } else {
           router.refresh();
         }

@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type FournisseurOption = { id: string; code: string; nom: string };
 
@@ -21,11 +22,14 @@ type Props = {
 
 export function NouvelleGrilleChantierButton({ chantierId, fournisseurs }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [fournisseurId, setFournisseurId] = useState<string>('');
 
   function creer() {
     if (!fournisseurId) return;
-    router.push(`/tiers/fournisseurs/${fournisseurId}/grilles/nouveau?chantierId=${chantierId}`);
+    router.push(
+      versTenant(`/tiers/fournisseurs/${fournisseurId}/grilles/nouveau?chantierId=${chantierId}`),
+    );
   }
 
   if (fournisseurs.length === 0) {

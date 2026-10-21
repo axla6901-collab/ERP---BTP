@@ -151,7 +151,8 @@ export async function listerActiviteClient(clientId: string): Promise<ActiviteCl
 /** Une facture du client, projetée pour le bloc « Facturation & encours ». */
 export type FactureClientItem = {
   id: string;
-  numero: string;
+  /** Numéro légal ; NULL tant que la facture est en brouillon (attribué à l'émission). */
+  numero: string | null;
   objet: string | null;
   dateFacture: string;
   dateEcheance: string | null;

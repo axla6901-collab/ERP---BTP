@@ -41,6 +41,7 @@ import {
   vehiculeSchema,
   type VehiculeInput,
 } from '@/lib/validation/flotte';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -81,6 +82,7 @@ export function VehiculeForm({
   railBottom,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -135,7 +137,11 @@ export function VehiculeForm({
       return;
     }
     toast.success('Véhicule enregistré');
-    router.push(successRedirect);
+    // Valeurs enregistrées = nouvelle référence : sans ce reset, le formulaire
+    // reste « modifié » quand on reste sur la fiche (édition → même page) et la
+    // garde de navigation réclame un enregistrement déjà fait.
+    form.reset(form.getValues());
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 
@@ -144,7 +150,7 @@ export function VehiculeForm({
       <PageToolbar
         title={titre}
         subtitle={sousTitre}
-        backHref={backHref}
+        backHref={backHref ? versTenant(backHref) : undefined}
         backLabel={backLabel}
         actions={
           <>

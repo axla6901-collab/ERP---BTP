@@ -1,12 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DevisEditor } from '@/components/commercial/devis-editor';
 import type { ComposantLigneInput, DevisInput, LigneDevisInput } from '@/lib/validation/commercial';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({
     refresh: vi.fn(),
     push: vi.fn(),
@@ -91,11 +92,17 @@ const LABELS_COMPOSANTS = [
   'Vider les composants',
 ];
 
+/** Le menu ⋮ ne rend ses entrées qu'à l'ouverture (allègement des lignes). */
+function ouvrirMenuLigne() {
+  fireEvent.click(screen.getByTitle('Actions de la ligne'));
+}
+
 describe('DevisEditor — boutons composants gatés sur import DPGF', () => {
   afterEach(() => cleanup());
 
   it('masque les 4 boutons composants quand aucun DPGF n’a été importé', () => {
     renderEditor([ligneLibre(false)]);
+    ouvrirMenuLigne();
     for (const label of LABELS_COMPOSANTS) {
       expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
     }
@@ -105,6 +112,7 @@ describe('DevisEditor — boutons composants gatés sur import DPGF', () => {
 
   it('affiche les 4 boutons composants dès qu’une ligne provient d’un import DPGF', () => {
     renderEditor([section(true), ligneLibre(true)]);
+    ouvrirMenuLigne();
     for (const label of LABELS_COMPOSANTS) {
       expect(screen.getByLabelText(label)).toBeInTheDocument();
     }
@@ -112,6 +120,7 @@ describe('DevisEditor — boutons composants gatés sur import DPGF', () => {
 
   it('garde les boutons accessibles sur une ligne sans DPGF mais portant déjà des composants (anciens devis)', () => {
     renderEditor([ligneLibre(false, [composantLibre()])]);
+    ouvrirMenuLigne();
     for (const label of LABELS_COMPOSANTS) {
       expect(screen.getByLabelText(label)).toBeInTheDocument();
     }

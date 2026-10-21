@@ -14,6 +14,7 @@ import {
   type MotifAbsence,
   type TypePointage,
 } from '@/lib/validation/rh';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type EmployeOption = { id: string; nom: string; prenom: string };
 type ChantierOption = { id: string; numero: string; libelle: string };
@@ -79,6 +80,7 @@ export function PointageMatrice({
   onSubmit,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [annee, setAnnee] = useState(initialAnnee);
   const [mois, setMois] = useState(initialMois);
   const [lignes, setLignes] = useState<LigneState[]>(
@@ -101,7 +103,7 @@ export function PointageMatrice({
   function changerMoisOuAnnee(nouvelAnnee: number, nouveauMois: number) {
     setAnnee(nouvelAnnee);
     setMois(nouveauMois);
-    router.push(`/rh/pointages/saisie?annee=${nouvelAnnee}&mois=${nouveauMois}`);
+    router.push(versTenant(`/rh/pointages/saisie?annee=${nouvelAnnee}&mois=${nouveauMois}`));
   }
 
   function ajouterLigne() {

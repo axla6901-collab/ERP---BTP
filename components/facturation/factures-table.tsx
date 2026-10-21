@@ -1,13 +1,14 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { FilterPills, type FilterPillItem } from '@/components/ui/filter-pills';
 import type { FactureAvecClient } from '@/lib/facturation/factures';
+import { libelleNumeroFacture } from '@/lib/facturation/numerotation-facture';
 import { LIBELLES_STATUT_FACTURE, type StatutFacture } from '@/lib/validation/facturation';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatMontant(m: string): string {
   const n = Number(m);
@@ -72,9 +73,17 @@ export function FacturesTable({ items, rightActions, peutEcrire }: Props) {
     {
       id: 'numero',
       header: 'Numéro',
-      cell: (f) => <span className="font-mono text-xs">{f.numero}</span>,
-      sortAccessor: (f) => f.numero,
-      searchAccessor: (f) => f.numero,
+      // Brouillon : pas encore de numéro légal (attribué à l'émission).
+      cell: (f) =>
+        f.numero ? (
+          <span className="font-mono text-xs">{f.numero}</span>
+        ) : (
+          <span className="text-xs italic text-muted-foreground">
+            {libelleNumeroFacture(f.numero)}
+          </span>
+        ),
+      sortAccessor: (f) => f.numero ?? '',
+      searchAccessor: (f) => libelleNumeroFacture(f.numero),
     },
     {
       id: 'date',
@@ -128,12 +137,12 @@ export function FacturesTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (f) => (
-        <Link
+        <LienTenant
           href={`/facturation/factures/${f.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Ouvrir' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

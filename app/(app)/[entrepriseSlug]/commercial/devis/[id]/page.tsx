@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { CreerDepuisDevisButton } from '@/components/chantiers/creer-depuis-devis-button';
@@ -28,6 +27,7 @@ import {
   type PosteInterneFormInput,
   type StatutDevis,
 } from '@/lib/validation/commercial';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function libelleClient(c: {
   type: string;
@@ -205,9 +205,12 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
             {chantierLie ? (
               <p>
                 Devis lié au chantier :{' '}
-                <Link href={`/chantiers/${chantierLie}`} className="underline underline-offset-4">
+                <LienTenant
+                  href={`/chantiers/${chantierLie}`}
+                  className="underline underline-offset-4"
+                >
                   voir le chantier
-                </Link>
+                </LienTenant>
                 .
               </p>
             ) : peutCreerChantier ? (
@@ -229,12 +232,12 @@ export default async function DevisDetailPage({ params }: { params: Promise<{ id
                   Les lignes du devis serviront de base à la situation : tu n&apos;auras qu&apos;à
                   saisir le % d&apos;avancement par poste.
                 </p>
-                <Link
+                <LienTenant
                   href={`/facturation/situations/nouveau?chantierId=${chantierLie}&devisId=${id}`}
                   className={buttonVariants()}
                 >
                   Créer une situation depuis ce devis
-                </Link>
+                </LienTenant>
               </div>
             )}
           </CardContent>

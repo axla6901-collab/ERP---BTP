@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { Client } from '@/db/schema/commercial';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 /** Le nom (raison sociale) provient désormais du référentiel central, joint
  *  côté serveur et exposé sous `raisonSociale`. */
@@ -70,9 +69,12 @@ export function ClientsTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (c) => (
-        <Link href={`/commercial/clients/${c.id}`} className="text-sm underline underline-offset-4">
+        <LienTenant
+          href={`/commercial/clients/${c.id}`}
+          className="text-sm underline underline-offset-4"
+        >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

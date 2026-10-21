@@ -32,6 +32,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { familleSchema, type FamilleInput } from '@/lib/validation/catalogue';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -63,6 +64,7 @@ export function FamilleForm({
   actions,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export function FamilleForm({
       return;
     }
     toast.success('Famille enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

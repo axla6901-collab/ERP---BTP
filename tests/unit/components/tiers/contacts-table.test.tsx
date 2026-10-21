@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
@@ -73,11 +74,11 @@ describe('ContactsTable', () => {
     render(<ContactsTable items={[FOURNISSEUR, CLIENT]} />);
     expect(screen.getByRole('link', { name: 'BTP Plus' })).toHaveAttribute(
       'href',
-      '/tiers/fournisseurs/f9',
+      '/acme/tiers/fournisseurs/f9',
     );
     expect(screen.getByRole('link', { name: 'SCI Horizon' })).toHaveAttribute(
       'href',
-      '/commercial/clients/cl7',
+      '/acme/commercial/clients/cl7',
     );
   });
 

@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 import { FacturesTable } from '@/components/facturation/factures-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
@@ -7,6 +5,7 @@ import { StatCard, StatGrid } from '@/components/ui/stat-card';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerFactures } from '@/lib/facturation/factures';
 import { peutEcrireFacturation } from '@/lib/facturation/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function eur(n: number): string {
   return `${n.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} €`;
@@ -50,9 +49,12 @@ export default async function FacturesPage() {
         subtitle={`${items.length} facture(s)`}
         actions={
           peutEcrire ? (
-            <Link href="/facturation/factures/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant
+              href="/facturation/factures/nouveau"
+              className={buttonVariants({ size: 'sm' })}
+            >
               + Nouvelle facture
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

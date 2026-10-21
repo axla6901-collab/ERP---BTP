@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EcheancesAlertesTable, type AlerteRow } from '@/components/flotte/echeances-alertes-table';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 

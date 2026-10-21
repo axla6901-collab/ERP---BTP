@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const push = vi.fn();
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push, refresh: vi.fn(), prefetch: vi.fn() }),
 }));
 
@@ -119,7 +120,8 @@ describe('ArticlesListeCard', () => {
       />,
     );
     fireEvent.click(dataRows()[0]!);
-    expect(push).toHaveBeenCalledWith('/catalogue/articles/art-1');
+    // Chemin préfixé par le slug d’entreprise : pas de redirection middleware.
+    expect(push).toHaveBeenCalledWith('/acme/catalogue/articles/art-1');
   });
 
   it('le tri par prix décroissant réordonne', () => {

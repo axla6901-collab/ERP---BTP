@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { CorpsEtatTable } from '@/components/referencement/corps-etat-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerCorpsEtat } from '@/lib/referencement/corps-etat';
 import { peutAdministrerReferentielTiers } from '@/lib/referencement/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function CorpsEtatListPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -19,12 +18,12 @@ export default async function CorpsEtatListPage() {
         subtitle={`${items.length} corps d’état`}
         actions={
           peutEcrire ? (
-            <Link
+            <LienTenant
               href="/administration/referentiel-tiers/corps-etat/nouveau"
               className={buttonVariants({ size: 'sm' })}
             >
               + Nouveau
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

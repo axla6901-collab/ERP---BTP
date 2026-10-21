@@ -100,6 +100,12 @@ describe('societeSchema', () => {
       societeSchema.safeParse({ code: 'SBI', raisonSociale: 'SBI', siret: '123' }).success,
     ).toBe(false);
   });
+
+  it('accepte un SIRET laissé vide dans le formulaire (chaîne vide → null)', () => {
+    const r = societeSchema.safeParse({ code: 'SBI', raisonSociale: 'SBI Bâtiment', siret: '' });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.siret).toBeNull();
+  });
 });
 
 describe('agrementActionSchema', () => {
@@ -144,6 +150,42 @@ describe('tierSchema', () => {
     expect(tierSchema.safeParse({ code: 'X1', nom: 'Test', natureTiers: 'inconnue' }).success).toBe(
       false,
     );
+  });
+
+  it('accepte les champs facultatifs laissés vides (chaîne vide → null)', () => {
+    const r = tierSchema.safeParse({
+      code: 'X1',
+      nom: 'Test',
+      natureTiers: 'artisan',
+      siret: '',
+      nTvaIntra: '',
+      email: '',
+      codePostal: '',
+      cdtResponsableId: '',
+      managerCdtId: '',
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data).toMatchObject({
+        siret: null,
+        nTvaIntra: null,
+        email: null,
+        codePostal: null,
+        cdtResponsableId: null,
+        managerCdtId: null,
+      });
+    }
+  });
+
+  it('met le N° TVA intracom en majuscules', () => {
+    const r = tierSchema.safeParse({
+      code: 'X1',
+      nom: 'Test',
+      natureTiers: 'artisan',
+      nTvaIntra: 'fr12345678901',
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.nTvaIntra).toBe('FR12345678901');
   });
 
   it('rejette un SIRET à 13 chiffres', () => {

@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { EmployesTable } from '@/components/rh/employes-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerEmployes } from '@/lib/rh/employes';
 import { peutEcrireEmploye } from '@/lib/rh/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function EmployesPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -18,9 +17,9 @@ export default async function EmployesPage() {
         title="Employés"
         actions={
           peutEcrire ? (
-            <Link href="/rh/employes/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant href="/rh/employes/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouvel employé
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

@@ -5,6 +5,7 @@ import { useTransition } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type Props = {
   devisId: string;
@@ -15,6 +16,7 @@ type Props = {
 
 export function CreerDepuisDevisButton({ devisId, action }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isPending, startTransition] = useTransition();
 
   function handle() {
@@ -22,7 +24,7 @@ export function CreerDepuisDevisButton({ devisId, action }: Props) {
       const r = await action(devisId);
       if (r.ok) {
         toast.success(`Chantier ${r.data.numero} créé.`);
-        router.push(`/chantiers/${r.data.id}`);
+        router.push(versTenant(`/chantiers/${r.data.id}`));
         router.refresh();
       } else {
         toast.error(r.error);

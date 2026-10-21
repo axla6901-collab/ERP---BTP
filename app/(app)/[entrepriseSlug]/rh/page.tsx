@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { and, count, eq, gte, isNull, lte, sum } from 'drizzle-orm';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { employes } from '@/db/schema/employes';
 import { pointages } from '@/db/schema/pointages';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 async function compter(entrepriseId: string) {
   const now = new Date();
@@ -57,7 +57,7 @@ export default async function RhDashboard() {
   const compteurs = await compter(ctx.entreprise.id);
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Link href="/rh/employes" className="block">
+      <LienTenant href="/rh/employes" className="block">
         <Card className="transition hover:border-foreground/40">
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
@@ -68,8 +68,8 @@ export default async function RhDashboard() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Voir la liste →</CardContent>
         </Card>
-      </Link>
-      <Link href="/rh/pointages" className="block">
+      </LienTenant>
+      <LienTenant href="/rh/pointages" className="block">
         <Card className="transition hover:border-foreground/40">
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
@@ -80,8 +80,8 @@ export default async function RhDashboard() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Filtrer →</CardContent>
         </Card>
-      </Link>
-      <Link href="/rh/pointages/saisie" className="block">
+      </LienTenant>
+      <LienTenant href="/rh/pointages/saisie" className="block">
         <Card className="transition hover:border-foreground/40">
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
@@ -94,7 +94,7 @@ export default async function RhDashboard() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Saisir la matrice →</CardContent>
         </Card>
-      </Link>
+      </LienTenant>
     </div>
   );
 }

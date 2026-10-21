@@ -33,7 +33,7 @@ type DetailsTva = Record<string, { base: string; tva: string }> | null;
  * + entreprise émettrice). Fonction pure (hors I/O).
  */
 function construireModele(
-  facture: typeof factures.$inferSelect,
+  facture: typeof factures.$inferSelect & { numero: string },
   lignes: (typeof lignesFacture.$inferSelect)[],
   client: typeof clients.$inferSelect & { raisonSociale: string | null },
   emetteur: typeof entreprises.$inferSelect,
@@ -177,7 +177,17 @@ export async function genererFacturX(factureId: string): Promise<ActionResult<{ 
 
   if (!lu) return { ok: false, error: 'Facture introuvable.' };
 
-  const model = construireModele(lu.facture, lu.lignes, lu.client, lu.emetteur);
+  // Le Factur-X porte le numéro légal, attribué seulement à l'émission.
+  const numero = lu.facture.numero;
+  if (!numero) {
+    return {
+      ok: false,
+      error:
+        'Émettez d’abord la facture : le Factur-X porte le numéro légal, attribué à l’émission.',
+    };
+  }
+
+  const model = construireModele({ ...lu.facture, numero }, lu.lignes, lu.client, lu.emetteur);
 
   const manquants = champsManquantsFacturX(model);
   if (manquants.length > 0) {

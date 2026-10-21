@@ -30,6 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { nomenclatureSchema, type NomenclatureInput } from '@/lib/validation/catalogue';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -83,6 +84,7 @@ export function NomenclatureEditor({
   onSubmit,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -283,11 +285,11 @@ export function NomenclatureEditor({
                         </span>
                       ) : (
                         <Link
-                          href={
+                          href={versTenant(
                             estCompose
                               ? `/catalogue/articles/${composant.id}/composition`
-                              : `/catalogue/articles/${composant.id}`
-                          }
+                              : `/catalogue/articles/${composant.id}`,
+                          )}
                           className="text-xs text-destructive underline underline-offset-4"
                           title={
                             estCompose

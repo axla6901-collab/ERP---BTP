@@ -14,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 export type DataTableColumn<T> = {
   /** Identifiant stable de la colonne (sert au tri et à la persistance UI). */
@@ -95,6 +96,10 @@ export function DataTable<T>({
   rowClassName,
 }: Props<T>) {
   const router = useRouter();
+  // `rowHref` peut renvoyer un chemin de module sans slug (`/catalogue/…`) : on le
+  // préfixe ici, une fois pour toutes les tables, pour éviter la redirection du
+  // middleware à chaque clic (idempotent si le chemin est déjà préfixé).
+  const versTenant = useCheminTenant();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<{ id: string; dir: 'asc' | 'desc' } | null>(defaultSort ?? null);
 
@@ -242,7 +247,7 @@ export function DataTable<T>({
             </TableHeader>
             <TableBody>
               {filteredSorted.map((row) => {
-                const href = rowHref?.(row);
+                const href = rowHref ? versTenant(rowHref(row)) : undefined;
                 const extra = rowClassName?.(row);
                 const baseInteractive = href
                   ? 'cursor-pointer focus:bg-muted/50 focus:outline-none'

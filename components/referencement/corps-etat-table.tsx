@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { CorpsEtat } from '@/db/schema/referentiel-tiers';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: CorpsEtat[];
@@ -50,12 +49,12 @@ export function CorpsEtatTable({ items, peutEcrire, rightActions }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (c) => (
-        <Link
+        <LienTenant
           href={`/administration/referentiel-tiers/corps-etat/${c.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

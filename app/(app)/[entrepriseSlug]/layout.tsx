@@ -19,8 +19,11 @@ export default async function TenantLayout({
   children: React.ReactNode;
 }) {
   const { entrepriseSlug } = await params;
-  const ctx = await resolveTenantFromUrl(entrepriseSlug);
-  const entreprises = await listEntreprisesUtilisateur();
+  // Lectures indépendantes : en parallèle (l'utilisateur courant est mémoïsé par requête).
+  const [ctx, entreprises] = await Promise.all([
+    resolveTenantFromUrl(entrepriseSlug),
+    listEntreprisesUtilisateur(),
+  ]);
 
   return (
     <SidebarProvider>
@@ -36,6 +39,7 @@ export default async function TenantLayout({
           'tiers-referencement': ctx.entreprise.tiersReferencementActive,
           'compte-prorata': ctx.entreprise.compteProrataActive,
           flotte: ctx.entreprise.flotteAutomobileActive,
+          'test-sirh': ctx.entreprise.testSirhActive,
         }}
       />
       <TenantContentShell>

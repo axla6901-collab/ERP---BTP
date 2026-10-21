@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { count, isNull } from 'drizzle-orm';
 
 import { PageToolbar } from '@/components/layout/page-toolbar';
@@ -6,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { articles, familles } from '@/db/schema/catalogue';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 async function compter(entrepriseId: string) {
   const [[fam], [art]] = await withTenant(entrepriseId, (tx) =>
@@ -46,7 +46,7 @@ export default async function CatalogueDashboard() {
       <PageToolbar title="Catalogue" subtitle="Familles et articles" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {TUILES.map((t) => (
-          <Link key={t.href} href={t.href} className="block">
+          <LienTenant key={t.href} href={t.href} className="block">
             <Card className="transition hover:border-foreground/40">
               <CardHeader>
                 <CardTitle className="flex items-baseline justify-between gap-2">
@@ -57,7 +57,7 @@ export default async function CatalogueDashboard() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">Voir la liste →</CardContent>
             </Card>
-          </Link>
+          </LienTenant>
         ))}
       </div>
     </div>

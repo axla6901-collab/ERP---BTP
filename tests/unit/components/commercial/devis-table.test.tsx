@@ -7,6 +7,7 @@ import { DevisTable } from '@/components/commercial/devis-table';
 import type { DevisAvecClient } from '@/lib/commercial/devis';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({
     refresh: vi.fn(),
     push: vi.fn(),

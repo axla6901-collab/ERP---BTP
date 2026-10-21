@@ -48,6 +48,7 @@ import {
   employeSchema,
   type EmployeInput,
 } from '@/lib/validation/rh';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -64,6 +65,7 @@ type Props = {
 
 export function EmployeForm({ defaultValues, onSubmit, successRedirect }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -137,7 +139,11 @@ export function EmployeForm({ defaultValues, onSubmit, successRedirect }: Props)
       return;
     }
     toast.success('Employé enregistré');
-    router.push(successRedirect);
+    // Valeurs enregistrées = nouvelle référence : sans ce reset, le formulaire
+    // reste « modifié » quand on reste sur la fiche (édition → même page) et la
+    // garde de navigation réclame un enregistrement déjà fait.
+    form.reset(form.getValues());
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

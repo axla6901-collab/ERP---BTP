@@ -1,9 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import { LIBELLES_TYPE_CONTRAT, type TypeContrat } from '@/lib/validation/rh';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 // Type local pour éviter une dépendance directe au schéma RH (qui n'expose pas
 // d'export type idiomatique). Reflète les champs utilisés dans le tableau.
@@ -86,9 +85,9 @@ export function EmployesTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (e) => (
-        <Link href={`/rh/employes/${e.id}`} className="text-sm underline underline-offset-4">
+        <LienTenant href={`/rh/employes/${e.id}`} className="text-sm underline underline-offset-4">
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

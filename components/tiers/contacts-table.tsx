@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { StatutActifBadge } from '@/components/tiers/statut-actif-badge';
 import { StatutToggleButton } from '@/components/tiers/statut-toggle-button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
@@ -11,6 +9,7 @@ import {
   type SourceContact,
 } from '@/lib/tiers/contacts-annuaire';
 import { cn } from '@/lib/utils';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: ContactUnifie[];
@@ -94,12 +93,12 @@ export function ContactsTable({ items, rightActions, onChangerStatut }: Props) {
       id: 'tiers',
       header: 'Tiers',
       cell: (c) => (
-        <Link
+        <LienTenant
           href={c.tiersHref}
           className="text-sm underline underline-offset-4 hover:text-foreground"
         >
           {c.tiersNom}
-        </Link>
+        </LienTenant>
       ),
       sortAccessor: (c) => c.tiersNom,
       searchAccessor: (c) => c.tiersNom,

@@ -12,15 +12,19 @@ import {
   listerChantiersFacturables,
   listerDevisFacturablesChantier,
 } from '@/lib/facturation/situations';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 export default async function NouvelleSituationPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ entrepriseSlug: string }>;
   searchParams: Promise<{ chantierId?: string; devisId?: string }>;
 }) {
+  const { entrepriseSlug } = await params;
   const utilisateur = await requireAuthWithMfa();
   if (!ROLES_FACTURATION_WRITE.includes(utilisateur.role)) {
-    redirect('/facturation/situations');
+    redirect(cheminTenant(entrepriseSlug, '/facturation/situations'));
   }
 
   const { chantierId, devisId } = await searchParams;

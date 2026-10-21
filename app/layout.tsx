@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 import { NavigationProgress } from '@/components/layout/navigation-progress';
+import { DevServiceWorkerKiller } from '@/lib/pwa/dev-sw-killer';
 import { ServiceWorkerRegistrar } from '@/lib/pwa/sw-register';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/sonner';
@@ -47,6 +48,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={cn('font-sans', inter.variable)}>
       <body className="min-h-screen bg-background text-foreground antialiased">
+        {/* Dev-only : auto-désinscription d'un SW PWA résiduel avant les chunks
+            applicatifs (évite l'erreur Turbopack « module factory not available »). */}
+        <DevServiceWorkerKiller />
         <NavigationProgress />
         <ServiceWorkerRegistrar />
         {children}

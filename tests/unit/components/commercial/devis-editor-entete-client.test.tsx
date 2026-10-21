@@ -7,6 +7,7 @@ import { DevisEditor } from '@/components/commercial/devis-editor';
 import type { DevisInput } from '@/lib/validation/commercial';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({
     refresh: vi.fn(),
     push: vi.fn(),

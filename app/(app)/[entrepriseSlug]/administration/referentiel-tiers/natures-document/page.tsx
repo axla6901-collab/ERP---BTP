@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { NaturesDocumentTable } from '@/components/referencement/natures-document-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerNaturesDocument } from '@/lib/referencement/natures-document';
 import { peutAdministrerReferentielTiers } from '@/lib/referencement/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function NaturesDocumentListPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -19,12 +18,12 @@ export default async function NaturesDocumentListPage() {
         subtitle={`${items.length} nature${items.length > 1 ? 's' : ''} de document`}
         actions={
           peutEcrire ? (
-            <Link
+            <LienTenant
               href="/administration/referentiel-tiers/natures-document/nouveau"
               className={buttonVariants({ size: 'sm' })}
             >
               + Nouveau
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

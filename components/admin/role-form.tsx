@@ -29,6 +29,7 @@ import {
   type RoleCreateInput,
   type RoleUpdateInput,
 } from '@/lib/validation/admin';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -58,6 +59,7 @@ type Props = CreateProps | EditProps;
 
 export function RoleForm(props: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -65,7 +67,7 @@ export function RoleForm(props: Props) {
     return (
       <RoleFormCreate
         onSubmit={props.onSubmit}
-        successRedirect={props.successRedirect}
+        successRedirect={versTenant(props.successRedirect)}
         router={router}
         isSubmitting={isSubmitting}
         setIsSubmitting={setIsSubmitting}
@@ -77,7 +79,7 @@ export function RoleForm(props: Props) {
   return (
     <RoleFormEdit
       onSubmit={props.onSubmit}
-      successRedirect={props.successRedirect}
+      successRedirect={versTenant(props.successRedirect)}
       defaultValues={props.defaultValues}
       router={router}
       isSubmitting={isSubmitting}

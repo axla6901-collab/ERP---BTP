@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 
@@ -15,14 +14,14 @@ import {
 type Props = {
   factureId: string;
   statutCourant: StatutFacture;
+  /** `data.numero` : numéro légal de la facture (attribué à l'émission). */
   action: (
     factureId: string,
     nouveau: StatutFacture,
-  ) => Promise<{ ok: true; data: void } | { ok: false; error: string }>;
+  ) => Promise<{ ok: true; data: { numero: string | null } } | { ok: false; error: string }>;
 };
 
 export function StatutFactureActions({ factureId, statutCourant, action }: Props) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const transitions = TRANSITIONS_FACTURE[statutCourant];
 
@@ -34,8 +33,11 @@ export function StatutFactureActions({ factureId, statutCourant, action }: Props
     startTransition(async () => {
       const res = await action(factureId, nouveau);
       if (res.ok) {
-        toast.success(`Statut → ${LIBELLES_STATUT_FACTURE[nouveau]}`);
-        router.refresh();
+        toast.success(
+          nouveau === 'emise' && res.data.numero
+            ? `Facture ${res.data.numero} émise`
+            : `Statut → ${LIBELLES_STATUT_FACTURE[nouveau]}`,
+        );
       } else {
         toast.error(res.error);
       }

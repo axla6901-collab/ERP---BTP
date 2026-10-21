@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch';
 import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
 import { corpsEtatSchema, type CorpsEtatInput } from '@/lib/validation/referencement-tiers';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -40,6 +41,7 @@ type Props = {
 
 export function CorpsEtatForm({ defaultValues, onSubmit, successRedirect, titre }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export function CorpsEtatForm({ defaultValues, onSubmit, successRedirect, titre 
       return;
     }
     toast.success('Corps d’état enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

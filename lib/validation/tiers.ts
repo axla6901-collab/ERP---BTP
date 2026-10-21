@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { estPaysFrance } from '@/lib/geo/pays';
+
 /**
  * Schemas Zod du module Tiers : fournisseurs et sous-traitants.
  *
@@ -22,19 +24,31 @@ const nomMetier = z
   .min(2, 'Nom trop court (min 2 caractères).')
   .max(200, 'Nom trop long (max 200 caractères).');
 
-const siretOptionnel = z
-  .string()
-  .trim()
-  .regex(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+/**
+ * Normalise toute valeur "vide" venant du form (chaîne vide, espaces, null, undefined)
+ * vers `null` AVANT le contrôle de format : les formulaires initialisent ces champs
+ * facultatifs à `''`, que la regex (SIRET, e-mail, code postal…) rejetterait sinon,
+ * rendant impossible l'enregistrement d'un tiers sans SIRET ou sans e-mail. Même
+ * helper que `lib/validation/commercial.ts`.
+ */
+const emptyToNull = (v: unknown): unknown => {
+  if (v === null || v === undefined) return null;
+  if (typeof v === 'string' && v.trim().length === 0) return null;
+  return v;
+};
 
-const emailOptionnel = z
-  .email('Email invalide.')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const siretOptionnel = z.preprocess(
+  emptyToNull,
+  z.union([
+    z.null(),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).'),
+  ]),
+);
+
+const emailOptionnel = z.preprocess(emptyToNull, z.union([z.null(), z.email('Email invalide.')]));
 
 const telephoneOptionnel = z
   .string()
@@ -44,17 +58,46 @@ const telephoneOptionnel = z
   .nullable()
   .transform((v) => (v && v.length > 0 ? v : null));
 
-const dateOptionnelle = z
-  .string()
-  .trim()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const dateOptionnelle = z.preprocess(
+  emptyToNull,
+  z.union([
+    z.null(),
+    z
+      .string()
+      .trim()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).'),
+  ]),
+);
 
 // ─────────────────────────────────────────────────────────────
 // Adresse (partagée fournisseur + sous-traitant)
 // ─────────────────────────────────────────────────────────────
+
+const REGEX_CP_FRANCE = /^[0-9]{5}$/;
+/** Code postal hors de France : 2 à 10 caractères alphanumériques, espaces et tirets admis. */
+const REGEX_CP_ETRANGER = /^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$/;
+
+/**
+ * Impose le code postal français (5 chiffres) quand l'adresse est en France.
+ * Miroir applicatif des CHECK SQL `chk_fournisseurs_cp` / `chk_sous_traitants_cp`
+ * (migration 0081).
+ */
+function verifierCodePostalSelonPays(
+  adresse: { codePostal: string | null; pays: string },
+  ctx: z.RefinementCtx,
+) {
+  if (
+    adresse.codePostal &&
+    estPaysFrance(adresse.pays) &&
+    !REGEX_CP_FRANCE.test(adresse.codePostal)
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['codePostal'],
+      message: 'Code postal invalide (5 chiffres).',
+    });
+  }
+}
 
 const adresseShape = {
   adresseLigne1: z
@@ -71,13 +114,19 @@ const adresseShape = {
     .optional()
     .nullable()
     .transform((v) => (v && v.length > 0 ? v : null)),
-  codePostal: z
-    .string()
-    .trim()
-    .regex(/^[0-9]{5}$/, 'Code postal invalide (5 chiffres).')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
+  // Format générique ici (adresses à l'étranger) ; les 5 chiffres français sont
+  // imposés selon le pays par `verifierCodePostalSelonPays`.
+  codePostal: z.preprocess(
+    emptyToNull,
+    z.union([
+      z.null(),
+      z
+        .string()
+        .trim()
+        .regex(REGEX_CP_ETRANGER, 'Code postal invalide.')
+        .transform((v) => v.toUpperCase()),
+    ]),
+  ),
   ville: z
     .string()
     .trim()
@@ -151,15 +200,17 @@ export type CreerContactInput = z.infer<typeof creerContactSchema>;
 // Fournisseurs
 // ─────────────────────────────────────────────────────────────
 
-export const fournisseurSchema = z.object({
-  code: codeMetier,
-  nom: nomMetier,
-  siret: siretOptionnel,
-  email: emailOptionnel,
-  telephone: telephoneOptionnel,
-  ...adresseShape,
-  actif: z.boolean().default(true),
-});
+export const fournisseurSchema = z
+  .object({
+    code: codeMetier,
+    nom: nomMetier,
+    siret: siretOptionnel,
+    email: emailOptionnel,
+    telephone: telephoneOptionnel,
+    ...adresseShape,
+    actif: z.boolean().default(true),
+  })
+  .superRefine(verifierCodePostalSelonPays);
 
 export type FournisseurInput = z.infer<typeof fournisseurSchema>;
 
@@ -190,14 +241,18 @@ export const STATUT_SOUS_TRAITANT_LABELS: Record<StatutSousTraitant, string> = {
   refuse: 'Refusé',
 };
 
-const nTvaIntra = z
-  .string()
-  .trim()
-  .regex(/^[A-Z]{2}[A-Z0-9]{2,13}$/i, 'N° TVA intracom invalide (ex. FR12345678901).')
-  .transform((v) => v.toUpperCase())
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const nTvaIntra = z.preprocess(
+  emptyToNull,
+  z
+    .union([
+      z.null(),
+      z
+        .string()
+        .trim()
+        .regex(/^[A-Z]{2}[A-Z0-9]{2,13}$/i, 'N° TVA intracom invalide (ex. FR12345678901).'),
+    ])
+    .transform((v) => (typeof v === 'string' ? v.toUpperCase() : v)),
+);
 
 const qualifications = z
   .array(
@@ -245,45 +300,47 @@ const tauxRetenueGarantie = z.preprocess(
   }),
 );
 
-export const sousTraitantSchema = z.object({
-  code: codeMetier,
-  nom: nomMetier,
-  // Gérant / mandataire social (identification du dirigeant), optionnel.
-  gerantNom: z
-    .string()
-    .trim()
-    .max(100, 'Nom du gérant trop long (max 100 caractères).')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
-  gerantPrenom: z
-    .string()
-    .trim()
-    .max(100, 'Prénom du gérant trop long (max 100 caractères).')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
-  parentStId: parentStIdOptionnel,
-  siret: siretOptionnel,
-  nTvaIntra,
-  email: emailOptionnel,
-  telephone: telephoneOptionnel,
-  ...adresseShape,
-  assuranceDecennaleNum: z
-    .string()
-    .trim()
-    .max(100, 'Numéro de police trop long.')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
-  assuranceDecennaleDateFin: dateOptionnelle,
-  qualifications,
-  agrementDc4: z.boolean().default(false),
-  tauxRetenueGarantie,
-  dateAttestationUrssaf: dateOptionnelle,
-  statut: z.enum(STATUT_SOUS_TRAITANT_VALUES).default('a_qualifier'),
-  actif: z.boolean().default(true),
-});
+export const sousTraitantSchema = z
+  .object({
+    code: codeMetier,
+    nom: nomMetier,
+    // Gérant / mandataire social (identification du dirigeant), optionnel.
+    gerantNom: z
+      .string()
+      .trim()
+      .max(100, 'Nom du gérant trop long (max 100 caractères).')
+      .optional()
+      .nullable()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    gerantPrenom: z
+      .string()
+      .trim()
+      .max(100, 'Prénom du gérant trop long (max 100 caractères).')
+      .optional()
+      .nullable()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    parentStId: parentStIdOptionnel,
+    siret: siretOptionnel,
+    nTvaIntra,
+    email: emailOptionnel,
+    telephone: telephoneOptionnel,
+    ...adresseShape,
+    assuranceDecennaleNum: z
+      .string()
+      .trim()
+      .max(100, 'Numéro de police trop long.')
+      .optional()
+      .nullable()
+      .transform((v) => (v && v.length > 0 ? v : null)),
+    assuranceDecennaleDateFin: dateOptionnelle,
+    qualifications,
+    agrementDc4: z.boolean().default(false),
+    tauxRetenueGarantie,
+    dateAttestationUrssaf: dateOptionnelle,
+    statut: z.enum(STATUT_SOUS_TRAITANT_VALUES).default('a_qualifier'),
+    actif: z.boolean().default(true),
+  })
+  .superRefine(verifierCodePostalSelonPays);
 
 export type SousTraitantInput = z.infer<typeof sousTraitantSchema>;
 

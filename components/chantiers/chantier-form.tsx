@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { chantierSchema, type ChantierInput } from '@/lib/validation/chantiers';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -59,6 +60,7 @@ export function ChantierForm({
   hideStatut,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -98,7 +100,7 @@ export function ChantierForm({
       return;
     }
     toast.success('Chantier enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

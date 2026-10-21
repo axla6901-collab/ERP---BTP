@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const pushMock = vi.fn();
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: pushMock, refresh: vi.fn(), prefetch: vi.fn() }),
 }));
 
@@ -141,6 +142,59 @@ describe('DataTable — lignes cliquables (rowHref)', () => {
     fireEvent.keyDown(btn, { key: 'Enter' });
     // Le handler ligne ignore (e.target !== e.currentTarget). Aucune nav ligne.
     expect(pushMock).not.toHaveBeenCalledWith('/x/a');
+  });
+});
+
+describe('DataTable — rowHref de module sans slug (préfixage tenant)', () => {
+  it('clic : navigue directement vers l’URL préfixée par le slug d’entreprise', () => {
+    render(
+      <DataTable
+        columns={columns()}
+        rows={rows()}
+        rowKey={(r) => r.id}
+        rowHref={(r) => `/catalogue/articles/${r.id}`}
+      />,
+    );
+
+    fireEvent.click(dataRows()[0]!);
+    expect(pushMock).toHaveBeenCalledWith('/acme/catalogue/articles/a');
+  });
+
+  it('Enter et Ctrl+clic utilisent aussi l’URL préfixée', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    render(
+      <DataTable
+        columns={columns()}
+        rows={rows()}
+        rowKey={(r) => r.id}
+        rowHref={(r) => `/tiers/fournisseurs/${r.id}`}
+      />,
+    );
+
+    fireEvent.keyDown(dataRows()[1]!, { key: 'Enter' });
+    expect(pushMock).toHaveBeenCalledWith('/acme/tiers/fournisseurs/b');
+
+    fireEvent.click(dataRows()[0]!, { ctrlKey: true });
+    expect(openSpy).toHaveBeenCalledWith(
+      '/acme/tiers/fournisseurs/a',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    openSpy.mockRestore();
+  });
+
+  it('laisse intact un rowHref déjà préfixé (pas de double slug)', () => {
+    render(
+      <DataTable
+        columns={columns()}
+        rows={rows()}
+        rowKey={(r) => r.id}
+        rowHref={(r) => `/acme/flotte/vehicules/${r.id}`}
+      />,
+    );
+
+    fireEvent.click(dataRows()[0]!);
+    expect(pushMock).toHaveBeenCalledWith('/acme/flotte/vehicules/a');
   });
 });
 

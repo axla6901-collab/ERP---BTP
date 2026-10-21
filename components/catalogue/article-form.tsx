@@ -36,6 +36,7 @@ import {
   LIBELLES_ARTICLE_TYPE,
   type ArticleInput,
 } from '@/lib/validation/catalogue';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -102,6 +103,7 @@ export function ArticleForm({
   railBottom,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -142,7 +144,7 @@ export function ArticleForm({
       return;
     }
     toast.success('Article enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 
@@ -154,7 +156,7 @@ export function ArticleForm({
       <PageToolbar
         title={titre}
         subtitle={sousTitre}
-        backHref={backHref}
+        backHref={backHref ? versTenant(backHref) : undefined}
         backLabel={backLabel}
         actions={
           <>

@@ -35,6 +35,7 @@ import {
   type UniteInput,
   type UniteType,
 } from '@/lib/validation/catalogue';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 const LIBELLES_TYPE: Record<UniteType, string> = {
   masse: 'Masse',
@@ -65,6 +66,7 @@ type Props = {
 
 export function UniteForm({ defaultValues, onSubmit, successRedirect, titre, actions }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -96,7 +98,7 @@ export function UniteForm({ defaultValues, onSubmit, successRedirect, titre, act
       return;
     }
     toast.success('Unité enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

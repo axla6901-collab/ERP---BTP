@@ -7,6 +7,7 @@ import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { messageBlocageSuppression } from '@/lib/common/references-suppression';
+import { compterReferencesSirhEmploye } from '@/lib/test-sirh/references-employe';
 import { employes, type Employe } from '@/db/schema/employes';
 import { pointages } from '@/db/schema/pointages';
 import { employeSchema, type EmployeInput } from '@/lib/validation/rh';
@@ -199,8 +200,12 @@ export async function supprimerEmploye(id: string): Promise<ActionResult> {
       .select({ n: count() })
       .from(pointages)
       .where(eq(pointages.employeId, id));
+    // Références du module Test SIRH (contrats, absences, équipes, paie…) : elles
+    // existent même si le module a été désactivé depuis.
+    const referencesSirh = await compterReferencesSirhEmploye(tx, id);
     const message = messageBlocageSuppression('cet employé', [
       { nombre: rPointages?.n ?? 0, singulier: 'pointage', pluriel: 'pointages' },
+      ...referencesSirh,
     ]);
     if (message) return message;
 

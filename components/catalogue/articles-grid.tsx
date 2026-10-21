@@ -1,11 +1,11 @@
 'use client';
 
 import { StarIcon } from 'lucide-react';
-import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import type { ArticleAvecPrix } from '@/lib/catalogue/articles';
 import { cn } from '@/lib/utils';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatPrix(montant: string | null): string {
   if (!montant) return '—';
@@ -35,7 +35,7 @@ export function ArticlesGrid({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {items.map((a) => (
-        <Link
+        <LienTenant
           key={a.id}
           href={`/catalogue/articles/${a.id}`}
           className={cn(
@@ -69,7 +69,7 @@ export function ArticlesGrid({
               {formatPrix(a.prixCourant)} €
             </div>
           </div>
-        </Link>
+        </LienTenant>
       ))}
     </div>
   );

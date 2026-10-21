@@ -8,20 +8,21 @@ import { lireGrille, mettreAJourGrille, supprimerGrille } from '@/lib/catalogue/
 import { listerUnites } from '@/lib/catalogue/unites';
 import { listerChantiersPourSelecteur } from '@/lib/chantiers/chantiers';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 export default async function GrillePage({
   params,
 }: {
-  params: Promise<{ id: string; grilleId: string }>;
+  params: Promise<{ entrepriseSlug: string; id: string; grilleId: string }>;
 }) {
-  const { id: fournisseurId, grilleId } = await params;
+  const { entrepriseSlug, id: fournisseurId, grilleId } = await params;
   const utilisateur = await requireAuthWithMfa();
   const grille = await lireGrille(grilleId);
   if (!grille || grille.fournisseurId !== fournisseurId) notFound();
 
   const peutEcrire = peutEcrireTiers(utilisateur.role);
   if (!peutEcrire) {
-    redirect(`/tiers/fournisseurs/${fournisseurId}`);
+    redirect(cheminTenant(entrepriseSlug, `/tiers/fournisseurs/${fournisseurId}`));
   }
 
   const [articles, unites, chantiers] = await Promise.all([

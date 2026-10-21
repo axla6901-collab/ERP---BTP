@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { ArticleForm } from '@/components/catalogue/article-form';
@@ -33,6 +32,8 @@ import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
 import { enregistrerPrixReference, lirePrixReferenceCourant } from '@/lib/catalogue/prix-articles';
 import { listerUnites } from '@/lib/catalogue/unites';
 import { LIBELLES_ARTICLE_TYPE } from '@/lib/validation/catalogue';
+import { LienTenant } from '@/components/layout/lien-tenant';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 function formatMontant(n: number | string | null | undefined): string {
   if (n == null || n === '') return '—';
@@ -48,8 +49,12 @@ function formatDate(d: Date | string | null | undefined): string {
   return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-export default async function ArticleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ArticleDetailPage({
+  params,
+}: {
+  params: Promise<{ entrepriseSlug: string; id: string }>;
+}) {
+  const { entrepriseSlug, id } = await params;
   const utilisateur = await requireAuthWithMfa();
   const article = await lireArticle(id);
   if (!article) notFound();
@@ -62,7 +67,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         <PageToolbar
           title={article.libelle}
           subtitle={`${article.code} · ${LIBELLES_ARTICLE_TYPE[article.type]}`}
-          backHref="/catalogue/articles"
+          backHref={cheminTenant(entrepriseSlug, '/catalogue/articles')}
           backLabel="Articles"
         />
         <Card className="max-w-2xl">
@@ -144,12 +149,12 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <div className="flex items-center justify-between px-4 py-3">
         <h3 className="font-heading font-semibold text-orange-700">Prix de référence</h3>
-        <Link
+        <LienTenant
           href={`/catalogue/articles/${id}/prix`}
           className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
           Historique →
-        </Link>
+        </LienTenant>
       </div>
       <div className="space-y-2 border-t px-4 py-4">
         <PrixReferenceQuickForm
@@ -266,7 +271,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                         return (
                           <li key={aid}>
                             {a ? (
-                              <Link
+                              <LienTenant
                                 href={
                                   a.type === 'compose'
                                     ? `/catalogue/articles/${aid}/composition`
@@ -275,7 +280,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                                 className="underline"
                               >
                                 {a.code} — {a.libelle}
-                              </Link>
+                              </LienTenant>
                             ) : (
                               aid
                             )}
@@ -293,9 +298,9 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             </CardContent>
           )}
           <CardFooter className="gap-2">
-            <Link href={`/catalogue/articles/${id}/composition`} className={buttonVariants()}>
+            <LienTenant href={`/catalogue/articles/${id}/composition`} className={buttonVariants()}>
               {nomenclature ? 'Modifier la composition' : 'Définir la composition'}
-            </Link>
+            </LienTenant>
           </CardFooter>
         </Card>
       )}

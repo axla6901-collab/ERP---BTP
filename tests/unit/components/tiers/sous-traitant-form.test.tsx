@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('sonner', () => ({
@@ -8,6 +8,7 @@ vi.mock('sonner', () => ({
 }));
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -122,5 +123,32 @@ describe('SousTraitantForm — sections (gabarit maquette)', () => {
     // « Adresse » apparaît aussi dans les libellés de AdresseFields (ligne 1/2).
     expect(getAllByText(/^Adresse/).length).toBeGreaterThan(0);
     expect(getByText('Contact générique')).toBeInTheDocument();
+  });
+});
+
+describe('SousTraitantForm — champs facultatifs', () => {
+  it('enregistre un sous-traitant sans SIRET, TVA intracom, e-mail ni code postal', async () => {
+    const soumettre = vi.fn().mockResolvedValue({ ok: true });
+    const { container } = render(
+      <SousTraitantForm
+        titre="Nouveau sous-traitant"
+        defaultValues={{ code: 'RECST', nom: 'Sous-traitant test' }}
+        onSubmit={soumettre}
+        successRedirect="/x"
+      />,
+    );
+
+    fireEvent.submit(container.querySelector('#sous-traitant-form')!);
+
+    await waitFor(() => expect(soumettre).toHaveBeenCalledTimes(1));
+    expect(soumettre).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: 'RECST',
+        siret: null,
+        nTvaIntra: null,
+        email: null,
+        codePostal: null,
+      }),
+    );
   });
 });

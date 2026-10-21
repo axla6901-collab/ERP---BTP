@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { asc, eq } from 'drizzle-orm';
 
@@ -12,6 +11,7 @@ import { getCurrentUtilisateur } from '@/lib/auth/guards';
 import { mettreAJourUtilisateur, supprimerUtilisateur } from '@/lib/admin/utilisateurs';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (utilisateurs/roles, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function EditionUtilisateurPage({
   params,
@@ -53,12 +53,12 @@ export default async function EditionUtilisateurPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium">Modifier l&apos;utilisateur</h2>
-        <Link
+        <LienTenant
           href="/administration/utilisateurs"
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
           ← Retour à la liste
-        </Link>
+        </LienTenant>
       </div>
 
       {row.deletedAt && (

@@ -76,6 +76,49 @@ describe('AppSidebar', () => {
     expect(avecFlag.getByRole('link', { name: 'Planning' })).toBeInTheDocument();
   });
 
+  it('masque Test SIRH sans le feature flag, l’affiche avec', () => {
+    const sansFlag = renderSidebar();
+    expect(sansFlag.queryByRole('link', { name: 'Test SIRH' })).not.toBeInTheDocument();
+    cleanup();
+    const avecFlag = renderSidebar({ features: { 'test-sirh': true } });
+    expect(avecFlag.getByRole('link', { name: 'Test SIRH' })).toBeInTheDocument();
+  });
+
+  it('Test SIRH : filtre les sous-menus selon le rôle (ouvrier = libre-service)', () => {
+    mockPathname = '/acme/test-sirh/mon-espace';
+    const ouvrier = renderSidebar({ role: 'ouvrier', features: { 'test-sirh': true } });
+    expect(ouvrier.getByRole('link', { name: 'Mon espace' })).toBeInTheDocument();
+    expect(ouvrier.getByRole('link', { name: 'Annonces' })).toBeInTheDocument();
+    expect(ouvrier.queryByRole('link', { name: 'Collaborateurs' })).not.toBeInTheDocument();
+    expect(ouvrier.queryByRole('link', { name: 'Paie' })).not.toBeInTheDocument();
+    expect(ouvrier.queryByRole('link', { name: 'Validations' })).not.toBeInTheDocument();
+    cleanup();
+
+    const comptable = renderSidebar({ role: 'comptable', features: { 'test-sirh': true } });
+    expect(comptable.getByRole('link', { name: 'Paie' })).toBeInTheDocument();
+    expect(comptable.getByRole('link', { name: 'Collaborateurs' })).toBeInTheDocument();
+    expect(comptable.queryByRole('link', { name: 'Validations' })).not.toBeInTheDocument();
+  });
+
+  it('Tiers et Facturation pointent directement vers leur page d’atterrissage (pas de redirection)', () => {
+    const { getByRole } = renderSidebar();
+    expect(getByRole('link', { name: 'Tiers' })).toHaveAttribute(
+      'href',
+      '/acme/tiers/fournisseurs',
+    );
+    expect(getByRole('link', { name: 'Facturation' })).toHaveAttribute(
+      'href',
+      '/acme/facturation/factures',
+    );
+  });
+
+  it('la section Tiers reste active sur une autre de ses pages', () => {
+    mockPathname = '/acme/tiers/sous-traitants';
+    const { getByRole } = renderSidebar();
+    const conteneur = getByRole('link', { name: 'Tiers' }).parentElement as HTMLElement;
+    expect(conteneur.className).toContain('bg-orange-500');
+  });
+
   it('expose un bouton de repli du menu (desktop)', () => {
     const { getByRole } = renderSidebar();
     expect(getByRole('button', { name: /Réduire le menu|Déployer le menu/ })).toBeInTheDocument();

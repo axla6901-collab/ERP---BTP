@@ -121,28 +121,30 @@ const entierJoursOptionnel = z
   .optional()
   .transform((v) => (v === undefined || v === null || Number.isNaN(v) ? null : v));
 
-const siretOptionnel = z
-  .string()
-  .trim()
-  .regex(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+/**
+ * Normalise toute valeur "vide" venant du form (chaîne vide, espaces, null, undefined)
+ * vers `null` AVANT le contrôle de format : les formulaires initialisent ces champs
+ * facultatifs à `''`, que la regex / le format (SIRET, e-mail, UUID…) rejetterait
+ * sinon. Même helper que `lib/validation/commercial.ts` et `lib/validation/tiers.ts`.
+ */
+const emptyToNull = (v: unknown): unknown => {
+  if (v === null || v === undefined) return null;
+  if (typeof v === 'string' && v.trim().length === 0) return null;
+  return v;
+};
 
-const nTvaIntraOptionnel = z
-  .string()
-  .trim()
-  .regex(/^[A-Z]{2}[A-Z0-9]{2,13}$/i, 'N° TVA intracom invalide (ex. FR12345678901).')
-  .transform((v) => v.toUpperCase())
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+/** Chaîne facultative au format imposé par `regex` (vide → `null`). */
+const formatOptionnel = (regex: RegExp, message: string) =>
+  z.preprocess(emptyToNull, z.union([z.null(), z.string().trim().regex(regex, message)]));
 
-const emailOptionnel = z
-  .email('Email invalide.')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const siretOptionnel = formatOptionnel(/^\d{14}$/, 'SIRET invalide (14 chiffres requis).');
+
+const nTvaIntraOptionnel = formatOptionnel(
+  /^[A-Z]{2}[A-Z0-9]{2,13}$/i,
+  'N° TVA intracom invalide (ex. FR12345678901).',
+).transform((v) => (typeof v === 'string' ? v.toUpperCase() : v));
+
+const emailOptionnel = z.preprocess(emptyToNull, z.union([z.null(), z.email('Email invalide.')]));
 
 const telephoneOptionnel = z
   .string()
@@ -161,31 +163,18 @@ const texteCourtOptionnel = (max: number, label = 'Texte') =>
     .nullable()
     .transform((v) => (v && v.length > 0 ? v : null));
 
-const dateOptionnelle = z
-  .string()
-  .trim()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const dateOptionnelle = formatOptionnel(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (YYYY-MM-DD).');
 
-const uuidOptionnel = z
-  .string()
-  .uuid('Identifiant invalide.')
-  .optional()
-  .nullable()
-  .transform((v) => (v && v.length > 0 ? v : null));
+const uuidOptionnel = z.preprocess(
+  emptyToNull,
+  z.union([z.null(), z.string().uuid('Identifiant invalide.')]),
+);
 
 const adresseShape = {
   adresseLigne1: texteCourtOptionnel(200, 'Adresse'),
   adresseLigne2: texteCourtOptionnel(200, 'Adresse'),
-  codePostal: z
-    .string()
-    .trim()
-    .regex(/^[0-9]{5}$/, 'Code postal invalide (5 chiffres).')
-    .optional()
-    .nullable()
-    .transform((v) => (v && v.length > 0 ? v : null)),
+  // 5 chiffres : aligné sur le CHECK SQL de la table `tiers` (migration 0028).
+  codePostal: formatOptionnel(/^[0-9]{5}$/, 'Code postal invalide (5 chiffres).'),
   ville: texteCourtOptionnel(100, 'Ville'),
   pays: z.string().trim().min(1).max(100).default('France'),
 } as const;

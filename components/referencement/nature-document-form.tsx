@@ -36,6 +36,7 @@ import {
   type ModeControleDocument,
   type NatureDocumentInput,
 } from '@/lib/validation/referencement-tiers';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -53,6 +54,7 @@ type Props = {
 
 export function NatureDocumentForm({ defaultValues, onSubmit, successRedirect, titre }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -89,7 +91,7 @@ export function NatureDocumentForm({ defaultValues, onSubmit, successRedirect, t
       return;
     }
     toast.success('Nature de document enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

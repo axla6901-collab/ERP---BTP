@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import type { ArticleAvecPrix } from '@/lib/catalogue/articles';
 import { cn } from '@/lib/utils';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 const PAGE_SIZE = 12;
 
@@ -97,6 +98,7 @@ export function ArticlesListeCard({
   articleIdsChantier?: Set<string>;
 }) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const chantierSet = articleIdsChantier ?? new Set<string>();
   const [tri, setTri] = useState<string>('code-asc');
   const [page, setPage] = useState(1);
@@ -131,7 +133,7 @@ export function ArticlesListeCard({
   }
 
   function go(id: string) {
-    router.push(`/catalogue/articles/${id}`);
+    router.push(versTenant(`/catalogue/articles/${id}`));
   }
   function onRowKeyDown(e: KeyboardEvent<HTMLTableRowElement>, id: string) {
     if (e.target !== e.currentTarget) return;

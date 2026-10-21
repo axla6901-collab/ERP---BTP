@@ -13,7 +13,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useFieldArray,
   useForm,
@@ -25,7 +25,10 @@ import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 import { typedZodResolver } from '@/lib/forms/zod-resolver';
+import { appliquerRemiseGlobale } from '@/lib/remise-globale';
 import { useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
+import { useRenduProgressif } from '@/lib/hooks/use-rendu-progressif';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 import {
   DpgfImportZone,
@@ -67,6 +70,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SelectDiffere } from '@/components/ui/select-differe';
 import { Textarea } from '@/components/ui/textarea';
 import {
   devisSchema,
@@ -461,6 +465,14 @@ export function construireArbreSections(
 
 /** Total HT d'un groupe = somme des montants HT de ses articles directs,
  *  en tenant compte des overrides TVA/remise par composant libre. */
+/** Libellé du déclencheur « Article catalogue » d'une ligne (même texte que
+ *  l'ancien rendu de `<SelectValue>`). */
+function libelleArticle(articles: ArticleOption[], articleId: string): string {
+  if (!articleId) return 'Choisir un article catalogue';
+  const a = articles.find((x) => x.id === articleId);
+  return a ? `${a.code} — ${a.libelle}` : articleId;
+}
+
 function calculerTotalGroupe(articleIdxs: number[], lignes: LigneDevisInput[]): number {
   let total = 0;
   for (const i of articleIdxs) {
@@ -493,6 +505,7 @@ export function DevisEditor({
   historique,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   // Mode plein écran : piloté via le contexte sidebar (masque sidebar + header
   // + rail). Optionnel pour rester montable hors `<SidebarProvider>` (tests).
   const sidebar = useSidebarOptional();
@@ -594,6 +607,10 @@ export function DevisEditor({
     name: 'lignes',
   });
 
+  // Affichage progressif des lignes (cf. <CorpsLignesDevis>) : tout import DPGF
+  // incrémente cette génération, ce qui relance la progression depuis le début.
+  const [generationLignes, setGenerationLignes] = useState(0);
+
   const lignesLive = form.watch('lignes') as LigneDevisInput[];
   const postesInternesLive = form.watch('postesInternes') ?? [];
   const remiseGlobaleType = form.watch('remiseGlobaleType') ?? null;
@@ -616,10 +633,19 @@ export function DevisEditor({
   // try/catch identique à <TotauxDevis> : une ligne en cours de saisie peut
   // être transitoirement invalide → on retombe sur 0.
   let totalHtDevis = 0;
+  // Total HT NET (après remise globale, ventilée comme dans <TotauxDevis>) : c'est
+  // la vente réelle, donc la base de la carte « Estimation marge ».
+  let totalHtNetDevis = 0;
   try {
-    totalHtDevis = Number(calculerTotauxDevis(lignesLive, postesInternesLive).totalHt);
+    const totaux = calculerTotauxDevis(lignesLive, postesInternesLive);
+    totalHtDevis = Number(totaux.totalHt);
+    totalHtNetDevis = Number(
+      appliquerRemiseGlobale(totaux, { type: remiseGlobaleType, valeur: remiseGlobaleValeur })
+        .totalHt,
+    );
   } catch {
     totalHtDevis = 0;
+    totalHtNetDevis = 0;
   }
 
   // Coût estimé (carte « Estimation marge » du rail) : somme, sur les lignes
@@ -647,14 +673,18 @@ export function DevisEditor({
     if (pc != null && Number.isFinite(q)) coutEstimeDevis += q * pc;
   }
 
-  function toggleSection(idx: number) {
+  // Rappels STABLES passés à <GroupeRow> (mémoïsé) : recréés à chaque rendu, ils
+  // forçaient le re-rendu de toutes les lignes à chaque frappe et à chaque
+  // tranche de l'affichage progressif (coût quadratique sur un gros DPGF).
+  const toggleSection = useCallback((idx: number) => {
     setSectionsRepliees((set) => {
       const ns = new Set(set);
       if (ns.has(idx)) ns.delete(idx);
       else ns.add(idx);
       return ns;
     });
-  }
+  }, []);
+  const supprimerLigne = useCallback((idx: number) => remove(idx), [remove]);
 
   const tousLesIdxSections = useMemo(
     () => groupes.filter((g) => g.sectionIdx !== null).map((g) => g.sectionIdx as number),
@@ -736,6 +766,7 @@ export function DevisEditor({
     } else {
       for (const l of nouvelles) append(l);
     }
+    setGenerationLignes((n) => n + 1);
     // RHF v7 : `replace()` ne marque pas le form dirty. On force-marque via
     // un override local pour que la garde de navigation déclenche le dialog.
     setDirtyOverride(true);
@@ -781,7 +812,7 @@ export function DevisEditor({
         successRedirectAppendId && resolvedId
           ? `${successRedirect.replace(/\/$/, '')}/${resolvedId}`
           : successRedirect;
-      router.push(url);
+      router.push(versTenant(url));
       router.refresh();
     } catch (err) {
       setErreur({
@@ -939,7 +970,7 @@ export function DevisEditor({
             action={workflowDupliquerAction}
             peutVersionner={workflowPeutVersionner}
             onSuccess={(nouveauId) => {
-              router.push(`/commercial/devis/${nouveauId}`);
+              router.push(versTenant(`/commercial/devis/${nouveauId}`));
               router.refresh();
             }}
           />
@@ -1181,36 +1212,23 @@ export function DevisEditor({
                     <th className={cn(TH_STICKY, 'px-2')}>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {groupes.map((g) => {
-                    if (g.sectionIdx !== null && groupesMasques.has(g.sectionIdx)) {
-                      return null;
-                    }
-                    return (
-                      <GroupeRow
-                        key={g.sectionIdx ?? `orphelins-${g.articleIdxs.join('-')}`}
-                        groupe={g}
-                        lignes={lignesLive}
-                        articles={articles}
-                        unites={unites}
-                        form={form}
-                        replie={g.sectionIdx !== null && sectionsRepliees.has(g.sectionIdx)}
-                        onToggle={() => g.sectionIdx !== null && toggleSection(g.sectionIdx)}
-                        onSupprimer={(idx) => remove(idx)}
-                        totalSection={
-                          g.sectionIdx !== null
-                            ? (totauxRecursifs.get(g.sectionIdx) ?? 0)
-                            : calculerTotalGroupe(g.articleIdxs, lignesLive)
-                        }
-                        profondeur={
-                          g.sectionIdx !== null ? (profondeurParSection.get(g.sectionIdx) ?? 1) : 1
-                        }
-                        enModeTree={enModeTree}
-                        dpgfImporte={dpgfImporte}
-                      />
-                    );
-                  })}
-                </tbody>
+                <CorpsLignesDevis
+                  nbLignes={fields.length}
+                  generation={generationLignes}
+                  groupes={groupes}
+                  groupesMasques={groupesMasques}
+                  sectionsRepliees={sectionsRepliees}
+                  totauxRecursifs={totauxRecursifs}
+                  profondeurParSection={profondeurParSection}
+                  lignes={lignesLive}
+                  articles={articles}
+                  unites={unites}
+                  form={form}
+                  onToggle={toggleSection}
+                  onSupprimer={supprimerLigne}
+                  enModeTree={enModeTree}
+                  dpgfImporte={dpgfImporte}
+                />
               </table>
             </FormSection>
 
@@ -1343,7 +1361,7 @@ export function DevisEditor({
             />
             {chantierRattache && <ChantierRattacheCard chantier={chantierRattache} />}
             <EstimationMargeCard
-              venteHt={totalHtDevis}
+              venteHt={totalHtNetDevis}
               coutEstime={coutEstimeDevis}
               ciblePct={20}
             />
@@ -1374,19 +1392,20 @@ export function DevisEditor({
 }
 
 /** Carte « Chantier rattaché » du rail (maquette devis) : lien vers la fiche
- *  chantier, fidèle aux hrefs non préfixés utilisés ailleurs dans l'écran. */
+ *  chantier, préfixé par le slug d'entreprise (pas de redirection middleware). */
 function ChantierRattacheCard({
   chantier,
 }: {
   chantier: { id: string; numero: string; libelle: string; avancementPct?: number | null };
 }) {
+  const versTenant = useCheminTenant();
   return (
     <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <div className="px-4 py-3">
         <h3 className="font-heading font-semibold text-orange-700">Chantier rattaché</h3>
       </div>
       <GuardedLink
-        href={`/chantiers/${chantier.id}`}
+        href={versTenant(`/chantiers/${chantier.id}`)}
         className="m-3 mt-0 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-3 transition-colors hover:bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30"
       >
         <span className="size-2 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
@@ -1410,9 +1429,10 @@ function ChantierRattacheCard({
 }
 
 /** Carte « Estimation marge » du rail (maquette devis dynamique). La vente HT
- *  est le total réel du devis ; le coût estimé est calculé sur les lignes
- *  catalogue (prix de revient des articles) — les lignes libres ne sont pas
- *  chiffrées en coût, d'où la mention « estimation sur les lignes catalogue ». */
+ *  est le total HT NET du devis (après remise globale) ; le coût estimé est
+ *  calculé sur les lignes catalogue (prix de revient des articles) — les lignes
+ *  libres ne sont pas chiffrées en coût, d'où la mention « estimation sur les
+ *  lignes catalogue ». */
 function EstimationMargeCard({
   venteHt,
   coutEstime,
@@ -1536,8 +1556,108 @@ function HistoriqueCard({ evenements }: { evenements: EvenementHistoriqueDevis[]
 // Sous-composants : section + ligne article + composants
 // ─────────────────────────────────────────────────────────────
 
-function GroupeRow({
+/**
+ * Corps du tableau des lignes, affiché progressivement : un DPGF de plusieurs
+ * centaines de lignes rendu d'un bloc pesait ~3 Mo de HTML (≈ 9 Ko par ligne)
+ * et figeait l'ouverture. Seules les `limite` premières lignes (index dans
+ * `lignes`, donc un début continu de l'affichage) sont rendues au serveur et à
+ * l'hydratation, le reste par tranches. L'état de progression vit ICI et non
+ * dans l'éditeur : une tranche ne re-rend que ce corps (les groupes déjà
+ * complets sont mémoïsés), pas les menus, totaux et rail de l'éditeur. Les
+ * totaux restent calculés sur toutes les valeurs du formulaire.
+ */
+function CorpsLignesDevis({
+  nbLignes,
+  generation,
+  groupes,
+  groupesMasques,
+  sectionsRepliees,
+  totauxRecursifs,
+  profondeurParSection,
+  lignes,
+  articles,
+  unites,
+  form,
+  onToggle,
+  onSupprimer,
+  enModeTree,
+  dpgfImporte,
+}: {
+  nbLignes: number;
+  /** Change à chaque import DPGF : relance la progression. */
+  generation: number;
+  groupes: GroupeSection[];
+  groupesMasques: ReadonlySet<number>;
+  sectionsRepliees: ReadonlySet<number>;
+  totauxRecursifs: ReadonlyMap<number, number>;
+  profondeurParSection: ReadonlyMap<number, number>;
+  lignes: LigneDevisInput[];
+  articles: ArticleOption[];
+  unites: UniteOption[];
+  form: UseFormReturn<DevisInput>;
+  onToggle: (sectionIdx: number) => void;
+  onSupprimer: (idx: number) => void;
+  enModeTree: boolean;
+  dpgfImporte: boolean;
+}) {
+  // 20 lignes couvrent l'écran sous l'en-tête ; tranches de 10 pour que chaque
+  // étape bloque peu le navigateur (une ligne = une dizaine de champs, listes et
+  // boutons, ~70 ms à monter en développement le 2026-10-21).
+  const limite = useRenduProgressif(nbLignes, { initial: 20, pas: 10, cle: generation });
+
+  return (
+    <tbody>
+      {groupes.map((g) => {
+        if (g.sectionIdx !== null && groupesMasques.has(g.sectionIdx)) {
+          return null;
+        }
+        // Groupe entièrement au-delà de la tranche affichée : pas encore rendu.
+        if ((g.sectionIdx ?? g.articleIdxs[0] ?? 0) >= limite) {
+          return null;
+        }
+        // Seul le groupe à cheval sur la limite la reçoit ; un groupe déjà
+        // complet reçoit une valeur fixe et n'est pas re-rendu (memo).
+        const derniereLigne = g.articleIdxs.at(-1) ?? g.sectionIdx ?? 0;
+        return (
+          <GroupeRow
+            key={g.sectionIdx ?? `orphelins-${g.articleIdxs.join('-')}`}
+            groupe={g}
+            limite={derniereLigne < limite ? Infinity : limite}
+            lignes={lignes}
+            articles={articles}
+            unites={unites}
+            form={form}
+            replie={g.sectionIdx !== null && sectionsRepliees.has(g.sectionIdx)}
+            onToggle={onToggle}
+            onSupprimer={onSupprimer}
+            totalSection={
+              g.sectionIdx !== null
+                ? (totauxRecursifs.get(g.sectionIdx) ?? 0)
+                : calculerTotalGroupe(g.articleIdxs, lignes)
+            }
+            profondeur={g.sectionIdx !== null ? (profondeurParSection.get(g.sectionIdx) ?? 1) : 1}
+            enModeTree={enModeTree}
+            dpgfImporte={dpgfImporte}
+          />
+        );
+      })}
+      {limite < nbLignes && (
+        <tr aria-live="polite">
+          <td colSpan={8} className="px-3 py-2 text-xs italic text-muted-foreground">
+            Affichage des lignes… {limite} / {nbLignes}
+          </td>
+        </tr>
+      )}
+    </tbody>
+  );
+}
+
+/** Mémoïsé : une frappe dans une ligne ou une nouvelle tranche d'affichage ne
+ *  re-rend plus les groupes inchangés (les lignes suivent leur propre état via
+ *  `useWatch`). Toutes les props sont donc stables ou scalaires. */
+const GroupeRow = memo(function GroupeRow({
   groupe,
+  limite,
   lignes,
   articles,
   unites,
@@ -1551,12 +1671,14 @@ function GroupeRow({
   dpgfImporte,
 }: {
   groupe: GroupeSection;
+  /** Affichage progressif : seules les lignes d'index < `limite` sont rendues. */
+  limite: number;
   lignes: LigneDevisInput[];
   articles: ArticleOption[];
   unites: UniteOption[];
   form: UseFormReturn<DevisInput>;
   replie: boolean;
-  onToggle: () => void;
+  onToggle: (sectionIdx: number) => void;
   onSupprimer: (idx: number) => void;
   totalSection: number;
   profondeur: number;
@@ -1571,7 +1693,6 @@ function GroupeRow({
   // restent structurellement présentes : on ne peut pas les retirer
   // individuellement, il faut ré-importer un autre DPGF.
   const sectionLigne = groupe.sectionIdx !== null ? lignes[groupe.sectionIdx] : undefined;
-  const sectionDesignation = sectionLigne?.designation ?? '';
   const estDpgfImporte =
     (sectionLigne as { origineDpgf?: boolean } | undefined)?.origineDpgf ?? false;
   return (
@@ -1586,7 +1707,7 @@ function GroupeRow({
               <button
                 type="button"
                 className="flex h-6 w-6 items-center justify-center rounded hover:bg-background/50"
-                onClick={onToggle}
+                onClick={() => onToggle(groupe.sectionIdx!)}
                 aria-label={replie ? 'Déplier la section' : 'Replier la section'}
               >
                 {replie ? (
@@ -1612,7 +1733,12 @@ function GroupeRow({
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => {
-                      const titre = sectionDesignation.trim() || 'cette section';
+                      // Lu au clic (et non au rendu) : le groupe étant mémoïsé, un
+                      // titre renommé depuis ne re-rend pas forcément l'en-tête.
+                      const designation = form.getValues(
+                        `lignes.${groupe.sectionIdx!}.designation`,
+                      );
+                      const titre = (designation ?? '').trim() || 'cette section';
                       if (
                         window.confirm(`Supprimer la section « ${titre} » et tout son contenu ?`)
                       ) {
@@ -1645,6 +1771,7 @@ function GroupeRow({
             </tr>
           )}
           {groupe.articleIdxs.map((idx) => {
+            if (idx >= limite) return null;
             const ligne = lignes[idx]!;
             if (ligne.type === 'section') return null;
             return (
@@ -1664,7 +1791,7 @@ function GroupeRow({
       )}
     </>
   );
-}
+});
 
 function LigneArticleRow({
   idx,
@@ -1689,19 +1816,6 @@ function LigneArticleRow({
   // sous un menu ⋮ (gabarit dynamique) pour libérer de la place à la
   // Désignation. Hors `<SidebarProvider>` (tests) → mode normal.
   const focusMode = useSidebarOptional()?.focusMode ?? false;
-  const kebabRef = useRef<HTMLDetailsElement>(null);
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (kebabRef.current && !kebabRef.current.contains(e.target as Node)) {
-        kebabRef.current.open = false;
-      }
-    }
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, []);
-  function fermerKebab() {
-    if (kebabRef.current) kebabRef.current.open = false;
-  }
 
   // Abonnement direct au state de la ligne via useWatch. Indispensable car
   // RHF mute son state interne sans changer les références d'objets : si on
@@ -1713,25 +1827,30 @@ function LigneArticleRow({
     name: `lignes.${idx}` as const,
   }) as LigneDevisInput | undefined;
 
-  const composantsFieldArray = useFieldArray({
-    control: form.control,
-    name: `lignes.${idx}.composants` as never,
-  });
-
   // Si la ligne n'est pas encore montée (cas transitoire après un remove),
   // on retourne null pour éviter les accès undefined.
   if (!ligne || ligne.type === 'section') return null;
 
   const composants = (ligne.composants ?? []) as ComposantLigneInput[];
 
-  function ajouterComposantCatalogue() {
-    composantsFieldArray.append(nouveauComposantCatalogue() as never);
+  // Composants modifiés par `setValue` sur le tableau entier : le field array
+  // n'est instancié que dans <ComposantsRows> (monté quand ils sont affichés).
+  function remplacerComposants(suivants: ComposantLigneInput[]) {
+    form.setValue(`lignes.${idx}.composants` as never, suivants as never, { shouldDirty: true });
+  }
+
+  function ajouterComposant(composant: ComposantLigneInput) {
+    const actuels = (form.getValues(`lignes.${idx}.composants`) ?? []) as ComposantLigneInput[];
+    remplacerComposants([...actuels, composant]);
     setComposantsOuverts(true);
   }
 
+  function ajouterComposantCatalogue() {
+    ajouterComposant(nouveauComposantCatalogue());
+  }
+
   function ajouterComposantLibre() {
-    composantsFieldArray.append(nouveauComposantLibre() as never);
-    setComposantsOuverts(true);
+    ajouterComposant(nouveauComposantLibre());
   }
 
   function viderComposants() {
@@ -1743,7 +1862,7 @@ function LigneArticleRow({
     ) {
       return;
     }
-    composantsFieldArray.remove();
+    remplacerComposants([]);
     setComposantsOuverts(false);
   }
 
@@ -1796,27 +1915,19 @@ function LigneArticleRow({
           <div className="flex min-w-0 items-center gap-1">
             {indenter && <span className="w-4 shrink-0" aria-hidden />}
             {estCatalogue ? (
-              <Select
+              <SelectDiffere
                 value={articleIdLigne}
+                libelle={libelleArticle(articles, articleIdLigne)}
                 onValueChange={(v) => v && appliquerArticleSurLigne(v)}
+                className="w-full"
+                aria-label="Article catalogue"
               >
-                <SelectTrigger className="w-full" aria-label="Article catalogue">
-                  <SelectValue placeholder="Choisir un article catalogue">
-                    {(v) => {
-                      if (!v) return 'Choisir un article catalogue';
-                      const a = articles.find((x) => x.id === v);
-                      return a ? `${a.code} — ${a.libelle}` : String(v);
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {articles.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.code} — {a.libelle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {articles.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.code} — {a.libelle}
+                  </SelectItem>
+                ))}
+              </SelectDiffere>
             ) : (
               <Input
                 placeholder="Désignation"
@@ -1835,31 +1946,29 @@ function LigneArticleRow({
         </td>
         <td className="px-2 py-2">
           {unites.length > 0 ? (
-            <Select
+            <SelectDiffere
               value={ligne.unite ?? ''}
+              libelle={ligne.unite || 'Unité'}
               onValueChange={(v) =>
                 form.setValue(`lignes.${idx}.unite` as never, v as never, {
                   shouldDirty: true,
                 })
               }
+              className="w-full"
+              aria-label="Unité"
             >
-              <SelectTrigger className="w-full" aria-label="Unité">
-                <SelectValue placeholder="Unité">{(v) => (v ? String(v) : 'Unité')}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {/* Si l'unité courante n'est pas dans le catalogue (ex.
-                 *  import DPGF avec libellé custom), on l'ajoute en tête
-                 *  pour qu'elle reste sélectionnable et visible. */}
-                {ligne.unite && !unites.some((u) => u.symbole === ligne.unite) && (
-                  <SelectItem value={ligne.unite}>{ligne.unite} (hors catalogue)</SelectItem>
-                )}
-                {unites.map((u) => (
-                  <SelectItem key={u.symbole} value={u.symbole}>
-                    {u.symbole} — {u.libelle}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Si l'unité courante n'est pas dans le catalogue (ex.
+               *  import DPGF avec libellé custom), on l'ajoute en tête
+               *  pour qu'elle reste sélectionnable et visible. */}
+              {ligne.unite && !unites.some((u) => u.symbole === ligne.unite) && (
+                <SelectItem value={ligne.unite}>{ligne.unite} (hors catalogue)</SelectItem>
+              )}
+              {unites.map((u) => (
+                <SelectItem key={u.symbole} value={u.symbole}>
+                  {u.symbole} — {u.libelle}
+                </SelectItem>
+              ))}
+            </SelectDiffere>
           ) : (
             <Input
               placeholder="u"
@@ -1893,26 +2002,25 @@ function LigneArticleRow({
           />
         </td>
         <td className="px-2 py-2">
-          <Select
+          <SelectDiffere
             value={(ligne as { tauxTva?: string }).tauxTva ?? '20.00'}
+            // Valeur brute, comme le rendu par défaut de <SelectValue> jusqu'ici.
+            libelle={(ligne as { tauxTva?: string }).tauxTva ?? '20.00'}
             onValueChange={(v) =>
               v &&
               form.setValue(`lignes.${idx}.tauxTva` as never, v as never, {
                 shouldDirty: true,
               })
             }
+            className="w-full"
+            aria-label="Taux de TVA"
           >
-            <SelectTrigger className="w-full" aria-label="Taux de TVA">
-              <SelectValue placeholder="TVA" />
-            </SelectTrigger>
-            <SelectContent>
-              {TAUX_TVA_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {TAUX_TVA_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectDiffere>
         </td>
         <td className="px-2 py-2">
           <Input
@@ -1998,100 +2106,94 @@ function LigneArticleRow({
             </div>
           ) : (
             <div className="flex justify-center">
-              <details ref={kebabRef} className="relative inline-block text-left">
-                <summary
-                  className="inline-flex size-7 cursor-pointer items-center justify-center rounded-[min(var(--radius-md),12px)] text-muted-foreground hover:bg-accent hover:text-foreground [&::-webkit-details-marker]:hidden [&::marker]:hidden"
-                  aria-label="Actions de la ligne"
-                  title="Actions de la ligne"
-                >
-                  <MoreVerticalIcon className="size-4" />
-                </summary>
-                <div className="absolute right-0 top-full z-30 mt-1 w-60 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-                  {(dpgfImporte || composants.length > 0) && (
-                    <>
-                      <LigneMenuItem
-                        icon={PackageIcon}
-                        label="Afficher / masquer les composants"
-                        disabled={composants.length === 0}
-                        onClick={() => {
-                          setComposantsOuverts((v) => !v);
-                          fermerKebab();
-                        }}
-                      />
-                      <LigneMenuItem
-                        icon={BookOpenIcon}
-                        label="Ajouter un composant article catalogue"
-                        onClick={() => {
-                          ajouterComposantCatalogue();
-                          fermerKebab();
-                        }}
-                      />
-                      <LigneMenuItem
-                        icon={PencilIcon}
-                        label="Ajouter un composant libre"
-                        onClick={() => {
-                          ajouterComposantLibre();
-                          fermerKebab();
-                        }}
-                      />
-                      <LigneMenuItem
-                        icon={Trash2Icon}
-                        label="Vider les composants"
-                        disabled={composants.length === 0}
-                        onClick={() => {
-                          viderComposants();
-                          fermerKebab();
-                        }}
-                      />
-                      <div className="my-1 border-t" />
-                    </>
-                  )}
-                  <LigneMenuItem
-                    icon={Trash2Icon}
-                    label="Supprimer la ligne"
-                    danger
-                    onClick={() => {
-                      supprimerLigne();
-                      fermerKebab();
-                    }}
-                  />
-                </div>
-              </details>
+              <MenuActionsLigne>
+                {(fermerKebab) => (
+                  <>
+                    {(dpgfImporte || composants.length > 0) && (
+                      <>
+                        <LigneMenuItem
+                          icon={PackageIcon}
+                          label="Afficher / masquer les composants"
+                          disabled={composants.length === 0}
+                          onClick={() => {
+                            setComposantsOuverts((v) => !v);
+                            fermerKebab();
+                          }}
+                        />
+                        <LigneMenuItem
+                          icon={BookOpenIcon}
+                          label="Ajouter un composant article catalogue"
+                          onClick={() => {
+                            ajouterComposantCatalogue();
+                            fermerKebab();
+                          }}
+                        />
+                        <LigneMenuItem
+                          icon={PencilIcon}
+                          label="Ajouter un composant libre"
+                          onClick={() => {
+                            ajouterComposantLibre();
+                            fermerKebab();
+                          }}
+                        />
+                        <LigneMenuItem
+                          icon={Trash2Icon}
+                          label="Vider les composants"
+                          disabled={composants.length === 0}
+                          onClick={() => {
+                            viderComposants();
+                            fermerKebab();
+                          }}
+                        />
+                        <div className="my-1 border-t" />
+                      </>
+                    )}
+                    <LigneMenuItem
+                      icon={Trash2Icon}
+                      label="Supprimer la ligne"
+                      danger
+                      onClick={() => {
+                        supprimerLigne();
+                        fermerKebab();
+                      }}
+                    />
+                  </>
+                )}
+              </MenuActionsLigne>
             </div>
           )}
         </td>
       </tr>
 
       {composantsOuverts && composants.length > 0 && (
-        <ComposantsRows
-          ligneIdx={idx}
-          articles={articles}
-          form={form}
-          fields={composantsFieldArray.fields}
-          onRemove={(i) => {
-            if (window.confirm('Supprimer ce composant ?')) {
-              composantsFieldArray.remove(i);
-            }
-          }}
-        />
+        <ComposantsRows ligneIdx={idx} articles={articles} form={form} />
       )}
     </>
   );
 }
 
+/** Sous-lignes de composants. Le `useFieldArray` vit ICI, monté seulement quand
+ *  les composants sont affichés : instancié sur chaque ligne du devis, il coûtait
+ *  un abonnement RHF par ligne pour un usage rare. Les ajouts / vidages faits
+ *  depuis la ligne passent par `setValue` (que RHF répercute sur ce field array). */
 function ComposantsRows({
   ligneIdx,
   articles,
   form,
-  fields,
-  onRemove,
 }: {
   ligneIdx: number;
   articles: ArticleOption[];
   form: UseFormReturn<DevisInput>;
-  fields: { id: string }[];
-  onRemove: (idx: number) => void;
 }) {
+  const { fields, remove } = useFieldArray({
+    control: form.control,
+    name: `lignes.${ligneIdx}.composants` as never,
+  });
+
+  function onRemove(idx: number) {
+    if (window.confirm('Supprimer ce composant ?')) remove(idx);
+  }
+
   function appliquerArticle(idx: number, articleId: string) {
     const a = articles.find((x) => x.id === articleId);
     if (!a) return;
@@ -2452,6 +2554,50 @@ function MenuAjouterArticle({
 
 /** Item du menu ⋮ des actions d'une ligne (mode normal). Mêmes intitulés
  *  (`aria-label`) que les icônes en ligne du plein écran. */
+/**
+ * Menu ⋮ d'une ligne. Son contenu (entrées + icônes) n'est rendu qu'à
+ * l'ouverture, et l'écoute du clic extérieur n'est posée que pendant qu'il est
+ * ouvert : rendu fermé sur chaque ligne avec un écouteur `document` par ligne, il
+ * était l'élément le plus coûteux d'une ligne de devis (banc du 2026-10-21).
+ */
+function MenuActionsLigne({ children }: { children: (fermer: () => void) => React.ReactNode }) {
+  const [ouvert, setOuvert] = useState(false);
+  const ref = useRef<HTMLDetailsElement>(null);
+  const fermer = useCallback(() => setOuvert(false), []);
+
+  useEffect(() => {
+    if (!ouvert) return;
+    function onDocMouseDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOuvert(false);
+    }
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [ouvert]);
+
+  return (
+    <details ref={ref} open={ouvert} className="relative inline-block text-left">
+      <summary
+        className="inline-flex size-7 cursor-pointer items-center justify-center rounded-[min(var(--radius-md),12px)] text-muted-foreground hover:bg-accent hover:text-foreground [&::-webkit-details-marker]:hidden [&::marker]:hidden"
+        aria-label="Actions de la ligne"
+        aria-expanded={ouvert}
+        title="Actions de la ligne"
+        onClick={(e) => {
+          // Ouverture pilotée par React (contenu monté à la demande).
+          e.preventDefault();
+          setOuvert((o) => !o);
+        }}
+      >
+        <MoreVerticalIcon className="size-4" />
+      </summary>
+      {ouvert && (
+        <div className="absolute right-0 top-full z-30 mt-1 w-60 rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+          {children(fermer)}
+        </div>
+      )}
+    </details>
+  );
+}
+
 function LigneMenuItem({
   icon: Icon,
   label,

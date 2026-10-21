@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = { ok: true; data: void } | { ok: false; error: string };
 
@@ -21,6 +22,7 @@ type Props = {
  */
 export function DeleteVehiculeButton({ successRedirect, onDelete }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [confirme, setConfirme] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -29,7 +31,7 @@ export function DeleteVehiculeButton({ successRedirect, onDelete }: Props) {
       const r = await onDelete();
       if (r.ok) {
         toast.success('Véhicule supprimé');
-        router.push(successRedirect);
+        router.push(versTenant(successRedirect));
         router.refresh();
       } else {
         toast.error(r.error);

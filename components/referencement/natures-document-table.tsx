@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { NatureDocument } from '@/db/schema/referentiel-tiers';
@@ -9,6 +7,7 @@ import {
   LIBELLES_MODE_CONTROLE,
   type ModeControleDocument,
 } from '@/lib/validation/referencement-tiers';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: NatureDocument[];
@@ -81,12 +80,12 @@ export function NaturesDocumentTable({ items, peutEcrire, rightActions }: Props)
       header: 'Actions',
       align: 'right',
       cell: (n) => (
-        <Link
+        <LienTenant
           href={`/administration/referentiel-tiers/natures-document/${n.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

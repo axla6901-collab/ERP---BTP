@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { grilleTarifaireSchema, type GrilleTarifaireInput } from '@/lib/validation/catalogue';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -86,6 +87,7 @@ export function GrilleTarifaireEditor({
   successRedirect,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -126,7 +128,7 @@ export function GrilleTarifaireEditor({
       return;
     }
     toast.success('Grille enregistrée');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

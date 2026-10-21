@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { detectFormatImport, type ImportStats } from '@/lib/rh/import-export-types';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult<T> =
   | { ok: true; data: T }
@@ -20,6 +21,7 @@ type Props = {
 
 export function ImportForm({ onJson, onExcel }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const inputRef = useRef<HTMLInputElement>(null);
   const [stats, setStats] = useState<ImportStats | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -139,7 +141,11 @@ export function ImportForm({ onJson, onExcel }: Props) {
       )}
 
       <div className="flex gap-2">
-        <Button variant="outline" onClick={() => router.push('/rh/pointages')} disabled={isPending}>
+        <Button
+          variant="outline"
+          onClick={() => router.push(versTenant('/rh/pointages'))}
+          disabled={isPending}
+        >
           Voir les pointages
         </Button>
       </div>

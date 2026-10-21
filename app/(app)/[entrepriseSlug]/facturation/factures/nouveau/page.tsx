@@ -8,6 +8,7 @@ import { listerClients } from '@/lib/commercial/clients';
 import { listerDevis } from '@/lib/commercial/devis';
 import { creerFacture } from '@/lib/facturation/factures';
 import { ROLES_FACTURATION_WRITE } from '@/lib/facturation/permissions';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 function libelleClient(c: {
   type: string;
@@ -19,10 +20,15 @@ function libelleClient(c: {
   return [c.prenom, c.nom].filter(Boolean).join(' ') || '?';
 }
 
-export default async function NouvelleFacturePage() {
+export default async function NouvelleFacturePage({
+  params,
+}: {
+  params: Promise<{ entrepriseSlug: string }>;
+}) {
+  const { entrepriseSlug } = await params;
   const utilisateur = await requireAuthWithMfa();
   if (!ROLES_FACTURATION_WRITE.includes(utilisateur.role)) {
-    redirect('/facturation/factures');
+    redirect(cheminTenant(entrepriseSlug, '/facturation/factures'));
   }
 
   const [clients, chantiers, devis, articles] = await Promise.all([

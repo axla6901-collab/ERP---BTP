@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { SituationActions } from '@/components/facturation/situation-actions';
@@ -12,6 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
+import { libelleNumeroFacture } from '@/lib/facturation/numerotation-facture';
 import { peutEcrireFacturation } from '@/lib/facturation/permissions';
 import {
   calculerMontantRemiseGlobale,
@@ -25,6 +25,7 @@ import {
   validerSituation,
 } from '@/lib/facturation/situations';
 import { LIBELLES_STATUT_SITUATION, type StatutSituation } from '@/lib/validation/facturation';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatMontant(m: string | null | number): string {
   if (m === null || m === undefined || m === '') return '—';
@@ -121,16 +122,16 @@ export default async function SituationDetailPage({ params }: { params: Promise<
                 </dd>
               </>
             )}
-            {situation.factureNumero && situation.factureId ? (
+            {situation.factureId ? (
               <>
                 <dt className="text-muted-foreground">Facture</dt>
                 <dd>
-                  <Link
+                  <LienTenant
                     href={`/facturation/factures/${situation.factureId}`}
                     className="font-mono text-xs underline underline-offset-4"
                   >
-                    {situation.factureNumero}
-                  </Link>
+                    {libelleNumeroFacture(situation.factureNumero)}
+                  </LienTenant>
                 </dd>
               </>
             ) : (
@@ -243,12 +244,12 @@ export default async function SituationDetailPage({ params }: { params: Promise<
         />
       )}
 
-      <Link
+      <LienTenant
         href="/facturation/situations"
         className="text-sm text-muted-foreground underline underline-offset-4"
       >
         ← Retour aux situations
-      </Link>
+      </LienTenant>
     </div>
   );
 }

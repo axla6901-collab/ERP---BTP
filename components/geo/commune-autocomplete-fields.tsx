@@ -26,6 +26,11 @@ type Props<T extends FieldValues> = {
   /** Classe du conteneur grille (défaut : grille 3 colonnes responsive). */
   className?: string;
   disabled?: boolean;
+  /**
+   * Adresse hors de France : code postal libre (jusqu'à 10 caractères) et pas
+   * de suggestions — le référentiel des codes postaux ne couvre que la France.
+   */
+  horsFrance?: boolean;
 };
 
 const DELAI_DEBOUNCE_MS = 250;
@@ -60,6 +65,7 @@ function ChampCommune({
   className,
   rendreOption,
   erreur,
+  suggestionsActives = true,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -73,6 +79,8 @@ function ChampCommune({
   className?: string | undefined;
   rendreOption: (s: CommuneSuggestion) => string;
   erreur?: string | undefined;
+  /** false = saisie libre, sans recherche ni liste de suggestions. */
+  suggestionsActives?: boolean | undefined;
 }) {
   const [suggestions, setSuggestions] = useState<CommuneSuggestion[]>([]);
   const [ouvert, setOuvert] = useState(false);
@@ -114,7 +122,7 @@ function ChampCommune({
   useEffect(() => {
     if (terme === null) return;
     const q = terme.trim();
-    if (q.length < 2) {
+    if (!suggestionsActives || q.length < 2) {
       setSuggestions([]);
       setOuvert(false);
       return;
@@ -130,7 +138,7 @@ function ChampCommune({
       clearTimeout(t);
       ctrl.abort();
     };
-  }, [terme]);
+  }, [terme, suggestionsActives]);
 
   function choisir(s: CommuneSuggestion) {
     onSelectionner(s);
@@ -249,6 +257,7 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
   codeInseeName,
   className,
   disabled,
+  horsFrance = false,
 }: Props<T>) {
   const { setValue } = useFormContext<T>();
   const cp = useController({ control, name: codePostalName });
@@ -275,9 +284,9 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
     <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-3', className)}>
       <ChampCommune
         label="Code postal"
-        placeholder="69001"
-        inputMode="numeric"
-        maxLength={5}
+        placeholder={horsFrance ? 'ex. 1200' : '69001'}
+        inputMode={horsFrance ? 'text' : 'numeric'}
+        maxLength={horsFrance ? 10 : 5}
         disabled={disabled}
         value={valeurCp}
         onChange={cp.field.onChange}
@@ -285,11 +294,12 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
         onSelectionner={remplir}
         rendreOption={(s) => `${s.codePostal} ${s.commune}`}
         erreur={cp.fieldState.error?.message}
+        suggestionsActives={!horsFrance}
       />
       <ChampCommune
         className="sm:col-span-2"
         label="Ville"
-        placeholder="Lyon"
+        placeholder={horsFrance ? 'ex. Genève' : 'Lyon'}
         maxLength={100}
         disabled={disabled}
         value={valeurVille}
@@ -298,6 +308,7 @@ export function CommuneAutocompleteFields<T extends FieldValues>({
         onSelectionner={remplir}
         rendreOption={(s) => `${s.commune} (${s.codePostal})`}
         erreur={ville.fieldState.error?.message}
+        suggestionsActives={!horsFrance}
       />
     </div>
   );

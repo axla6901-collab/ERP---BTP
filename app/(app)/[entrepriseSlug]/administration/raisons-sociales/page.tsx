@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { RaisonsSocialesTable } from '@/components/referencement/raisons-sociales-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { peutAdministrer } from '@/lib/admin/permissions';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerRaisonsSociales } from '@/lib/referencement/raisons-sociales';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function RaisonsSocialesPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -18,12 +17,12 @@ export default async function RaisonsSocialesPage() {
         title="Raisons sociales"
         actions={
           peutEcrire ? (
-            <Link
+            <LienTenant
               href="/administration/raisons-sociales/nouveau"
               className={buttonVariants({ size: 'sm' })}
             >
               + Nouvelle raison sociale
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

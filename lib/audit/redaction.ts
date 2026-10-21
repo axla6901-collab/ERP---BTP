@@ -15,6 +15,7 @@ export const CHAMPS_SENSIBLES_PAR_TABLE: Record<string, readonly string[]> = {
   employes: ['numeroSecu', 'iban', 'bic', 'salaireMensuelBrut', 'tauxHoraireBrut'],
   entreprises: ['iban', 'bic'],
   flotte_pleins: ['numeroCarteCarburant'],
+  sirh_contrats: ['salaireBrutMensuel', 'tauxHoraireBrut'],
 };
 
 /** Valeur de remplacement stockée à la place du clair dans l'audit. */

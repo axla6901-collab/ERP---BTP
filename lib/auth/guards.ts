@@ -3,6 +3,7 @@ import 'server-only';
 import { and, eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 
 import { db } from '@/lib/db/client';
 import { permissions, rolePermissions, roles } from '@/db/schema/rbac';
@@ -11,9 +12,13 @@ import { utilisateurs } from '@/db/schema/utilisateurs';
 import { auth } from './server';
 import { ROLES_MFA_OBLIGATOIRE, isRole, type Role } from './rbac';
 
-export async function getSession() {
-  return auth.api.getSession({ headers: await headers() });
-}
+/**
+ * Session de la requête, mémoïsée par requête (React `cache`, comme
+ * `getTenantContext`) : layouts, page et gardes la demandent jusqu'à 8 fois par
+ * rendu, et chaque appel non mémoïsé relisait la session en base. Hors rendu
+ * (server action, route handler), `cache` laisse passer : lecture à chaque appel.
+ */
+export const getSession = cache(async () => auth.api.getSession({ headers: await headers() }));
 
 export type UtilisateurCourant = {
   id: string;
@@ -36,7 +41,8 @@ export type UtilisateurCourant = {
   isSuperAdmin: boolean;
 };
 
-export async function getCurrentUtilisateur(): Promise<UtilisateurCourant | null> {
+/** Utilisateur courant (rôle compris), mémoïsé par requête comme `getSession`. */
+export const getCurrentUtilisateur = cache(async (): Promise<UtilisateurCourant | null> => {
   const session = await getSession();
   if (!session) return null;
 
@@ -78,7 +84,7 @@ export async function getCurrentUtilisateur(): Promise<UtilisateurCourant | null
     twoFactorEnabled: session.user.twoFactorEnabled ?? false,
     isSuperAdmin: row.isSuperAdmin,
   };
-}
+});
 
 export async function requireAuth(role?: Role | readonly Role[]): Promise<UtilisateurCourant> {
   const utilisateur = await getCurrentUtilisateur();

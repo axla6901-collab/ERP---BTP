@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { asc, count, desc, isNull } from 'drizzle-orm';
 
 import {
@@ -25,6 +24,7 @@ import { utilisateurs } from '@/db/schema/utilisateurs';
 import { basculerActif, dupliquerRole, enregistrerMatrice, supprimerRole } from '@/lib/admin/roles';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (RBAC, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function grouperPermissions(perms: (typeof permissions.$inferSelect)[]): GroupePermissions[] {
   const parModule = new Map<string, Map<string | null, typeof perms>>();
@@ -89,9 +89,12 @@ export default async function RolesPage() {
         title="Rôles applicatifs"
         subtitle={`${rolesRows.length} rôle(s)`}
         actions={
-          <Link href="/administration/roles/nouveau" className={buttonVariants({ size: 'sm' })}>
+          <LienTenant
+            href="/administration/roles/nouveau"
+            className={buttonVariants({ size: 'sm' })}
+          >
             + Ajouter
-          </Link>
+          </LienTenant>
         }
       />
       <section className="space-y-3">

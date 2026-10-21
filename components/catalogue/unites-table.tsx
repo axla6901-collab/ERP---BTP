@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { Unite } from '@/db/schema/catalogue';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 const LIBELLES_TYPE: Record<string, string> = {
   masse: 'Masse',
@@ -69,12 +68,12 @@ export function UnitesTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (u) => (
-        <Link
+        <LienTenant
           href={`/administration/unites/${u.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

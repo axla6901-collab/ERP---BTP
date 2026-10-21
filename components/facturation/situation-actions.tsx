@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { StatutSituation } from '@/lib/validation/facturation';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -15,9 +16,7 @@ type Props = {
   statut: StatutSituation;
   dejaFacturee: boolean;
   actionValider: (id: string) => Promise<Result<void>>;
-  actionGenererFacture: (
-    id: string,
-  ) => Promise<Result<{ factureId: string; factureNumero: string }>>;
+  actionGenererFacture: (id: string) => Promise<Result<{ factureId: string }>>;
   actionAnnuler: (id: string) => Promise<Result<void>>;
 };
 
@@ -30,6 +29,7 @@ export function SituationActions({
   actionAnnuler,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isPending, startTransition] = useTransition();
 
   function handleValider() {
@@ -37,7 +37,6 @@ export function SituationActions({
       const res = await actionValider(situationId);
       if (res.ok) {
         toast.success('Situation validée');
-        router.refresh();
       } else {
         toast.error(res.error);
       }
@@ -48,8 +47,8 @@ export function SituationActions({
     startTransition(async () => {
       const res = await actionGenererFacture(situationId);
       if (res.ok) {
-        toast.success(`Facture ${res.data.factureNumero} créée en brouillon`);
-        router.push(`/facturation/factures/${res.data.factureId}`);
+        toast.success('Facture créée en brouillon : son numéro sera attribué à l’émission');
+        router.push(versTenant(`/facturation/factures/${res.data.factureId}`));
       } else {
         toast.error(res.error);
       }
@@ -61,7 +60,6 @@ export function SituationActions({
       const res = await actionAnnuler(situationId);
       if (res.ok) {
         toast.success('Situation annulée');
-        router.refresh();
       } else {
         toast.error(res.error);
       }

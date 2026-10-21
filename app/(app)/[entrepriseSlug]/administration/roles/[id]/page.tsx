@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { count, eq } from 'drizzle-orm';
 
@@ -10,6 +9,7 @@ import { utilisateurs } from '@/db/schema/utilisateurs';
 import { mettreAJourRole, supprimerRole } from '@/lib/admin/roles';
 // eslint-disable-next-line no-restricted-imports -- lecture de tables globales (RBAC, sans entreprise_id) : pas de contexte tenant requis
 import { db } from '@/lib/db/client';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function EditionRolePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,12 +28,12 @@ export default async function EditionRolePage({ params }: { params: Promise<{ id
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium">Modifier le rôle</h2>
-        <Link
+        <LienTenant
           href="/administration/roles"
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
           ← Retour à la liste
-        </Link>
+        </LienTenant>
       </div>
 
       {role.systeme && (
@@ -42,9 +42,9 @@ export default async function EditionRolePage({ params }: { params: Promise<{ id
             Ce rôle est <strong>système</strong> : le code est figé, et il ne peut pas être
             supprimé. Le libellé, la description et l&apos;état actif/désactivé restent modifiables.
             Ses permissions s&apos;éditent dans la matrice de la page{' '}
-            <Link href="/administration/roles" className="underline underline-offset-4">
+            <LienTenant href="/administration/roles" className="underline underline-offset-4">
               Rôles &amp; permissions
-            </Link>
+            </LienTenant>
             .
           </AlertDescription>
         </Alert>

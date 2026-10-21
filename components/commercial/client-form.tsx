@@ -33,6 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { clientSchema, type ClientInput } from '@/lib/validation/commercial';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -56,6 +57,7 @@ export function ClientForm({
   raisonsSocialesConnues = [],
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -105,7 +107,7 @@ export function ClientForm({
       return;
     }
     toast.success('Client enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 

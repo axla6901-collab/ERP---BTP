@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { RaisonSociale } from '@/db/schema/raisons-sociales';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: RaisonSociale[];
@@ -35,12 +34,12 @@ export function RaisonsSocialesTable({ items, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (r) => (
-        <Link
+        <LienTenant
           href={`/administration/raisons-sociales/${r.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

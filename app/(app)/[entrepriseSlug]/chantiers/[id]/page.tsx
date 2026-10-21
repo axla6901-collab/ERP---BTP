@@ -475,7 +475,7 @@ export default async function ChantierDetailPage({
                           </TableCell>
                           <TableCell className="text-right">
                             <Link
-                              href={`/tiers/fournisseurs/${g.fournisseurId}/grilles/${g.id}`}
+                              href={`/${entrepriseSlug}/tiers/fournisseurs/${g.fournisseurId}/grilles/${g.id}`}
                               className="text-sm underline underline-offset-4"
                             >
                               {peutEcrire ? 'Modifier' : 'Consulter'}

@@ -8,6 +8,7 @@ import { SidebarProvider } from '@/components/layout/sidebar-context';
 import type { DevisInput, LigneDevisInput } from '@/lib/validation/commercial';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   usePathname: () => '/acme/commercial/devis/devis-1',
   useRouter: () => ({
     refresh: vi.fn(),
@@ -91,7 +92,8 @@ describe('DevisEditor — rail récap & plein écran', () => {
     expect(screen.getByText('Chantier rattaché')).toBeInTheDocument();
     expect(screen.getByText('École Marguerite')).toBeInTheDocument();
     const lien = screen.getByRole('link', { name: /École Marguerite/ });
-    expect(lien).toHaveAttribute('href', '/chantiers/ch-1');
+    // Préfixé par le slug (plus de redirection middleware au clic).
+    expect(lien).toHaveAttribute('href', '/acme/chantiers/ch-1');
   });
 
   it('aucune carte chantier sans chantier rattaché', () => {
@@ -117,8 +119,11 @@ describe('DevisEditor — rail récap & plein écran', () => {
   it('actions de ligne sous un menu ⋮ en mode normal, en icônes alignées en plein écran', () => {
     renderEditor();
 
-    // Mode normal : un menu ⋮ regroupe les actions de la ligne.
-    expect(screen.getByTitle('Actions de la ligne')).toBeInTheDocument();
+    // Mode normal : un menu ⋮ regroupe les actions de la ligne ; ses entrées ne
+    // sont rendues qu'à l'ouverture (allègement des lignes).
+    const menu = screen.getByTitle('Actions de la ligne');
+    expect(screen.queryByLabelText('Supprimer la ligne')).not.toBeInTheDocument();
+    fireEvent.click(menu);
     // « Supprimer la ligne » reste accessible (item du menu).
     expect(screen.getByLabelText('Supprimer la ligne')).toBeInTheDocument();
 

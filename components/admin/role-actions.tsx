@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -29,6 +30,7 @@ export function RoleActions({
   onSupprimer,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isPending, startTransition] = useTransition();
 
   const estAdminSysteme = systeme && roleCode === 'admin';
@@ -41,7 +43,7 @@ export function RoleActions({
         return;
       }
       toast.success('Rôle dupliqué');
-      router.push(`/administration/roles/${res.data.id}`);
+      router.push(versTenant(`/administration/roles/${res.data.id}`));
     });
   }
 
@@ -79,7 +81,7 @@ export function RoleActions({
   return (
     <div className="flex justify-end gap-3 whitespace-nowrap text-sm">
       <Link
-        href={`/administration/roles/${roleId}`}
+        href={versTenant(`/administration/roles/${roleId}`)}
         className="text-primary underline underline-offset-4 hover:text-primary/80"
       >
         Modifier

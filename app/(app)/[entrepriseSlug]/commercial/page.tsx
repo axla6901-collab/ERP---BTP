@@ -1,10 +1,10 @@
-import Link from 'next/link';
 import { count, eq, isNull, and } from 'drizzle-orm';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
 import { clients, devis } from '@/db/schema/commercial';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 async function compter(entrepriseId: string) {
   const [[cli], [dev], [brouillons]] = await withTenant(entrepriseId, (tx) =>
@@ -30,7 +30,7 @@ export default async function CommercialDashboard() {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Link href="/commercial/clients" className="block">
+      <LienTenant href="/commercial/clients" className="block">
         <Card className="transition hover:border-foreground/40">
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
@@ -41,8 +41,8 @@ export default async function CommercialDashboard() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Voir la liste →</CardContent>
         </Card>
-      </Link>
-      <Link href="/commercial/devis" className="block">
+      </LienTenant>
+      <LienTenant href="/commercial/devis" className="block">
         <Card className="transition hover:border-foreground/40">
           <CardHeader>
             <CardTitle className="flex items-baseline justify-between">
@@ -57,7 +57,7 @@ export default async function CommercialDashboard() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Voir la liste →</CardContent>
         </Card>
-      </Link>
+      </LienTenant>
     </div>
   );
 }

@@ -28,13 +28,16 @@ export function joindreEnumerationFr(parties: readonly string[]): string {
  * Construit le message de blocage si l'entité est encore référencée, sinon
  * retourne `null` (suppression autorisée).
  *
- * @param sujet      Désignation au masculin singulier, accordée avec « référencé ».
- *                   Ex. `'ce client'`, `'ce fournisseur'`, `'ce sous-traitant'`.
+ * @param sujet      Désignation au singulier, accordée avec « référencé(e) ».
+ *                   Ex. `'ce client'`, `'ce fournisseur'`, `'cette équipe'`.
  * @param compteurs  Nombre de références par relation. Les compteurs nuls sont ignorés.
+ * @param options    `feminin` : accorde « référencée » / « Désactivez-la » ;
+ *                   `conseil` : remplace la phrase finale (ex. « Réformez-le plutôt. »).
  */
 export function messageBlocageSuppression(
   sujet: string,
   compteurs: readonly CompteurReference[],
+  options: { feminin?: boolean; conseil?: string } = {},
 ): string | null {
   const parties = compteurs
     .filter((c) => c.nombre > 0)
@@ -42,8 +45,12 @@ export function messageBlocageSuppression(
 
   if (parties.length === 0) return null;
 
+  const e = options.feminin ? 'e' : '';
+  const conseil =
+    options.conseil ??
+    `Désactivez-l${options.feminin ? 'a' : 'e'} plutôt si vous ne l'utilisez plus.`;
   return (
-    `Suppression impossible : ${sujet} est référencé par ${joindreEnumerationFr(parties)}. ` +
-    `Désactivez-le plutôt si vous ne l'utilisez plus.`
+    `Suppression impossible : ${sujet} est référencé${e} par ${joindreEnumerationFr(parties)}. ` +
+    conseil
   );
 }

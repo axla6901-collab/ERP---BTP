@@ -82,4 +82,29 @@ describe('messageBlocageSuppression', () => {
       ]),
     ).toContain('ce fournisseur est référencé par 1 grille tarifaire');
   });
+
+  it('accorde au féminin (référencée / Désactivez-la)', () => {
+    expect(
+      messageBlocageSuppression(
+        'cette équipe',
+        [{ nombre: 2, singulier: 'annonce', pluriel: 'annonces' }],
+        { feminin: true },
+      ),
+    ).toBe(
+      'Suppression impossible : cette équipe est référencée par 2 annonces. ' +
+        "Désactivez-la plutôt si vous ne l'utilisez plus.",
+    );
+  });
+
+  it('accepte un conseil personnalisé', () => {
+    expect(
+      messageBlocageSuppression(
+        'ce matériel',
+        [{ nombre: 1, singulier: 'attribution', pluriel: 'attributions' }],
+        { conseil: 'Réformez-le plutôt.' },
+      ),
+    ).toBe(
+      'Suppression impossible : ce matériel est référencé par 1 attribution. Réformez-le plutôt.',
+    );
+  });
 });

@@ -4,7 +4,7 @@ import { Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { useGuardedRouter, useUnsavedChangesGuard } from '@/lib/hooks/navigation-guard';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -37,6 +37,7 @@ import {
   type FactureInput,
   type LigneFactureInput,
 } from '@/lib/validation/facturation';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -103,6 +104,7 @@ export function FactureEditor({
   successRedirectAppendId,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -155,23 +157,19 @@ export function FactureEditor({
   const remiseGlobaleType = form.watch('remiseGlobaleType') ?? null;
   const remiseGlobaleValeur = form.watch('remiseGlobaleValeur') ?? null;
 
-  const totauxLive = useMemo(
-    () =>
-      appliquerRemiseGlobale(calculerTotauxFacture(lignesLive, { autoLiquidation: autoLiq }), {
-        type: remiseGlobaleType,
-        valeur: remiseGlobaleValeur,
-      }),
-    [lignesLive, autoLiq, remiseGlobaleType, remiseGlobaleValeur],
+  // Totaux live recalculés à CHAQUE rendu (PAS de useMemo) : RHF mute son state
+  // interne sans changer la référence du tableau `lignes`, donc un useMemo sur
+  // [lignesLive] restait figé (totaux à 0,00 € pendant la saisie). Même raison
+  // que `totalHtDevis` dans <DevisEditor> ; coût O(lignes) négligeable.
+  const totauxLive = appliquerRemiseGlobale(
+    calculerTotauxFacture(lignesLive, { autoLiquidation: autoLiq }),
+    { type: remiseGlobaleType, valeur: remiseGlobaleValeur },
   );
   const aRemise = Number(totauxLive.remiseGlobaleMontant) > 0;
-  const montantRetenueLive = useMemo(
-    () => calculerMontantRetenue(totauxLive.totalHt, retenuePct ?? null),
-    [totauxLive.totalHt, retenuePct],
-  );
-  const netAPayer = useMemo(() => {
-    if (!montantRetenueLive) return totauxLive.totalTtc;
-    return (Number(totauxLive.totalTtc) - Number(montantRetenueLive)).toFixed(2);
-  }, [totauxLive.totalTtc, montantRetenueLive]);
+  const montantRetenueLive = calculerMontantRetenue(totauxLive.totalHt, retenuePct ?? null);
+  const netAPayer = montantRetenueLive
+    ? (Number(totauxLive.totalTtc) - Number(montantRetenueLive)).toFixed(2)
+    : totauxLive.totalTtc;
 
   function applyArticle(idx: number, articleId: string) {
     const a = articles.find((x) => x.id === articleId);
@@ -248,6 +246,10 @@ export function FactureEditor({
         ? `Facture ${result.data.numero} enregistrée`
         : 'Facture enregistrée',
     );
+    // Valeurs enregistrées = nouvelle référence : sans ce reset, le formulaire
+    // reste « modifié » quand on reste sur la même page (édition → fiche) et la
+    // garde de navigation réclame un enregistrement déjà fait.
+    form.reset(form.getValues());
     const resolvedId =
       result.data && typeof result.data === 'object' && 'id' in result.data
         ? (result.data as { id?: string }).id
@@ -256,8 +258,7 @@ export function FactureEditor({
       successRedirectAppendId && resolvedId
         ? `${successRedirect.replace(/\/$/, '')}/${resolvedId}`
         : successRedirect;
-    router.push(url);
-    router.refresh();
+    router.push(versTenant(url));
   }
 
   const clientId = form.watch('clientId');

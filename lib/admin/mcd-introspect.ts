@@ -25,6 +25,7 @@ import * as rbac from '@/db/schema/rbac';
 import * as referentielTiers from '@/db/schema/referentiel-tiers';
 import * as societes from '@/db/schema/societes';
 import * as sousTraitance from '@/db/schema/sous-traitance';
+import * as testSirh from '@/db/schema/test-sirh';
 import * as tiers from '@/db/schema/tiers';
 import * as tiersRegistre from '@/db/schema/tiers-registre';
 import * as utilisateurs from '@/db/schema/utilisateurs';
@@ -105,6 +106,7 @@ const SCHEMAS_PAR_MODULE: Partial<Record<McdModuleId, Record<string, unknown>>> 
   facturation,
   'sous-traitance': sousTraitance,
   flotte,
+  'test-sirh': testSirh,
 };
 
 function getColumnSqlType(col: PgColumn): string {

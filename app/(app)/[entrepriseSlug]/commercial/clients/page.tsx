@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { ClientsTable } from '@/components/commercial/clients-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerClients } from '@/lib/commercial/clients';
 import { peutEcrireCommercial } from '@/lib/commercial/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function ClientsPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -18,9 +17,12 @@ export default async function ClientsPage() {
         title="Clients"
         actions={
           peutEcrire ? (
-            <Link href="/commercial/clients/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant
+              href="/commercial/clients/nouveau"
+              className={buttonVariants({ size: 'sm' })}
+            >
               + Nouveau client
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

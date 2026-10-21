@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { Societe } from '@/db/schema/societes';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 /** Raison sociale jointe depuis le référentiel central (alias `raisonSociale`). */
 type SocieteRow = Societe & { raisonSociale: string };
@@ -52,12 +51,12 @@ export function SocietesTable({ items, peutEcrire, rightActions }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (s) => (
-        <Link
+        <LienTenant
           href={`/administration/referentiel-tiers/societes/${s.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

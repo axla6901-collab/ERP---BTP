@@ -7,11 +7,13 @@ import { EntrepriseLogosSection } from '@/components/admin/entreprise-logos-sect
 import { EntreprisePlanningToggle } from '@/components/admin/entreprise-planning-toggle';
 import { EntrepriseCompteProrataToggle } from '@/components/admin/entreprise-compte-prorata-toggle';
 import { EntrepriseFlotteToggle } from '@/components/admin/entreprise-flotte-toggle';
+import { EntrepriseTestSirhToggle } from '@/components/admin/entreprise-test-sirh-toggle';
 import { NumerotationForm } from '@/components/admin/numerotation-form';
 import { TiersReferencementToggle } from '@/components/referencement/tiers-referencement-toggle';
 import { setPlanningActive } from '@/lib/planning/planning';
 import { setCompteProrataActive } from '@/lib/chantiers/compte-prorata-actions';
 import { setFlotteAutomobileActive } from '@/lib/flotte/activation';
+import { setTestSirhActive } from '@/lib/test-sirh/activation';
 import { setTiersReferencementActive } from '@/lib/referencement/activation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -162,6 +164,14 @@ export default async function EntreprisePage() {
             onToggle={async (actif) => {
               'use server';
               const result = await setFlotteAutomobileActive({ actif });
+              return result.ok ? { ok: true } : { ok: false, error: result.error };
+            }}
+          />
+          <EntrepriseTestSirhToggle
+            initialActif={ctx.entreprise.testSirhActive}
+            onToggle={async (actif) => {
+              'use server';
+              const result = await setTestSirhActive({ actif });
               return result.ok ? { ok: true } : { ok: false, error: result.error };
             }}
           />

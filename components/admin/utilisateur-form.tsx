@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -44,6 +45,7 @@ export function UtilisateurForm({
   successRedirect,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [roleId, setRoleId] = useState(defaultValues.roleId);
   const [actif, setActif] = useState(defaultValues.actif);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export function UtilisateurForm({
         return;
       }
       toast.success('Utilisateur enregistré');
-      router.push(successRedirect);
+      router.push(versTenant(successRedirect));
       router.refresh();
     });
   }

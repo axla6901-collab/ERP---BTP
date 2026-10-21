@@ -1,6 +1,6 @@
 'use server';
 
-import { and, asc, count, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNotNull, isNull, max, ne, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { auditLogIn } from '@/lib/audit/log';
@@ -30,8 +30,12 @@ import {
   calculerTotauxFacture,
 } from './calculs';
 import { appliquerRemiseGlobale } from '@/lib/remise-globale';
+import { verifierChronologieEmission } from './numerotation-facture';
 import { ROLES_FACTURATION_WRITE } from './permissions';
 import type { ActionResult } from './types';
+
+/** Refus métier à l'émission, porteur d'un message destiné à l'utilisateur. */
+class RefusEmission extends Error {}
 
 export type FactureAvecClient = Facture & {
   clientCode: string;
@@ -129,9 +133,12 @@ export async function lireFacture(id: string): Promise<FactureHydrate | null> {
 // Écriture
 // ─────────────────────────────────────────────────────────────
 
-export async function creerFacture(
-  input: FactureInput,
-): Promise<ActionResult<{ id: string; numero: string }>> {
+/**
+ * Crée une facture BROUILLON, sans numéro : le numéro légal est attribué à
+ * l'émission (`changerStatutFacture`), pour qu'un brouillon supprimé ne laisse
+ * pas de trou dans la séquence.
+ */
+export async function creerFacture(input: FactureInput): Promise<ActionResult<{ id: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
   const parsed = factureSchema.safeParse(input);
   if (!parsed.success) {
@@ -153,80 +160,70 @@ export async function creerFacture(
   );
   const montantRetenue = calculerMontantRetenue(totaux.totalHt, parsed.data.retenueGarantiePct);
 
-  try {
-    const { id, numero } = await withTenant(ctx.entreprise.id, async (tx) => {
-      const numero = await generateNumero(tx, 'facture', ctx.entreprise.id);
+  const id = await withTenant(ctx.entreprise.id, async (tx) => {
+    const [inserted] = await tx
+      .insert(factures)
+      .values({
+        entrepriseId: ctx.entreprise.id,
+        clientId: parsed.data.clientId,
+        chantierId: parsed.data.chantierId,
+        devisId: parsed.data.devisId,
+        dateFacture: parsed.data.dateFacture,
+        dateEcheance: parsed.data.dateEcheance,
+        delaiPaiementJours: parsed.data.delaiPaiementJours,
+        objet: parsed.data.objet,
+        conditionsPaiement: parsed.data.conditionsPaiement,
+        mentionsLegales: parsed.data.mentionsLegales,
+        notes: parsed.data.notes,
+        autoLiquidation: parsed.data.autoLiquidation,
+        retenueGarantiePct: parsed.data.retenueGarantiePct,
+        montantRetenue,
+        totalHt: totaux.totalHt,
+        totalTva: totaux.totalTva,
+        totalTtc: totaux.totalTtc,
+        detailsTva: totaux.detailsTva,
+        remiseGlobaleType: parsed.data.remiseGlobaleType,
+        remiseGlobaleValeur: parsed.data.remiseGlobaleValeur,
+        createdBy: ctx.utilisateur.id,
+        updatedBy: ctx.utilisateur.id,
+      })
+      .returning({ id: factures.id });
+    if (!inserted) throw new Error('INSERT failed');
 
-      const [inserted] = await tx
-        .insert(factures)
-        .values({
+    await tx.insert(lignesFacture).values(
+      parsed.data.lignes.map((l, idx) => {
+        const m = calculerMontantLigneFacture(l);
+        return {
           entrepriseId: ctx.entreprise.id,
-          numero,
-          clientId: parsed.data.clientId,
-          chantierId: parsed.data.chantierId,
-          devisId: parsed.data.devisId,
-          dateFacture: parsed.data.dateFacture,
-          dateEcheance: parsed.data.dateEcheance,
-          delaiPaiementJours: parsed.data.delaiPaiementJours,
-          objet: parsed.data.objet,
-          conditionsPaiement: parsed.data.conditionsPaiement,
-          mentionsLegales: parsed.data.mentionsLegales,
-          notes: parsed.data.notes,
-          autoLiquidation: parsed.data.autoLiquidation,
-          retenueGarantiePct: parsed.data.retenueGarantiePct,
-          montantRetenue,
-          totalHt: totaux.totalHt,
-          totalTva: totaux.totalTva,
-          totalTtc: totaux.totalTtc,
-          detailsTva: totaux.detailsTva,
-          remiseGlobaleType: parsed.data.remiseGlobaleType,
-          remiseGlobaleValeur: parsed.data.remiseGlobaleValeur,
-          createdBy: ctx.utilisateur.id,
-          updatedBy: ctx.utilisateur.id,
-        })
-        .returning({ id: factures.id });
-      if (!inserted) throw new Error('INSERT failed');
+          factureId: inserted.id,
+          ordre: idx,
+          type: l.type,
+          designation: l.designation,
+          articleId: l.type === 'article_catalogue' ? l.articleId : null,
+          quantite: l.type === 'section' ? null : (l.quantite as string),
+          unite: l.type === 'section' ? null : l.unite,
+          prixUnitaireHt: l.type === 'section' ? null : (l.prixUnitaireHt as string),
+          tauxTva: l.type === 'section' ? null : (l.tauxTva as string),
+          remisePourcent: l.type === 'section' ? null : l.remisePourcent,
+          montantHt: m.montantHt,
+          montantTva: m.montantTva,
+          montantTtc: m.montantTtc,
+          notes: l.notes,
+        };
+      }),
+    );
 
-      await tx.insert(lignesFacture).values(
-        parsed.data.lignes.map((l, idx) => {
-          const m = calculerMontantLigneFacture(l);
-          return {
-            entrepriseId: ctx.entreprise.id,
-            factureId: inserted.id,
-            ordre: idx,
-            type: l.type,
-            designation: l.designation,
-            articleId: l.type === 'article_catalogue' ? l.articleId : null,
-            quantite: l.type === 'section' ? null : (l.quantite as string),
-            unite: l.type === 'section' ? null : l.unite,
-            prixUnitaireHt: l.type === 'section' ? null : (l.prixUnitaireHt as string),
-            tauxTva: l.type === 'section' ? null : (l.tauxTva as string),
-            remisePourcent: l.type === 'section' ? null : l.remisePourcent,
-            montantHt: m.montantHt,
-            montantTva: m.montantTva,
-            montantTtc: m.montantTtc,
-            notes: l.notes,
-          };
-        }),
-      );
-
-      await auditLogIn(tx, {
-        action: 'insert',
-        tableName: 'factures',
-        rowId: inserted.id,
-        after: { numero, ...parsed.data },
-      });
-
-      return { id: inserted.id, numero };
+    await auditLogIn(tx, {
+      action: 'insert',
+      tableName: 'factures',
+      rowId: inserted.id,
+      after: parsed.data,
     });
-    revalidatePath(`/${ctx.entreprise.slug}/facturation/factures`);
-    return { ok: true, data: { id, numero } };
-  } catch (err) {
-    if (err instanceof Error && /unique/i.test(err.message)) {
-      return { ok: false, error: 'Conflit de numéro de facture, réessayez.' };
-    }
-    throw err;
-  }
+
+    return inserted.id;
+  });
+  revalidatePath(`/${ctx.entreprise.slug}/facturation/factures`);
+  return { ok: true, data: { id } };
 }
 
 export async function mettreAJourFacture(id: string, input: FactureInput): Promise<ActionResult> {
@@ -339,14 +336,18 @@ export async function mettreAJourFacture(id: string, input: FactureInput): Promi
   }
 }
 
+/**
+ * Change le statut d'une facture. À l'émission d'un brouillon, attribue le
+ * numéro légal (renvoyé dans `data.numero`) après contrôle de chronologie.
+ */
 export async function changerStatutFacture(
   id: string,
   nouveau: StatutFacture,
   options: { datePaiement?: string } = {},
-): Promise<ActionResult> {
+): Promise<ActionResult<{ numero: string | null }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
   try {
-    await withTenant(ctx.entreprise.id, async (tx) => {
+    const numero = await withTenant(ctx.entreprise.id, async (tx) => {
       const [before] = await tx
         .select()
         .from(factures)
@@ -364,6 +365,27 @@ export async function changerStatutFacture(
       };
       if (nouveau === 'emise' && !before.dateEmission) {
         updates.dateEmission = new Date();
+      }
+      if (nouveau === 'emise' && !before.numero) {
+        // Émissions sérialisées par entreprise (verrou de transaction) : le
+        // contrôle de chronologie et l'attribution du numéro forment un bloc,
+        // l'ordre des numéros suit donc celui des dates.
+        await tx.execute(
+          sql`SELECT pg_advisory_xact_lock(hashtext(${`emission_facture:${ctx.entreprise.id}`}))`,
+        );
+        const [derniere] = await tx
+          .select({ date: max(factures.dateFacture) })
+          .from(factures)
+          .where(
+            and(
+              isNull(factures.deletedAt),
+              isNotNull(factures.numero),
+              ne(factures.statut, 'brouillon'),
+            ),
+          );
+        const refus = verifierChronologieEmission(before.dateFacture, derniere?.date ?? null);
+        if (refus) throw new RefusEmission(refus);
+        updates.numero = await generateNumero(tx, 'facture', ctx.entreprise.id);
       }
       if (nouveau === 'payee') {
         updates.datePaiement = options.datePaiement ?? new Date().toISOString().slice(0, 10);
@@ -383,14 +405,18 @@ export async function changerStatutFacture(
         action: 'update',
         tableName: 'factures',
         rowId: id,
-        before: { statut: actuel },
-        after: { statut: nouveau },
+        before: { statut: actuel, numero: before.numero },
+        after: { statut: nouveau, numero: updates.numero ?? before.numero },
       });
+      return updates.numero ?? before.numero;
     });
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures`);
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures/${id}`);
-    return { ok: true, data: undefined };
+    return { ok: true, data: { numero } };
   } catch (err) {
+    if (err instanceof RefusEmission) {
+      return { ok: false, error: err.message };
+    }
     if (err instanceof Error && err.message === 'NOT_FOUND') {
       return { ok: false, error: 'Facture introuvable.' };
     }
@@ -412,6 +438,11 @@ export async function supprimerFacture(id: string): Promise<ActionResult> {
       if (!before) return null;
       if (before.statut !== 'brouillon') {
         throw new Error('NON_SUPPRIMABLE');
+      }
+      // Brouillon numéroté avant la migration 0082 : le supprimer laisserait un
+      // trou dans la séquence légale — on l'annule plutôt.
+      if (before.numero) {
+        return `Ce brouillon porte déjà le numéro ${before.numero} : passez-le en « Annulée » plutôt que de le supprimer, pour ne pas créer de trou dans la numérotation.`;
       }
 
       // Soft-delete : pas de FK déclenchée. Les lignes sont en cascade. On

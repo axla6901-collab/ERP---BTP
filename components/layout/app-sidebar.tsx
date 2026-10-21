@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BriefcaseIcon,
   Building2Icon,
   CalculatorIcon,
   CalendarRangeIcon,
@@ -27,16 +28,28 @@ import { EntrepriseSwitcher } from '@/components/layout/entreprise-switcher';
 import { GuardedLink } from '@/components/layout/guarded-link';
 import { useSidebar } from '@/components/layout/sidebar-context';
 import { LIBELLES_ROLE, type Role } from '@/lib/auth/rbac';
+import {
+  ROLES_SIRH_LECTURE,
+  ROLES_SIRH_PAIE,
+  ROLES_SIRH_VALIDATION,
+} from '@/lib/test-sirh/permissions';
 import { cn } from '@/lib/utils';
 
 /** Feature flags activables par entreprise. Étendre l'union quand on en ajoute. */
-export type FeatureFlag = 'planning' | 'tiers-referencement' | 'compte-prorata' | 'flotte';
+export type FeatureFlag =
+  | 'planning'
+  | 'tiers-referencement'
+  | 'compte-prorata'
+  | 'flotte'
+  | 'test-sirh';
 
 type NavChild = {
   href: string;
   label: string;
   /** Si défini, l'enfant n'apparaît que si `features[featureFlag]` est `true`. */
   featureFlag?: FeatureFlag;
+  /** Rôles autorisés à voir l'enfant. Si absent, visible par tous les rôles. */
+  rolesAutorises?: readonly Role[];
 };
 
 type NavItem = {
@@ -50,6 +63,10 @@ type NavItem = {
   superAdminOnly?: boolean;
   /** Si true, l'href est utilisé tel quel (pas de préfixe slug tenant). */
   absolu?: boolean;
+  /** Page d'atterrissage du clic quand la racine de section (`href`) ne fait que
+   *  rediriger : évite un aller-retour serveur à chaque clic. `href` reste la
+   *  racine, qui sert à l'état actif de la section. */
+  cible?: string;
   /** Si défini, l'entrée n'apparaît que si `features[featureFlag]` est `true`. */
   featureFlag?: FeatureFlag;
 };
@@ -67,6 +84,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: '/tiers',
+    cible: '/tiers/fournisseurs',
     label: 'Tiers',
     icon: HandshakeIcon,
     children: [
@@ -116,6 +134,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: '/facturation',
+    cible: '/facturation/factures',
     label: 'Facturation',
     icon: FileTextIcon,
     children: [
@@ -133,6 +152,50 @@ const NAV_ITEMS: NavItem[] = [
       { href: '/rh/pointages', label: 'Pointages' },
       { href: '/rh/pointages/saisie', label: 'Saisie matrice' },
       { href: '/rh/import', label: 'Import' },
+    ],
+  },
+  {
+    href: '/test-sirh',
+    label: 'Test SIRH',
+    icon: BriefcaseIcon,
+    featureFlag: 'test-sirh',
+    children: [
+      { href: '/test-sirh', label: 'Tableau de bord', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/mon-espace', label: 'Mon espace' },
+      {
+        href: '/test-sirh/validations',
+        label: 'Validations',
+        rolesAutorises: ROLES_SIRH_VALIDATION,
+      },
+      {
+        href: '/test-sirh/collaborateurs',
+        label: 'Collaborateurs',
+        rolesAutorises: ROLES_SIRH_LECTURE,
+      },
+      {
+        href: '/test-sirh/organisation',
+        label: 'Organisation',
+        rolesAutorises: ROLES_SIRH_LECTURE,
+      },
+      { href: '/test-sirh/absences', label: 'Absences', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/temps', label: 'Temps de travail', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/paie', label: 'Paie', rolesAutorises: ROLES_SIRH_PAIE },
+      {
+        href: '/test-sirh/notes-frais',
+        label: 'Notes de frais',
+        rolesAutorises: ROLES_SIRH_LECTURE,
+      },
+      { href: '/test-sirh/recrutement', label: 'Recrutement', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/entretiens', label: 'Entretiens', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/formation', label: 'Formation', rolesAutorises: ROLES_SIRH_LECTURE },
+      {
+        href: '/test-sirh/onboarding',
+        label: 'Onboarding & tâches',
+        rolesAutorises: ROLES_SIRH_LECTURE,
+      },
+      { href: '/test-sirh/materiel', label: 'Matériel & EPI', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/documents', label: 'Documents', rolesAutorises: ROLES_SIRH_LECTURE },
+      { href: '/test-sirh/annonces', label: 'Annonces' },
     ],
   },
   {
@@ -313,7 +376,11 @@ export function AppSidebar({
             // Filtre les enfants masqués par feature flag — un parent sans enfant
             // visible se rend comme une feuille (pas de chevron, pas d'expansion).
             const visibleChildren =
-              children?.filter((c) => !c.featureFlag || features?.[c.featureFlag]) ?? [];
+              children?.filter(
+                (c) =>
+                  (!c.featureFlag || features?.[c.featureFlag]) &&
+                  (!c.rolesAutorises || c.rolesAutorises.includes(role)),
+              ) ?? [];
             const sectionActive = isSectionActive(item);
             const isOpen = expanded[href] ?? sectionActive;
             const hasChildren = visibleChildren.length > 0;
@@ -328,7 +395,7 @@ export function AppSidebar({
                   )}
                 >
                   <GuardedLink
-                    href={resolveHref(item)}
+                    href={resolveHref(item.cible ? { ...item, href: item.cible } : item)}
                     onClick={() => setOpen(false)}
                     className={cn(
                       'flex flex-1 items-center gap-3 px-3 py-2',

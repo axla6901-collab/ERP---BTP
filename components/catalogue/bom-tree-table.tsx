@@ -1,7 +1,6 @@
 'use client';
 
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
 
 import {
@@ -13,6 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ArbreBomNoeud } from '@/lib/catalogue/bom';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export type PrixComposantInfo = {
   prix: string | null;
@@ -150,7 +150,7 @@ function NoeudRows({ noeud, niveau, prixParArticle, deplies, toggle }: NoeudRows
             ) : (
               <span className="inline-block size-5" aria-hidden="true" />
             )}
-            <Link
+            <LienTenant
               href={
                 estCompose
                   ? `/catalogue/articles/${noeud.composantArticleId}/composition`
@@ -165,7 +165,7 @@ function NoeudRows({ noeud, niveau, prixParArticle, deplies, toggle }: NoeudRows
                   composé
                 </span>
               )}
-            </Link>
+            </LienTenant>
           </div>
         </TableCell>
         <TableCell className="text-right tabular-nums">{formatQuantite(noeud.quantite)}</TableCell>

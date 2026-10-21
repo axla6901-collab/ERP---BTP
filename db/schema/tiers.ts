@@ -114,7 +114,11 @@ export const sousTraitants = pgTable(
     index('idx_sous_traitants_statut').on(t.statut),
     index('idx_sous_traitants_parent').on(t.parentStId),
     index('idx_sous_traitants_raison_sociale').on(t.raisonSocialeId),
-    check('chk_sous_traitants_cp', sql`code_postal IS NULL OR code_postal ~ '^[0-9]{5}$'`),
+    // 5 chiffres en France, format libre (2-10 caractères) à l'étranger (0081).
+    check(
+      'chk_sous_traitants_cp',
+      sql`code_postal IS NULL OR (lower(btrim(pays)) IN ('france', 'fr', 'fra') AND code_postal ~ '^[0-9]{5}$') OR (lower(btrim(pays)) NOT IN ('france', 'fr', 'fra') AND code_postal ~ '^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$')`,
+    ),
     check(
       'chk_sous_traitants_taux_retenue',
       sql`taux_retenue_garantie >= 0 AND taux_retenue_garantie <= 10`,

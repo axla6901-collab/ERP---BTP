@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { auditLogIn } from '@/lib/audit/log';
 import { requireTenantContextWithMfa } from '@/lib/auth/tenant-guards';
 import { withTenant } from '@/lib/db/with-tenant';
-import { generateNumero } from '@/lib/numbering/generate';
 import { chantiers } from '@/db/schema/chantiers';
 import { devis, lignesDevis } from '@/db/schema/commercial';
 import {
@@ -512,11 +511,12 @@ export async function validerSituation(id: string): Promise<ActionResult> {
 /**
  * Génère une facture brouillon à partir d'une situation. Chaque ligne de la
  * situation (avec delta > 0) devient une ligne de facture (type 'libre' ou
- * 'article_catalogue' si la ligne est rattachée à un article).
+ * 'article_catalogue' si la ligne est rattachée à un article). Le brouillon n'a
+ * pas encore de numéro : il est attribué à l'émission (cf. `changerStatutFacture`).
  */
 export async function genererFactureDepuisSituation(
   id: string,
-): Promise<ActionResult<{ factureId: string; factureNumero: string }>> {
+): Promise<ActionResult<{ factureId: string }>> {
   const ctx = await requireTenantContextWithMfa(ROLES_FACTURATION_WRITE);
   try {
     const result = await withTenant(ctx.entreprise.id, async (tx) => {
@@ -551,8 +551,6 @@ export async function genererFactureDepuisSituation(
       const lignesAFacturer = lignesSit.filter((l) => Number(l.montantAFacturerHt) > 0);
       if (lignesAFacturer.length === 0) throw new Error('DELTA_ZERO');
 
-      const factureNumero = await generateNumero(tx, 'facture', ctx.entreprise.id);
-
       const tauxTva = Number(situation.tauxTva);
       const totalHt = lignesAFacturer.reduce((acc, l) => acc + Number(l.montantAFacturerHt), 0);
       const totalTva = (totalHt * tauxTva) / 100;
@@ -585,7 +583,6 @@ export async function genererFactureDepuisSituation(
         .insert(factures)
         .values({
           entrepriseId: ctx.entreprise.id,
-          numero: factureNumero,
           clientId: chantier.clientId,
           chantierId: chantier.id,
           dateFacture: new Date().toISOString().slice(0, 10),
@@ -638,7 +635,6 @@ export async function genererFactureDepuisSituation(
         tableName: 'factures',
         rowId: insertedFacture.id,
         after: {
-          numero: factureNumero,
           source: 'situation',
           situationId: id,
           situationNumero: situation.numero,
@@ -646,7 +642,7 @@ export async function genererFactureDepuisSituation(
         },
       });
 
-      return { factureId: insertedFacture.id, factureNumero };
+      return { factureId: insertedFacture.id };
     });
     revalidatePath(`/${ctx.entreprise.slug}/facturation/situations`);
     revalidatePath(`/${ctx.entreprise.slug}/facturation/factures`);

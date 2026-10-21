@@ -1,10 +1,11 @@
 'use client';
 
-import { type Control, type FieldValues, type Path } from 'react-hook-form';
+import { useWatch, type Control, type FieldValues, type Path } from 'react-hook-form';
 
 import { CommuneAutocompleteFields } from '@/components/geo/commune-autocomplete-fields';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { estPaysFrance } from '@/lib/geo/pays';
 
 type Props<T extends FieldValues> = {
   control: Control<T>;
@@ -13,9 +14,13 @@ type Props<T extends FieldValues> = {
 /**
  * Section "Adresse postale" partagée entre les formulaires fournisseur et
  * sous-traitant. Toutes les colonnes sont optionnelles (sauf `pays` qui a un
- * default applicatif 'France').
+ * default applicatif 'France'). Le pays est saisi AVANT le code postal : hors de
+ * France, le code postal devient libre (pas de format 5 chiffres ni de
+ * suggestions de communes françaises).
  */
 export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
+  const pays = useWatch({ control, name: 'pays' as Path<T> }) as string | null | undefined;
+
   return (
     <div className="space-y-4">
       <FormField
@@ -54,7 +59,6 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
           </FormItem>
         )}
       />
-      <CommuneAutocompleteFields control={control} />
       <FormField
         control={control}
         name={'pays' as Path<T>}
@@ -68,6 +72,7 @@ export function AdresseFields<T extends FieldValues>({ control }: Props<T>) {
           </FormItem>
         )}
       />
+      <CommuneAutocompleteFields control={control} horsFrance={!estPaysFrance(pays)} />
     </div>
   );
 }

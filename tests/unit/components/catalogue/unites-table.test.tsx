@@ -4,6 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({
+  useParams: () => ({ entrepriseSlug: 'acme' }),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -43,7 +44,7 @@ describe('UnitesTable', () => {
   it('lie chaque ligne vers /administration/unites/:id (et non /catalogue)', () => {
     render(<UnitesTable items={[unite({ id: 'abc' })]} peutEcrire />);
     const lien = screen.getByRole('link', { name: 'Modifier' });
-    expect(lien).toHaveAttribute('href', '/administration/unites/abc');
+    expect(lien).toHaveAttribute('href', '/acme/administration/unites/abc');
   });
 
   it('affiche « Voir » au lieu de « Modifier » en lecture seule', () => {

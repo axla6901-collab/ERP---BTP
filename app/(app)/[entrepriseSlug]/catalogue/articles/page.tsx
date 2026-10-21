@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 import { ArticlesExplorer } from '@/components/catalogue/articles-explorer';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
@@ -8,6 +6,7 @@ import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { listerArticleIdsParChantier, listerArticlesAvecPrix } from '@/lib/catalogue/articles';
 import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
 import { listerChantiersPourSelecteur } from '@/lib/chantiers/chantiers';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function tempsRelatif(d: Date | null): string {
   if (!d) return '';
@@ -49,9 +48,12 @@ export default async function ArticlesPage() {
         }${maj ? ` · mise à jour ${maj}` : ''}`}
         actions={
           peutEcrire ? (
-            <Link href="/catalogue/articles/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant
+              href="/catalogue/articles/nouveau"
+              className={buttonVariants({ size: 'sm' })}
+            >
               + Nouvel article
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

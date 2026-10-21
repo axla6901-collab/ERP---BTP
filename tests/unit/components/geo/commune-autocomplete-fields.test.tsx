@@ -17,11 +17,15 @@ const LYON: CommuneSuggestion = {
   longitude: 4.834,
 };
 
-function Harness() {
+function Harness({ horsFrance = false }: { horsFrance?: boolean }) {
   const form = useForm({ defaultValues: { codePostal: '', ville: '', codeInsee: '' } });
   return (
     <Form {...form}>
-      <CommuneAutocompleteFields control={form.control} codeInseeName="codeInsee" />
+      <CommuneAutocompleteFields
+        control={form.control}
+        codeInseeName="codeInsee"
+        horsFrance={horsFrance}
+      />
       <output data-testid="cp">{form.watch('codePostal')}</output>
       <output data-testid="ville">{form.watch('ville')}</output>
       <output data-testid="insee">{form.watch('codeInsee')}</output>
@@ -83,5 +87,29 @@ describe('CommuneAutocompleteFields', () => {
     // Laisse passer le délai de debounce.
     await new Promise((r) => setTimeout(r, 350));
     expect(f).not.toHaveBeenCalled();
+  });
+
+  it('limite le code postal français à 5 chiffres', () => {
+    render(<Harness />);
+    const cp = screen.getByLabelText('Code postal');
+    expect(cp).toHaveAttribute('maxLength', '5');
+    expect(cp).toHaveAttribute('inputMode', 'numeric');
+  });
+
+  it('hors de France : code postal libre (10 caractères) et aucune suggestion', async () => {
+    const f = mockFetch([LYON]);
+    vi.stubGlobal('fetch', f);
+    render(<Harness horsFrance />);
+    const cp = screen.getByLabelText('Code postal');
+    expect(cp).toHaveAttribute('maxLength', '10');
+    expect(cp).toHaveAttribute('inputMode', 'text');
+
+    fireEvent.change(cp, { target: { value: 'SW1A 1AA' } });
+    fireEvent.change(screen.getByLabelText('Ville'), { target: { value: 'London' } });
+    await new Promise((r) => setTimeout(r, 350));
+
+    expect(f).not.toHaveBeenCalled();
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cp')).toHaveTextContent('SW1A 1AA');
   });
 });

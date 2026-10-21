@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { DevisAvecClient } from '@/lib/commercial/devis';
 import { LIBELLES_STATUT_DEVIS, type StatutDevis } from '@/lib/validation/commercial';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 function formatMontant(m: string): string {
   const n = Number(m);
@@ -71,6 +72,7 @@ export function DevisTable({
   peutVersionner = false,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [source, setSource] = useState<DevisAvecClient | null>(null);
   const peutDupliquer = peutEcrire && Boolean(dupliquerAction);
   const columns: DataTableColumn<DevisAvecClient>[] = [
@@ -144,7 +146,10 @@ export function DevisTable({
               Dupliquer
             </Button>
           )}
-          <Link href={`/commercial/devis/${d.id}`} className="text-sm underline underline-offset-4">
+          <Link
+            href={versTenant(`/commercial/devis/${d.id}`)}
+            className="text-sm underline underline-offset-4"
+          >
             {peutEcrire ? 'Ouvrir' : 'Voir'}
           </Link>
         </div>

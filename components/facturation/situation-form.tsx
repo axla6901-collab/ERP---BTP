@@ -51,6 +51,7 @@ import {
   type LigneSituationInput,
   type SituationTravauxInput,
 } from '@/lib/validation/facturation';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult<T = unknown> =
   | { ok: true; data: T }
@@ -130,6 +131,7 @@ export function SituationForm({
   successRedirect,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -247,22 +249,18 @@ export function SituationForm({
     }
   }
 
-  // Calcule l'aperçu live pour chaque ligne
-  const apercus = useMemo(() => {
-    return lignesLive.map((l) => {
-      const precCumule =
-        l.lignePrecedenteId && cumulesPrecedents.has(l.lignePrecedenteId)
-          ? cumulesPrecedents.get(l.lignePrecedenteId)!
-          : '0';
-      return calculerLigneSituation(l, precCumule);
-    });
-  }, [lignesLive, cumulesPrecedents]);
-
-  const totauxApercu = useMemo(() => {
-    const valides = apercus.filter((a): a is NonNullable<typeof a> => a !== null);
-    if (valides.length === 0) return null;
-    return calculerTotauxSituation(valides);
-  }, [apercus]);
+  // Aperçu live de chaque ligne, recalculé à CHAQUE rendu (PAS de useMemo) :
+  // RHF mute `lignes` sans en changer la référence, un useMemo sur [lignesLive]
+  // figeait l'aperçu (cumulé et « à facturer » à 0 pendant la saisie de l'avancement).
+  const apercus = lignesLive.map((l) => {
+    const precCumule =
+      l.lignePrecedenteId && cumulesPrecedents.has(l.lignePrecedenteId)
+        ? cumulesPrecedents.get(l.lignePrecedenteId)!
+        : '0';
+    return calculerLigneSituation(l, precCumule);
+  });
+  const apercusValides = apercus.filter((a): a is NonNullable<typeof a> => a !== null);
+  const totauxApercu = apercusValides.length > 0 ? calculerTotauxSituation(apercusValides) : null;
 
   // Remise globale appliquée sur le « à facturer HT » de la situation.
   const montantRemiseSituation = totauxApercu
@@ -401,8 +399,7 @@ export function SituationForm({
         ? `Situation n°${result.data.numero} créée`
         : 'Situation créée',
     );
-    router.push(successRedirect);
-    router.refresh();
+    router.push(versTenant(successRedirect));
   }
 
   return (

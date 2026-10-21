@@ -1,14 +1,17 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }));
 
+const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
+
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+  useParams: () => ({ entrepriseSlug: 'acme' }),
+  useRouter: () => ({ push: pushMock, refresh: vi.fn() }),
 }));
 
 // `useGuardedRouter` lève hors d'un <NavigationGuardProvider> : on stubble le module.
@@ -68,7 +71,8 @@ describe('FournisseurForm — barre d’actions', () => {
     );
     expect(getByRole('button', { name: /import catalogue/i })).toBeInTheDocument();
     const lien = getByRole('link', { name: /création catalogue/i });
-    expect(lien).toHaveAttribute('href', '/tiers/fournisseurs/f1/grilles/nouveau');
+    // Href legacy reçu de la page : préfixé par le slug au rendu (pas de redirection).
+    expect(lien).toHaveAttribute('href', '/acme/tiers/fournisseurs/f1/grilles/nouveau');
   });
 
   it('masque le bouton « Création catalogue » sans href (import non autorisé)', () => {
@@ -151,7 +155,7 @@ describe('FournisseurForm — slots du gabarit', () => {
     );
     expect(getByRole('link', { name: /fournisseurs/i })).toHaveAttribute(
       'href',
-      '/tiers/fournisseurs',
+      '/acme/tiers/fournisseurs',
     );
     expect(getByText('POINTP · SIRET 562…')).toBeInTheDocument();
     expect(getByText('Préféré · 12 articles')).toBeInTheDocument();
@@ -164,6 +168,86 @@ describe('FournisseurForm — slots du gabarit', () => {
     );
     expect(getByText('Coordonnées')).toBeInTheDocument();
     expect(getByText('Contact générique')).toBeInTheDocument();
+  });
+});
+
+describe('FournisseurForm — champs facultatifs', () => {
+  it('enregistre un fournisseur sans SIRET, sans e-mail ni code postal', async () => {
+    const soumettre = vi.fn().mockResolvedValue({ ok: true });
+    const { container } = render(
+      <FournisseurForm
+        titre="Nouveau fournisseur"
+        defaultValues={{ code: 'RECET', nom: 'Fournisseur test' }}
+        onSubmit={soumettre}
+        successRedirect="/x"
+      />,
+    );
+
+    fireEvent.submit(container.querySelector('#fournisseur-form')!);
+
+    await waitFor(() => expect(soumettre).toHaveBeenCalledTimes(1));
+    expect(soumettre).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'RECET', siret: null, email: null, codePostal: null }),
+    );
+  });
+
+  it('enregistre un fournisseur étranger avec son code postal local', async () => {
+    const soumettre = vi.fn().mockResolvedValue({ ok: true });
+    const { container } = render(
+      <FournisseurForm
+        titre="Nouveau fournisseur"
+        defaultValues={{
+          code: 'GENEVE',
+          nom: 'Fournisseur genevois',
+          pays: 'Suisse',
+          codePostal: '1200',
+          ville: 'Genève',
+        }}
+        onSubmit={soumettre}
+        successRedirect="/x"
+      />,
+    );
+
+    fireEvent.submit(container.querySelector('#fournisseur-form')!);
+
+    await waitFor(() => expect(soumettre).toHaveBeenCalledTimes(1));
+    expect(soumettre).toHaveBeenCalledWith(
+      expect.objectContaining({ pays: 'Suisse', codePostal: '1200', ville: 'Genève' }),
+    );
+  });
+});
+
+describe('FournisseurForm — redirection après enregistrement', () => {
+  it('préfixe par le slug d’entreprise un successRedirect sans slug', async () => {
+    const soumettre = vi.fn().mockResolvedValue({ ok: true });
+    const { container } = render(
+      <FournisseurForm
+        titre="Nouveau fournisseur"
+        defaultValues={{ code: 'RECET', nom: 'Fournisseur test' }}
+        onSubmit={soumettre}
+        successRedirect="/tiers/fournisseurs"
+      />,
+    );
+
+    fireEvent.submit(container.querySelector('#fournisseur-form')!);
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/acme/tiers/fournisseurs'));
+  });
+
+  it('ne double pas le préfixe d’un successRedirect déjà préfixé', async () => {
+    const soumettre = vi.fn().mockResolvedValue({ ok: true });
+    const { container } = render(
+      <FournisseurForm
+        titre="Nouveau fournisseur"
+        defaultValues={{ code: 'RECET', nom: 'Fournisseur test' }}
+        onSubmit={soumettre}
+        successRedirect="/acme/tiers/fournisseurs"
+      />,
+    );
+
+    fireEvent.submit(container.querySelector('#fournisseur-form')!);
+
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/acme/tiers/fournisseurs'));
   });
 });
 

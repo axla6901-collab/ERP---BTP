@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Badge } from '@/components/ui/badge';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { FamilleAvecParent } from '@/lib/catalogue/familles';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: FamilleAvecParent[];
@@ -54,9 +53,12 @@ export function FamillesTable({ items, rightActions, peutEcrire }: Props) {
       header: 'Actions',
       align: 'right',
       cell: (f) => (
-        <Link href={`/catalogue/familles/${f.id}`} className="text-sm underline underline-offset-4">
+        <LienTenant
+          href={`/catalogue/familles/${f.id}`}
+          className="text-sm underline underline-offset-4"
+        >
           {peutEcrire ? 'Modifier' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

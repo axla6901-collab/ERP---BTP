@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { DevisTable } from '@/components/commercial/devis-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { aPermission, requireAuthWithMfa } from '@/lib/auth/guards';
 import { dupliquerDevis, listerDevis } from '@/lib/commercial/devis';
 import { peutEcrireCommercial } from '@/lib/commercial/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function DevisPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -21,9 +20,9 @@ export default async function DevisPage() {
         title="Devis"
         actions={
           peutEcrire ? (
-            <Link href="/commercial/devis/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant href="/commercial/devis/nouveau" className={buttonVariants({ size: 'sm' })}>
               + Nouveau devis
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

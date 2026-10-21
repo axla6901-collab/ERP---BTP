@@ -33,6 +33,7 @@ import { fournisseurSchema, type FournisseurInput } from '@/lib/validation/tiers
 
 import { AdresseFields } from './adresse-fields';
 import { ChampApercu, NoteProposee, ProposeBadge, SelectApercu } from './champs-proposes';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ServerActionResult = {
   ok: boolean;
@@ -111,6 +112,7 @@ export function FournisseurForm({
   retourLabel = 'Fournisseurs',
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const guardedRouter = useGuardedRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -160,7 +162,7 @@ export function FournisseurForm({
       return;
     }
     toast.success('Fournisseur enregistré');
-    router.push(successRedirect);
+    router.push(versTenant(successRedirect));
     router.refresh();
   }
 
@@ -172,7 +174,7 @@ export function FournisseurForm({
       <div className="sticky top-0 z-10 -mx-4 -mt-6 mb-5 border-b bg-card/95 px-4 py-3 backdrop-blur lg:-mx-8 lg:px-8">
         {retourHref && (
           <Link
-            href={retourHref}
+            href={versTenant(retourHref)}
             className="mb-0.5 inline-block text-xs text-muted-foreground hover:text-foreground"
           >
             ‹ {retourLabel}
@@ -222,7 +224,7 @@ export function FournisseurForm({
             )}
             {nouvelleGrilleHref && (
               <Link
-                href={nouvelleGrilleHref}
+                href={versTenant(nouvelleGrilleHref)}
                 className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'gap-1.5')}
               >
                 <ListPlusIcon className="size-4" aria-hidden="true" />

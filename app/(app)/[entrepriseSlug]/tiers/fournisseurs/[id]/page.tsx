@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { DeleteButton } from '@/components/catalogue/delete-button';
@@ -44,6 +43,7 @@ import { resoudreEmailsUtilisateurs } from '@/lib/tiers/sous-traitants';
 import { listerRaisonsSocialesActives } from '@/lib/referencement/raisons-sociales';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
 import type { TypeDocumentTier } from '@/lib/validation/tiers';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type GrilleResume = Awaited<ReturnType<typeof listerGrillesFournisseur>>[number];
 
@@ -512,12 +512,12 @@ function GrillesSection({
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link
+                      <LienTenant
                         href={`/tiers/fournisseurs/${fournisseurId}/grilles/${g.id}`}
                         className={buttonVariants({ variant: 'ghost', size: 'sm' })}
                       >
                         {peutEcrire ? 'Modifier' : 'Consulter'}
-                      </Link>
+                      </LienTenant>
                     </TableCell>
                   </TableRow>
                 );

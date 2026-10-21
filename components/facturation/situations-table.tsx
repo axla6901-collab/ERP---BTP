@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { libelleNumeroFacture } from '@/lib/facturation/numerotation-facture';
 import type { SituationAvecChantier } from '@/lib/facturation/situations';
 import { LIBELLES_STATUT_SITUATION, type StatutSituation } from '@/lib/validation/facturation';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatMontant(m: string): string {
   const n = Number(m);
@@ -104,29 +104,29 @@ export function SituationsTable({ items, rightActions, peutEcrire }: Props) {
       id: 'facture',
       header: 'Facture',
       cell: (s) =>
-        s.factureNumero ? (
-          <Link
+        s.factureId ? (
+          <LienTenant
             href={`/facturation/factures/${s.factureId}`}
             className="font-mono text-xs underline underline-offset-4"
           >
-            {s.factureNumero}
-          </Link>
+            {libelleNumeroFacture(s.factureNumero)}
+          </LienTenant>
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         ),
-      searchAccessor: (s) => s.factureNumero ?? '',
+      searchAccessor: (s) => (s.factureId ? libelleNumeroFacture(s.factureNumero) : ''),
     },
     {
       id: 'actions',
       header: 'Actions',
       align: 'right',
       cell: (s) => (
-        <Link
+        <LienTenant
           href={`/facturation/situations/${s.id}`}
           className="text-sm underline underline-offset-4"
         >
           {peutEcrire ? 'Ouvrir' : 'Voir'}
-        </Link>
+        </LienTenant>
       ),
     },
   ];

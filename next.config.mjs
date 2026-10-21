@@ -45,6 +45,7 @@ const nextConfig = {
 
   // En-têtes de sécurité (OWASP ASVS niveau 2) + cache long pour les assets fingerprintés.
   async headers() {
+    const isDev = process.env.NODE_ENV !== 'production';
     return [
       {
         source: '/:path*',
@@ -62,10 +63,19 @@ const nextConfig = {
           },
         ],
       },
-      // Assets fingerprintés Next : immutables, jamais re-téléchargés par le navigateur.
+      // En PROD : assets Next fingerprintés → immutables, jamais re-téléchargés.
+      // En DEV : les chunks Turbopack changent de contenu à chaque rebuild HMR à
+      // URL parfois identique ; un cache long ferait resservir d'anciens chunks par
+      // le navigateur (erreur « module factory is not available », insensible au
+      // Ctrl+F5). On force donc `no-store` en dev. Cf. mémoire SW PWA périmé en dev.
       {
         source: '/_next/static/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: isDev ? 'no-store, must-revalidate' : 'public, max-age=31536000, immutable',
+          },
+        ],
       },
     ];
   },
@@ -87,6 +97,17 @@ const nextConfig = {
       'recharts',
       'zod',
     ],
+    // Plafond mémoire cible de Turbopack, en DEV uniquement (`next dev` pose
+    // NODE_ENV=development avant de lire ce fichier ; le build CI n'est pas bridé).
+    // Sans plafond, le serveur dev gonfle à chaque route compilée et n'évince
+    // jamais : 18,7 Go privés après ~23 h le 2026-10-20, machine en pagination,
+    // pages à 4–27 s. Au-delà de la cible, Turbopack évince ses caches.
+    // ⚠️ Ne borne QUE ces caches, pas le process : 10,5 Go mesurés le 2026-10-21
+    // après compilation des 122 routes (tas JS du serveur en plus). Relancer
+    // `pnpm dev` quand il dépasse quelques Go reste le vrai remède.
+    ...(process.env.NODE_ENV === 'development' && {
+      turbopackMemoryLimit: 4 * 1024 ** 3,
+    }),
   },
 };
 

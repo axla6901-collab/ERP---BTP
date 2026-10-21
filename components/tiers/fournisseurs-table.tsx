@@ -1,11 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-
 import { StatutActifBadge } from '@/components/tiers/statut-actif-badge';
 import { StatutToggleButton } from '@/components/tiers/statut-toggle-button';
 import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
 import type { FournisseurAvecCompteurs } from '@/lib/tiers/fournisseurs';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 type Props = {
   items: FournisseurAvecCompteurs[];
@@ -99,12 +98,12 @@ export function FournisseursTable({ items, rightActions, peutEcrire, onChangerSt
               action={(actif) => onChangerStatut(f.id, actif)}
             />
           )}
-          <Link
+          <LienTenant
             href={`/tiers/fournisseurs/${f.id}`}
             className="text-sm underline underline-offset-4"
           >
             {peutEcrire ? 'Modifier' : 'Voir'}
-          </Link>
+          </LienTenant>
         </div>
       ),
     },

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useCheminTenant } from '@/lib/navigation/use-chemin-tenant';
 
 type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -49,6 +50,7 @@ export function UtilisateurActions({
   onRestaurer,
 }: Props) {
   const router = useRouter();
+  const versTenant = useCheminTenant();
   const [isPending, startTransition] = useTransition();
 
   function changerRole(roleId: string) {
@@ -138,7 +140,7 @@ export function UtilisateurActions({
         </Select>
       )}
       <Link
-        href={`/administration/utilisateurs/${utilisateurId}`}
+        href={versTenant(`/administration/utilisateurs/${utilisateurId}`)}
         className="text-primary underline underline-offset-4 hover:text-primary/80"
       >
         Modifier

@@ -8,19 +8,20 @@ import { listerUnites } from '@/lib/catalogue/unites';
 import { listerChantiersPourSelecteur } from '@/lib/chantiers/chantiers';
 import { lireFournisseur } from '@/lib/tiers/fournisseurs';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
+import { cheminTenant } from '@/lib/navigation/chemin-tenant';
 
 export default async function NouvelleGrillePage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ entrepriseSlug: string; id: string }>;
   searchParams: Promise<{ chantierId?: string }>;
 }) {
-  const { id: fournisseurId } = await params;
+  const { entrepriseSlug, id: fournisseurId } = await params;
   const { chantierId: chantierIdParam } = await searchParams;
   const utilisateur = await requireAuthWithMfa();
   if (!peutEcrireTiers(utilisateur.role)) {
-    redirect(`/tiers/fournisseurs/${fournisseurId}`);
+    redirect(cheminTenant(entrepriseSlug, `/tiers/fournisseurs/${fournisseurId}`));
   }
 
   const [fournisseur, articles, unites, chantiers] = await Promise.all([

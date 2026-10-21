@@ -39,7 +39,8 @@ export type McdModuleId =
   | 'tiers'
   | 'facturation'
   | 'sous-traitance'
-  | 'flotte';
+  | 'flotte'
+  | 'test-sirh';
 
 export type McdModule = {
   id: McdModuleId;
@@ -84,6 +85,7 @@ export const MCD_MODULES: Record<McdModuleId, McdModule> = {
     bg: '#fef9c3',
   },
   flotte: { id: 'flotte', label: 'Flotte automobile', color: '#0e7490', bg: '#cffafe' },
+  'test-sirh': { id: 'test-sirh', label: 'Test SIRH', color: '#be185d', bg: '#fdf2f8' },
 };
 
 export const MCD_MODULE_ORDER: readonly McdModuleId[] = [
@@ -105,6 +107,7 @@ export const MCD_MODULE_ORDER: readonly McdModuleId[] = [
   'facturation',
   'sous-traitance',
   'flotte',
+  'test-sirh',
 ];
 
 /**

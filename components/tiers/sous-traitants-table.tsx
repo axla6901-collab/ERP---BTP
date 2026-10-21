@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { StatutActifBadge } from '@/components/tiers/statut-actif-badge';
@@ -14,6 +13,7 @@ import {
   STATUT_SOUS_TRAITANT_VALUES,
   type StatutSousTraitant,
 } from '@/lib/validation/tiers';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
@@ -187,12 +187,12 @@ export function SousTraitantsTable({ items, rightActions, peutEcrire, onChangerS
               action={(actif) => onChangerStatut(s.id, actif)}
             />
           )}
-          <Link
+          <LienTenant
             href={`/tiers/sous-traitants/${s.id}`}
             className="text-sm underline underline-offset-4"
           >
             {peutEcrire ? 'Modifier' : 'Voir'}
-          </Link>
+          </LienTenant>
         </div>
       ),
     },

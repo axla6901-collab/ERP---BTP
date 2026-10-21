@@ -1,11 +1,10 @@
-import Link from 'next/link';
-
 import { FournisseursTable } from '@/components/tiers/fournisseurs-table';
 import { PageToolbar } from '@/components/layout/page-toolbar';
 import { buttonVariants } from '@/components/ui/button';
 import { requireAuthWithMfa } from '@/lib/auth/guards';
 import { changerStatutFournisseur, listerFournisseurs } from '@/lib/tiers/fournisseurs';
 import { peutEcrireTiers } from '@/lib/tiers/permissions';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 export default async function FournisseursPage() {
   const utilisateur = await requireAuthWithMfa();
@@ -18,9 +17,12 @@ export default async function FournisseursPage() {
         title="Fournisseurs"
         actions={
           peutEcrire ? (
-            <Link href="/tiers/fournisseurs/nouveau" className={buttonVariants({ size: 'sm' })}>
+            <LienTenant
+              href="/tiers/fournisseurs/nouveau"
+              className={buttonVariants({ size: 'sm' })}
+            >
               + Nouveau fournisseur
-            </Link>
+            </LienTenant>
           ) : null
         }
       />

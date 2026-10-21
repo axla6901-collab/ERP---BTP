@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { NomenclatureEditor } from '@/components/catalogue/nomenclature-editor';
@@ -15,6 +14,7 @@ import {
 } from '@/lib/catalogue/nomenclatures';
 import { peutEcrireCatalogue } from '@/lib/catalogue/permissions';
 import { listerUnites } from '@/lib/catalogue/unites';
+import { LienTenant } from '@/components/layout/lien-tenant';
 
 function formatMontant(montant: string | null | undefined): string {
   if (!montant) return '—';
@@ -46,9 +46,9 @@ export default async function CompositionPage({ params }: { params: Promise<{ id
           <AlertDescription>
             Seuls les articles de type « composé » peuvent avoir une nomenclature. Modifie le type
             de l&apos;article si tu veux le rendre composé.{' '}
-            <Link href={`/catalogue/articles/${id}`} className="underline underline-offset-4">
+            <LienTenant href={`/catalogue/articles/${id}`} className="underline underline-offset-4">
               Retour à l&apos;article
-            </Link>
+            </LienTenant>
           </AlertDescription>
         </Alert>
       </div>
@@ -90,12 +90,12 @@ export default async function CompositionPage({ params }: { params: Promise<{ id
           </>
         }
         actions={
-          <Link
+          <LienTenant
             href={`/catalogue/articles/${id}`}
             className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             ← Retour à l&apos;article
-          </Link>
+          </LienTenant>
         }
       />
 
@@ -127,9 +127,12 @@ export default async function CompositionPage({ params }: { params: Promise<{ id
                       return (
                         <li key={aid}>
                           {a ? (
-                            <Link href={`/catalogue/articles/${aid}/prix`} className="underline">
+                            <LienTenant
+                              href={`/catalogue/articles/${aid}/prix`}
+                              className="underline"
+                            >
                               {a.code} — {a.libelle}
-                            </Link>
+                            </LienTenant>
                           ) : (
                             aid
                           )}
